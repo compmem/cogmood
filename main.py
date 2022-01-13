@@ -124,8 +124,7 @@ blocks = gen_order(CogBatt_config)
 print(blocks)
 # Do the get
 print('About to get')
-#http://44.194.15.202
-with open('serverinfo.txt', 'r') as f:
+with open(os.path.join(WRK_DIR, 'serverinfo.txt'), 'r') as f:
     serverinfo = f.read()
 
 try:
