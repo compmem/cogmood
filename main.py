@@ -5,6 +5,7 @@ import requests
 import json
 import subprocess
 import zipfile
+import hashlib
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, ButtonPress, \
                          Button, Label, Loop, If, Elif, Else, KeyPress, Ref,\
@@ -50,27 +51,45 @@ def ToOut(message, exp, post_urlFULL):
         print(f"Unexpected {err=}, Could not zip directory.{type(err)=}")
         raise err
 
-    if not (message is None):
-        with open('confirmation_code.txt', 'w') as f:
-            f.write(message['extra'][10:-5])
-        try:
-            copy2clip(message['extra'][10:-5])
-        except BaseException as err:
-            print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
-            failed_copy = True
+    status_code = None
     try:
         with open(to_zip, 'rb') as f:
             data = f.read()
+            print(post_urlFULL)
             r = requests.post(post_urlFULL,
-                          data={'results':data},
-                          verify=os.path.join(WRK_DIR, "cert.pem"),
-                          timeout=120)
-            print(r)
+                              data={'results':data},
+                              verify=os.path.join(WRK_DIR, "cert.pem"),
+                              allow_redirects=False,
+                              timeout=120)
+            print(r.status_code)
+            status_code = r.status_code
     except BaseException as err:
         print(f"Unexpected {err=}, {type(err)=}")
-        raise err
         failed_post = True
-    return failed_post, failed_copy
+    if status_code != 200:
+        failed_post = True
+    m = 'e0000000000'
+    if (not (message is None)) & (not failed_post):
+        with open('confirmation_code.txt', 'w') as f:
+            f.write(message['extra'][10:-5])
+
+        try:
+            copy2clip(message['extra'][10:-5])
+            m = message['extra'][10:-5]
+        except BaseException as err:
+            print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
+            failed_copy = True
+    else:
+        with open(to_zip, 'rb') as f:
+            data = f.read()
+            m = "e" + hashlib.md5(data).hexdigest()[:10]
+        try:
+            copy2clip(m)
+        except BaseException as err:
+            print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
+            failed_copy = True
+
+    return failed_post, failed_copy, m
 #----------------WRK_DIR EDITS HERE----------------
 # edited so the data_dir is the WRK_DIR if running from the packaged exe
 # otherwise the data_dir is '.'
@@ -125,14 +144,15 @@ print(blocks)
 # Do the get
 print('About to get')
 with open(os.path.join(WRK_DIR, 'serverinfo.txt'), 'r') as f:
-    serverinfo = f.read()
+    serverinfo = f.readline().strip()
+    post_urlFULL = f.readline().strip()
+    print(serverinfo, post_urlFULL)
 
 try:
     r = requests.get(serverinfo, verify=os.path.join(WRK_DIR, "cert.pem"),
                      timeout=2)
     print(r.text)
     message = json.loads(r.text.replace("\'", "\""))
-    post_urlFULL = serverinfo[:serverinfo.rfind('/')+1] + "end.php?at={}&sqlid={}"
     post_urlFULL = post_urlFULL.format(message['platformid'],
                                        message['sqlid'])
     connected = True
@@ -143,6 +163,7 @@ except:
     post_urlFULL = None
     connected = False
     to_message = "Yo"
+print("connected: ", connected)
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
@@ -292,7 +313,7 @@ with Parallel():
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)
 with If(connected):
-    Label(text="Thank you! Your data will be sent after the experiment window closes.\nOn the next screen you will see your confirmation code!\nPress any key to continue",
+    Label(text="Thank you! Your data is about to be sent to our servers.\nOn one of the next screens, you will see your confirmation code!\nPress any key to continue",
           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
     with UntilDone():
         KeyPress()
@@ -300,18 +321,19 @@ with If(connected):
     # since SMILE is a state machine. You must build it and then *.run()* it.
 
     Wait(.25)
-    Label(text="Code: {}\n\nThe code is saved to confirmation_code.txt\nPlease write down the code just in case it gets lost.\n\nOn the following screen we will attempt to send your data to our server and copy the code so you can paste into MTurk\n\nPress any key to continue. ".format(to_message),
-          text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-    with UntilDone():
-        KeyPress()
-
     Label(text="Please wait, this could take several minutes...",
           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
     with UntilDone():
         Wait(.033)
         to_server_resp = Func(ToOut, message, exp, post_urlFULL)
     with If(to_server_resp.result[1]):
-        Label(text="Due to an error, we were unable to copy the code to your clipboard.\n\nPlease see confirmation_code.txt for your code and paste it into MTurk. In case you cannot find this file, the code again is:\n\n{}\n\nPress any key to continue.".format(to_message),
+
+        Label(text="Due to an error, we were unable to copy the code to your clipboard.\n\nPlease see confirmation_code.txt for your code and paste it into MTurk. In case you cannot find this file, the code again is:\n\n"+to_server_resp.result[2]+"\n\nPress any key to continue.",
+              text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+        with UntilDone():
+            KeyPress()
+    with Else():
+        Label(text="Your confirmation code was sent to your clipboard and saved in confirmation_code.txt.\n\nPlease paste it into MTurk. The code is:\n\n"+ to_server_resp.result[2] + "\n\nPlease write it down, then press any key to continue.",
               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
         with UntilDone():
             KeyPress()
@@ -321,9 +343,11 @@ with If(connected):
         with UntilDone():
             KeyPress()
 with Else():
-    Label(text="Thank you!\n\nDue to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nPress any key to continue.",
+    ret2 = Func(ToOut, message, exp, post_urlFULL)
+
+    Label(text="Thank you!\n\nDue to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nYour confirmation code for the experiment is\n\n" +ret2.result[2]+".\n\nPress any key to continue.",
           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
     with UntilDone():
         KeyPress()
-    Func(ToOut, message, exp, post_urlFULL)
+
 exp.run()

@@ -220,7 +220,6 @@ def BARTSub(self,
                                         Reward_label.slide(duration=config.REWARD_SLIDE_DURATION,
                                                            center=Balloon.center,
                                                            color=(0,0,0,0))
-                                        Wait(0.5, jitter=0.3)
                                         with Parallel():
                                             Balloon.slide(duration=config.BALLOON_GROWTH_DURATION,
                                                           size=(s(self.curr_balloon_size),s(self.curr_balloon_size)),
