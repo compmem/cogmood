@@ -56,7 +56,12 @@ MMIDB = os.path.join("assets", "buttons", "pressed_STW.png")
 TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
 HAPPY_FONT_SIZE = 25
-HAPPY_SPEED = .5
+HAPPY_INC_BASE = .02
+HAPPY_INC_START = .2
+HAPPY_MOD = 20.
+HAPPY_RANGE = 10
+NON_PRESS_INT = .1
+PRESS_INT = .016
 SLIDER_WIDTH = 1000
 RESP_HAPPY = ["F", "J"]
 
@@ -173,7 +178,7 @@ CESD = [{'type':'TITLE',
          'group_id':"1"},
          {'type':'TI',
           'question':"2. Your Age: ",
-          'multiline':1},
+          'multiline':2},
         {'type':'LI',
          'question':"3. I was bothered by things that usually don't bother me.",
          'ans':['Rarely or none\nof the time\n(less than 1 day)',

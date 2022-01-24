@@ -11,6 +11,7 @@ from smile.common import Experiment, Log, Wait, Func, UntilDone, ButtonPress, \
                          Button, Label, Loop, If, Elif, Else, KeyPress, Ref,\
                          Parallel, Slider, MouseCursor, Rectangle, Meanwhile,\
                          Serial, Debug, Screenshot, Questionnaire, UpdateWidget
+from smile.clock import clock
 from smile.lsl import init_lsl_outlet, LSLPush
 from smile.scale import scale as s
 from supreme_demo import Demographics
@@ -217,22 +218,38 @@ with Parallel():
                   top=sld.bottom - s(250), font_size=s(CogBatt_config.HAPPY_FONT_SIZE))
 
         with UntilDone():
+            exp.happy_start_time = Ref(clock.now)
+            exp.last_check = exp.happy_start_time
+            exp.happy_dur = 0.0
+            exp.HAPPY_SPEED = CogBatt_config.HAPPY_INC_BASE
             exp.first_press_time = None
             with Loop():
                 ans = KeyPress(keys=CogBatt_config.RESP_HAPPY)
                 with If(exp.first_press_time == None):
                     exp.first_press_time = ans.press_time
+                with If(ans.press_time['time'] - exp.last_check <
+                        CogBatt_config.NON_PRESS_INT):
+                    exp.HAPPY_SPEED = (CogBatt_config.HAPPY_INC_BASE * (Ref(clock.now) -
+                                       exp.happy_start_time) * CogBatt_config.HAPPY_MOD) + CogBatt_config.HAPPY_INC_START
+
+                with Else():
+                    exp.HAPPY_SPEED = CogBatt_config.HAPPY_INC_START
+                    exp.happy_start_time = Ref(clock.now)
+                exp.last_check = Ref(clock.now)
+                Debug(a=exp.HAPPY_SPEED, b=exp.happy_start_time, c=ans.press_time['time'],
+                      d=ans.press_time['time'] - exp.happy_start_time < CogBatt_config.NON_PRESS_INT)
                 with If(ans.pressed == CogBatt_config.RESP_HAPPY[0]):
-                    with If(sld.value - CogBatt_config.HAPPY_SPEED <= -10):
-                        UpdateWidget(sld, value=-10)
+                    with If(sld.value - exp.HAPPY_SPEED <= (-1 * CogBatt_config.HAPPY_RANGE)):
+                        UpdateWidget(sld, value=(-1 * CogBatt_config.HAPPY_RANGE))
                     with Else():
-                        UpdateWidget(sld, value=sld.value - CogBatt_config.HAPPY_SPEED)
+                        UpdateWidget(sld, value=sld.value - exp.HAPPY_SPEED)
                 with Elif(ans.pressed == CogBatt_config.RESP_HAPPY[1]):
-                    with If(sld.value + CogBatt_config.HAPPY_SPEED >= 10):
-                        UpdateWidget(sld, value=10)
+                    with If(sld.value + exp.HAPPY_SPEED >= CogBatt_config.HAPPY_RANGE):
+                        UpdateWidget(sld, value=CogBatt_config.HAPPY_RANGE)
                     with Else():
-                        UpdateWidget(sld, value=sld.value + CogBatt_config.HAPPY_SPEED)
-                Wait(.05)
+                        UpdateWidget(sld, value=sld.value + exp.HAPPY_SPEED)
+
+                #Wait(.005)
             with UntilDone():
                 submit = KeyPress(keys=['SPACEBAR'])
         Log(name="happy",
