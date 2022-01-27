@@ -30,12 +30,10 @@ def HappyQuest(self, config, task, block_num, trial_num):
                     config.NON_PRESS_INT):
                 self.HAPPY_SPEED = (config.HAPPY_INC_BASE * (Ref(clock.now) -
                                     self.happy_start_time) * config.HAPPY_MOD) + config.HAPPY_INC_START
-
             with Else():
                 self.HAPPY_SPEED = config.HAPPY_INC_START
                 self.happy_start_time = Ref(clock.now)
             self.last_check = Ref(clock.now)
-
             with If(ans.pressed == config.RESP_HAPPY[0]):
                 with If(sld.value - self.HAPPY_SPEED <= (-1*config.HAPPY_RANGE)):
                     UpdateWidget(sld, value=(-1*config.HAPPY_RANGE))

@@ -238,8 +238,7 @@ with Parallel():
                     exp.HAPPY_SPEED = CogBatt_config.HAPPY_INC_START
                     exp.happy_start_time = Ref(clock.now)
                 exp.last_check = Ref(clock.now)
-                Debug(a=exp.HAPPY_SPEED, b=exp.happy_start_time, c=ans.press_time['time'],
-                      d=ans.press_time['time'] - exp.happy_start_time < CogBatt_config.NON_PRESS_INT)
+                
                 with If(ans.pressed == CogBatt_config.RESP_HAPPY[0]):
                     with If(sld.value - exp.HAPPY_SPEED <= (-1 * CogBatt_config.HAPPY_RANGE)):
                         UpdateWidget(sld, value=(-1 * CogBatt_config.HAPPY_RANGE))
@@ -316,11 +315,15 @@ with Parallel():
 
                 with Elif(TL.current[0] == "bart"):
                     Wait(.5)
+                    if hasattr(sys, '_MEIPASS'):
+                        task2dir = os.path.join(os.path.join(sys._MEIPASS), "tasks", "BARTUVA")
+                    else:
+                        task2dir = os.path.join("tasks", "BARTUVA")
                     BartuvaExp(Bartuva_config,
                                run_num=BL.i,
                                sub_dir=Ref.object(exp)._session_dir,
                                practice=False,
-                               task_dir=os.path.join("tasks", "BARTUVA"),
+                               task_dir=task2dir,
                                happy_mid=TL.current[1])
 
                 Wait(1.0)
