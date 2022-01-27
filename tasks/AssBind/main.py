@@ -27,7 +27,7 @@ import smile.ref as ref
 from .happy import HappyQuest
 
 from math import log
-
+import os
 from .list_gen import make_trials
 from .instruct import Instruct
 from .GetResponse import GetResponse
@@ -175,13 +175,17 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                                       color=(.35, .35, .35, 0.0),
                                       duration=config.STIM_PRES_TIME)
                 # present pair of images
-                left_image = Image(source=trial.current['img_L'],
+                #left_image = Image(source=trial.current['img_L'],
+                Debug(L=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
+                      R=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']))
+                left_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
                                    duration=config.STIM_PRES_TIME,
                                    right=self.exp.screen.center_x,
                                    width=s(config.IMG_WIDTH),
                                    height=s(config.IMG_HEIGHT),
                                    allow_stretch=True, keep_ratio=False)
-                right_image = Image(source=trial.current['img_R'],
+                #right_image = Image(source=trial.current['img_R'],
+                right_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']),
                                     duration=config.STIM_PRES_TIME,
                                     left=left_image.right,
                                     width=s(config.IMG_WIDTH),

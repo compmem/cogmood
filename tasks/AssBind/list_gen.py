@@ -32,7 +32,7 @@ def get_stim(config, subj_dir):
             else:
                 # remove old images from list of all images
                 #print images
-                [images.remove(i) for i in old_images]
+                [images.remove(os.path.join(config.TASK_DIR, 'stim', i)) for i in old_images]
                 print(len(old_images), 'removed from pool')
                 possible_images = images
 
@@ -49,7 +49,8 @@ def get_stim(config, subj_dir):
     for i in range(config.NUM_IMAGES):
         pic = random.choice(possible_images)
         possible_images.remove(pic)
-        new_pool.append(pic)
+        #new_pool.append(pic)
+        new_pool.append(os.path.basename(pic))
 
     # store list of used images:
     old_images = new_pool + old_images

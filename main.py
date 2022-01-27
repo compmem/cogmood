@@ -1,5 +1,6 @@
 # General imports
 import os
+from os.path import join
 import sys
 import requests
 import json
@@ -170,7 +171,8 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
                  scale_down=True, scale_box=(1000, 1000), debug=False,
                  Touch=False, local_crashlog=True,
-                 cmd_traceback=False, data_dir=WRK_DIR)
+                 cmd_traceback=False, data_dir=WRK_DIR,
+                 working_dir=WRK_DIR)
 
 InputSubject(exp_title="Supreme")
 with Parallel():
