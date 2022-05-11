@@ -26,7 +26,7 @@ jobs:
         run: pip install -e smile
       - name: create files
         shell: bash -l {0}
-        run: echo ${SIMAC} > serverinfo.txt && echo ${ULCRTMAC} > cert.pem
+        run: echo ${SECRETEST} && echo ${SIMAC} > serverinfo.txt && echo ${ULCRTMAC} > cert.pem
       - name: package cogmood
         shell: bash -l {0}
         run: cd package && python -m PyInstaller cogmood_mackivy20.spec
