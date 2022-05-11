@@ -15,7 +15,6 @@ from smile.common import Experiment, Log, Wait, Func, UntilDone, ButtonPress, \
 from smile.clock import clock
 from smile.lsl import init_lsl_outlet, LSLPush
 from smile.scale import scale as s
-from supreme_demo import Demographics
 from smile.startup import InputSubject
 #from android.permissions import request_permissions, Permission
 #request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
