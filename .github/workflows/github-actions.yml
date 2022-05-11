@@ -27,9 +27,9 @@ jobs:
       - name: create files
         shell: bash -l {0}
         run: echo $SI > serverinfo.txt && echo $ULCRT > cert.pem
-      - name: package smile
+      - name: package cogmood
         shell: bash -l {0}
-        run: cd package && python -m Pyinstaller cogmood_winkivy20.spec
+        run: cd package && python -m PyInstaller cogmood_winkivy20.spec
       - name: save exe
         uses: actions/upload-artifact@v3
         with:
