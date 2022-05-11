@@ -26,12 +26,17 @@ jobs:
         run: pip install -e smile
       - name: test env
         shell: bash
+        env:
+          SECRETEST: ${{ secrets.SECRETEST }}
         run: |
-          echo ${SECRETEST}
-          echo ${SECRETEST} > SECRETEST.txt
+          echo $SECRETEST
+          echo "$SECRETEST" > SECRETEST.txt
       - name: create files
         shell: bash -l {0}
-        run: echo ${SIMAC} > serverinfo.txt && echo ${ULCRTMAC} > cert.pem
+        env:
+          SIMAC: ${{ secrets.SIMAC }}
+          ULCRTMAC: ${{ secrets.ULCRTMAC }}
+        run: echo "$SIMAC" > serverinfo.txt && echo "$ULCRTMAC" > cert.pem
       - name: package cogmood
         shell: bash -l {0}
         run: cd package && python -m PyInstaller cogmood_mackivy20.spec
