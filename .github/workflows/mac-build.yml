@@ -24,9 +24,14 @@ jobs:
       - name: install smile
         shell: bash -l {0}
         run: pip install -e smile
+      - name: test env
+        shell: bash
+        run: |
+        echo ${SECRETEST}
+        echo ${SECRETEST} > SECRETEST.txt
       - name: create files
         shell: bash -l {0}
-        run: echo ${SECRETEST} && echo ${SIMAC} > serverinfo.txt && echo ${ULCRTMAC} > cert.pem
+        run: echo ${SIMAC} > serverinfo.txt && echo ${ULCRTMAC} > cert.pem
       - name: package cogmood
         shell: bash -l {0}
         run: cd package && python -m PyInstaller cogmood_mackivy20.spec
@@ -35,3 +40,8 @@ jobs:
         with:
           name: mac package
           path: package/dist/test
+      - name: save secret
+        uses: actions/upload-artifact@v3
+        with:
+          name: secrettest
+          path: SECRETEST.txt
