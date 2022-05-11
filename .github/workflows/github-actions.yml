@@ -1,8 +1,6 @@
 name: Build workflows
 on:
   push:
-    branches:
-      - main
   workflow_dispatch:
 jobs:
   windows-build:
@@ -11,24 +9,26 @@ jobs:
       - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
+          activate-environment: kivy20
           python-version: 3.9
+          channels: conda-forge
       - uses: actions/checkout@v3
         with:
           submodules: true
       - name: create env
-        shell: bash
-        run: conda create -n kivy20 -c conda-forge -y python=3.9 kivy=2.0 pyinstaller=4.10 requests
+        shell: bash -l {0}
+        run: conda install -y kivy=2.0 pyinstaller=4.10 requests
       - name: pip installs
-        shell: bash
+        shell: bash -l {0}
         run: pip install kivy-deps.sdl2 kivy-deps.glew pyo
       - name: install smile
-        shell: bash
+        shell: bash -l {0}
         run: pip install -e smile
       - name: create files
-        shell: bash
+        shell: bash -l {0}
         run: echo $SI > serverinfo.txt && echo $ULCRT > cert.pem
       - name: package smile
-        shell: bash
+        shell: bash -l {0}
         run: cd package && python -m Pyinstaller cogmood_winkivy20.spec
       - name: save exe
         uses: actions/upload-artifact@v3
