@@ -1,7 +1,8 @@
 name: mac build
 on:
   push:
-    master
+    branches:
+      - master
   workflow_dispatch:
 jobs:
   mac-build:
