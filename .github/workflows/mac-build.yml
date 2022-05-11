@@ -27,8 +27,8 @@ jobs:
       - name: test env
         shell: bash
         run: |
-        echo ${SECRETEST}
-        echo ${SECRETEST} > SECRETEST.txt
+          echo ${SECRETEST}
+          echo ${SECRETEST} > SECRETEST.txt
       - name: create files
         shell: bash -l {0}
         run: echo ${SIMAC} > serverinfo.txt && echo ${ULCRTMAC} > cert.pem
