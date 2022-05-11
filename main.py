@@ -24,15 +24,15 @@ import config as CogBatt_config
 from list_gen import gen_order
 import version
 
+# pyperclip for copying to clipboard
+import pyperclip
+
 # Various task imports
 from tasks import FlankerExp, Flanker_config
 from tasks import RDMExp, RDM_config
 from tasks import AssBindExp, AssBind_config
 from tasks import BartuvaExp, Bartuva_config
 
-def copy2clip(txt):
-    cmd='echo '+txt.strip()+'|clip'
-    return subprocess.check_call(cmd, shell=True)
 def zip_directory(folder_path, zip_path):
     with zipfile.ZipFile(zip_path, mode='w') as zipf:
         len_dir_path = len(folder_path)
@@ -71,12 +71,12 @@ def ToOut(message, exp, post_urlFULL):
         failed_post = True
     m = 'e0000000000'
     if (not (message is None)) & (not failed_post):
+        m = message['extra'][10:-5]
         with open('confirmation_code.txt', 'w') as f:
             f.write(message['extra'][10:-5])
 
         try:
-            copy2clip(message['extra'][10:-5])
-            m = message['extra'][10:-5]
+            pyperclip.copy(message['extra'][10:-5])
         except BaseException as err:
             print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
             failed_copy = True
@@ -85,7 +85,7 @@ def ToOut(message, exp, post_urlFULL):
             data = f.read()
             m = "e" + hashlib.md5(data).hexdigest()[:10]
         try:
-            copy2clip(m)
+            pyperclip.copy(m)
         except BaseException as err:
             print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
             failed_copy = True
