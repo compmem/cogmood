@@ -2,6 +2,8 @@
 
 ## Windows build instructions
 ### Kivy 2.0
+Pysinstaller 5.0 took out some tk hooks that kivy 2.0 depends on. kivy 2.1 fixes that, and could be used with pyinstaller 5.0, but there's a mouse issue with kivy 2.1.
+
 After cloning this repo
 ```commandline
 conda create -p ./env_kivy20 -c conda-forge python=3.9 kivy=2.0 pyinstaller=4.10 requests
