@@ -1,4 +1,5 @@
 # General imports
+import pefile
 import os
 from os.path import join
 import sys
@@ -9,15 +10,15 @@ import zipfile
 import hashlib
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, ButtonPress, \
-                         Button, Label, Loop, If, Elif, Else, KeyPress, Ref,\
-                         Parallel, Slider, MouseCursor, Rectangle, Meanwhile,\
-                         Serial, Debug, Screenshot, Questionnaire, UpdateWidget
+    Button, Label, Loop, If, Elif, Else, KeyPress, Ref, \
+    Parallel, Slider, MouseCursor, Rectangle, Meanwhile, \
+    Serial, Debug, Screenshot, Questionnaire, UpdateWidget
 from smile.clock import clock
 from smile.lsl import init_lsl_outlet, LSLPush
 from smile.scale import scale as s
 from smile.startup import InputSubject
-#from android.permissions import request_permissions, Permission
-#request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
+# from android.permissions import request_permissions, Permission
+# request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
 from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
@@ -33,6 +34,7 @@ from tasks import RDMExp, RDM_config
 from tasks import AssBindExp, AssBind_config
 from tasks import BartuvaExp, Bartuva_config
 
+
 def zip_directory(folder_path, zip_path):
     with zipfile.ZipFile(zip_path, mode='w') as zipf:
         len_dir_path = len(folder_path)
@@ -40,6 +42,8 @@ def zip_directory(folder_path, zip_path):
             for file in files:
                 file_path = os.path.join(root, file)
                 zipf.write(file_path, file_path[len_dir_path:])
+
+
 def ToOut(message, exp, post_urlFULL):
     failed_post = False
     failed_copy = False
@@ -58,7 +62,7 @@ def ToOut(message, exp, post_urlFULL):
             data = f.read()
             print(post_urlFULL)
             r = requests.post(post_urlFULL,
-                              data={'results':data},
+                              data={'results': data},
                               verify=os.path.join(WRK_DIR, "cert.pem"),
                               allow_redirects=False,
                               timeout=120)
@@ -78,7 +82,8 @@ def ToOut(message, exp, post_urlFULL):
         try:
             pyperclip.copy(message['extra'][10:-5])
         except BaseException as err:
-            print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
+            print(
+                f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
             failed_copy = True
     else:
         with open(to_zip, 'rb') as f:
@@ -87,11 +92,14 @@ def ToOut(message, exp, post_urlFULL):
         try:
             pyperclip.copy(m)
         except BaseException as err:
-            print(f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
+            print(
+                f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
             failed_copy = True
 
     return failed_post, failed_copy, m
-#----------------WRK_DIR EDITS HERE----------------
+
+
+# ----------------WRK_DIR EDITS HERE----------------
 # edited so the data_dir is the WRK_DIR if running from the packaged exe
 # otherwise the data_dir is '.'
 is_exe = False
@@ -103,12 +111,13 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 else:
     WRK_DIR = '.'
 
-import pefile
 
 def read_exe_subject_id() -> str | None:
-    exe_file_path: str = sys.executable  # Get the path to the currently running executable
+    # Get the path to the currently running executable
+    exe_file_path: str = sys.executable
     pe = pefile.PE(exe_file_path, fast_load=True)
-    pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_RESOURCE']])
+    pe.parse_data_directories(
+        directories=[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_RESOURCE']])
 
     if hasattr(pe, 'FileInfo'):
         for file_info in pe.FileInfo:
@@ -116,8 +125,9 @@ def read_exe_subject_id() -> str | None:
                 if info.name == 'StringFileInfo':
                     version_info_dict: dict = info.StringTable[0].entries
                     # Access the Subject ID
-                    subject_id_value: None | str = version_info_dict.get(b'SubjectID', None)
-                    
+                    subject_id_value: None | str = version_info_dict.get(
+                        b'SubjectID', None)
+
                     if subject_id_value:
                         # Convert it to a string if needed
                         subject_id_str: str = subject_id_value.decode('utf-8')
@@ -148,7 +158,7 @@ RDM_config.CONT_KEY = CogBatt_config.CONT_KEY
 Flanker_config.RESP_KEYS = CogBatt_config.RESP_KEYS[:]
 Flanker_config.CONT_KEY = CogBatt_config.CONT_KEY
 AssBind_config.RESP_KY = CogBatt_config.RESP_KEYS[:]
-AssBind_config.RESP_KEYS = {'old':'F', "new":'J'}
+AssBind_config.RESP_KEYS = {'old': 'F', "new": 'J'}
 AssBind_config.CONT_KEY = CogBatt_config.CONT_KEY
 Bartuva_config.RESP_KEYS = CogBatt_config.RESP_KEYS[:]
 Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
@@ -197,13 +207,13 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
 exp.subject_id = read_exe_subject_id() if is_exe else "Not running from exe, no Subject ID provided."
 
 Label(text="Subject ID: " + exp.subject_id + "\nPress any key to continue.",
-              text_size=(s(700), None),
-              font_size=s(CogBatt_config.INST_FONT),
-              halign="center")
+      text_size=(s(700), None),
+      font_size=s(CogBatt_config.INST_FONT),
+      halign="center")
 
 with UntilDone():
     KeyPress()
-    
+
 InputSubject(exp_title="Supreme")
 with Parallel():
     with Serial(blocking=False):
@@ -219,8 +229,8 @@ with Parallel():
         # Give participants the option to record demographic information, but only on
         # their first visit, the behavioral visit.
 
-        #Demographics(CogBatt_config)
-        #Wait(1.0)
+        # Demographics(CogBatt_config)
+        # Wait(1.0)
 
         # Present intial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
@@ -228,7 +238,6 @@ with Parallel():
               text_size=(s(700), None))
         with UntilDone():
             KeyPress()
-
 
         Label(text=CogBatt_config.HAPPY_TEXT,
               text_size=(s(700), None),
@@ -241,7 +250,8 @@ with Parallel():
                   font_size=s(CogBatt_config.HAPPY_FONT_SIZE),
                   halign='center',
                   center_y=exp.screen.center_y + s(300))
-            sld = Slider(min=-10, max=10, value=0, width=s(CogBatt_config.SLIDER_WIDTH))
+            sld = Slider(min=-10, max=10, value=0,
+                         width=s(CogBatt_config.SLIDER_WIDTH))
             Label(text="unhappy", font_size=s(CogBatt_config.HAPPY_FONT_SIZE),
                   center_x=sld.left, center_y=sld.center_y - s(100))
             Label(text="happy", font_size=s(CogBatt_config.HAPPY_FONT_SIZE),
@@ -268,10 +278,11 @@ with Parallel():
                     exp.HAPPY_SPEED = CogBatt_config.HAPPY_INC_START
                     exp.happy_start_time = Ref(clock.now)
                 exp.last_check = Ref(clock.now)
-                
+
                 with If(ans.pressed == CogBatt_config.RESP_HAPPY[0]):
                     with If(sld.value - exp.HAPPY_SPEED <= (-1 * CogBatt_config.HAPPY_RANGE)):
-                        UpdateWidget(sld, value=(-1 * CogBatt_config.HAPPY_RANGE))
+                        UpdateWidget(
+                            sld, value=(-1 * CogBatt_config.HAPPY_RANGE))
                     with Else():
                         UpdateWidget(sld, value=sld.value - exp.HAPPY_SPEED)
                 with Elif(ans.pressed == CogBatt_config.RESP_HAPPY[1]):
@@ -280,7 +291,7 @@ with Parallel():
                     with Else():
                         UpdateWidget(sld, value=sld.value + exp.HAPPY_SPEED)
 
-                #Wait(.005)
+                # Wait(.005)
             with UntilDone():
                 submit = KeyPress(keys=['SPACEBAR'])
         Log(name="happy",
@@ -296,7 +307,6 @@ with Parallel():
                           width=s(1100),
                           x=(exp.screen.width/2.) - s(1100)/2.)
             MouseCursor(blocking=False)
-
 
         exp.practice = True
         exp.BART_practice = True
@@ -328,7 +338,8 @@ with Parallel():
                     Wait(.5)
 
                     if hasattr(sys, '_MEIPASS'):
-                        taskdir = os.path.join(os.path.join(sys._MEIPASS), "tasks", "AssBind")
+                        taskdir = os.path.join(os.path.join(
+                            sys._MEIPASS), "tasks", "AssBind")
                     else:
                         taskdir = os.path.join("tasks", "AssBind")
                     AssBindExp(AssBind_config,
@@ -346,7 +357,8 @@ with Parallel():
                 with Elif(TL.current[0] == "bart"):
                     Wait(.5)
                     if hasattr(sys, '_MEIPASS'):
-                        task2dir = os.path.join(os.path.join(sys._MEIPASS), "tasks", "BARTUVA")
+                        task2dir = os.path.join(os.path.join(
+                            sys._MEIPASS), "tasks", "BARTUVA")
                     else:
                         task2dir = os.path.join("tasks", "BARTUVA")
                     BartuvaExp(Bartuva_config,
