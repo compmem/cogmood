@@ -4,9 +4,9 @@ from kivy_deps import sdl2, glew
 block_cipher = None
 
 data = [
-    ('..\\brain_load.png', '.'),
-    ('..\\serverinfo.txt', '.'),
-    ('..\\cert.pem', '.')
+    #('..\\brain_load.png', '.'),
+    #('..\\serverinfo.txt', '.'),
+    #('..\\cert.pem', '.')
     #('..\\pylsl\\lib\\lsl.dll', 'pylsl\\lib\\')
 ]
 

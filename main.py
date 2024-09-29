@@ -95,13 +95,11 @@ def ToOut(message, exp, post_urlFULL):
 # edited so the data_dir is the WRK_DIR if running from the packaged exe
 # otherwise the data_dir is '.'
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    is_exe = True
     WRK_DIR = sys._MEIPASS
+    resource_add_path(os.path.join(sys._MEIPASS))
 else:
     WRK_DIR = '.'
-
-print(WRK_DIR)
-if hasattr(sys, '_MEIPASS'):
-    resource_add_path(os.path.join(sys._MEIPASS))
 
 
 # Different configs getting set for the different subject names. If their ID
@@ -143,28 +141,28 @@ pulse_server = None
 blocks = gen_order(CogBatt_config)
 print(blocks)
 # Do the get
-print('About to get')
-with open(os.path.join(WRK_DIR, 'serverinfo.txt'), 'r') as f:
-    serverinfo = f.readline().strip()
-    post_urlFULL = f.readline().strip()
-    print(serverinfo, post_urlFULL)
+# print('About to get')
+# with open(os.path.join(WRK_DIR, 'serverinfo.txt'), 'r') as f:
+#     serverinfo = f.readline().strip()
+#     post_urlFULL = f.readline().strip()
+#     print(serverinfo, post_urlFULL)
 
-try:
-    r = requests.get(serverinfo, verify=os.path.join(WRK_DIR, "cert.pem"),
-                     timeout=2)
-    print(r.text)
-    message = json.loads(r.text.replace("\'", "\""))
-    post_urlFULL = post_urlFULL.format(message['platformid'],
-                                       message['sqlid'])
-    connected = True
-    to_message = message['extra'][10:-5]
-except:
-    print("NO CONNECTION")
-    message = None
-    post_urlFULL = None
-    connected = False
-    to_message = "Yo"
-print("connected: ", connected)
+# try:
+#     r = requests.get(serverinfo, verify=os.path.join(WRK_DIR, "cert.pem"),
+#                      timeout=2)
+#     print(r.text)
+#     message = json.loads(r.text.replace("\'", "\""))
+#     post_urlFULL = post_urlFULL.format(message['platformid'],
+#                                        message['sqlid'])
+#     connected = True
+#     to_message = message['extra'][10:-5]
+# except:
+#     print("NO CONNECTION")
+#     message = None
+#     post_urlFULL = None
+#     connected = False
+#     to_message = "Yo"
+# print("connected: ", connected)
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
@@ -172,7 +170,7 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
-
+   
 InputSubject(exp_title="Supreme")
 with Parallel():
     with Serial(blocking=False):
@@ -333,42 +331,41 @@ with Parallel():
 
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)
-with If(connected):
-    Label(text="Thank you! Your data is about to be sent to our servers.\nOn one of the next screens, you will see your confirmation code!\nPress any key to continue",
-          text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-    with UntilDone():
-        KeyPress()
-    # Start the experiment, everything above runs before the experiment even starts
-    # since SMILE is a state machine. You must build it and then *.run()* it.
-
-    Wait(.25)
-    Label(text="Please wait, this could take several minutes...",
-          text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-    with UntilDone():
-        Wait(.033)
-        to_server_resp = Func(ToOut, message, exp, post_urlFULL)
-    with If(to_server_resp.result[1]):
-
-        Label(text="Due to an error, we were unable to copy the code to your clipboard.\n\nPlease see confirmation_code.txt for your code and paste it into MTurk. In case you cannot find this file, the code again is:\n\n"+to_server_resp.result[2]+"\n\nPress any key to continue.",
-              text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-        with UntilDone():
-            KeyPress()
-    with Else():
-        Label(text="Your confirmation code was sent to your clipboard and saved in confirmation_code.txt.\n\nPlease paste it into MTurk. The code is:\n\n"+ to_server_resp.result[2] + "\n\nPlease write it down, then press any key to continue.",
-              text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-        with UntilDone():
-            KeyPress()
-    with If(to_server_resp.result[0]):
-        Label(text="Due to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nPress any key to exit.",
-              text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-        with UntilDone():
-            KeyPress()
-with Else():
-    ret2 = Func(ToOut, message, exp, post_urlFULL)
-
-    Label(text="Thank you!\n\nDue to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nYour confirmation code for the experiment is\n\n" +ret2.result[2]+".\n\nPress any key to continue.",
-          text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-    with UntilDone():
-        KeyPress()
-
 exp.run()
+# with If(connected):
+#     Label(text="Thank you! Your data is about to be sent to our servers.\nOn one of the next screens, you will see your confirmation code!\nPress any key to continue",
+#           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+#     with UntilDone():
+#         KeyPress()
+#     # Start the experiment, everything above runs before the experiment even starts
+#     # since SMILE is a state machine. You must build it and then *.run()* it.
+
+#     Wait(.25)
+#     Label(text="Please wait, this could take several minutes...",
+#           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+#     with UntilDone():
+#         Wait(.033)
+#         to_server_resp = Func(ToOut, message, exp, post_urlFULL)
+#     with If(to_server_resp.result[1]):
+
+#         Label(text="Due to an error, we were unable to copy the code to your clipboard.\n\nPlease see confirmation_code.txt for your code and paste it into MTurk. In case you cannot find this file, the code again is:\n\n"+to_server_resp.result[2]+"\n\nPress any key to continue.",
+#               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+#         with UntilDone():
+#             KeyPress()
+#     with Else():
+#         Label(text="Your confirmation code was sent to your clipboard and saved in confirmation_code.txt.\n\nPlease paste it into MTurk. The code is:\n\n"+ to_server_resp.result[2] + "\n\nPlease write it down, then press any key to continue.",
+#               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+#         with UntilDone():
+#             KeyPress()
+#     with If(to_server_resp.result[0]):
+#         Label(text="Due to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nPress any key to exit.",
+#               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+#         with UntilDone():
+#             KeyPress()
+# with Else():
+#     ret2 = Func(ToOut, message, exp, post_urlFULL)
+
+#     Label(text="Thank you!\n\nDue to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nYour confirmation code for the experiment is\n\n" +ret2.result[2]+".\n\nPress any key to continue.",
+#           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+#     with UntilDone():
+#         KeyPress()
