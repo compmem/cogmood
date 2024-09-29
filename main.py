@@ -125,12 +125,12 @@ def read_exe_subject_id() -> str | None:
                 if info.name == 'StringFileInfo':
                     version_info_dict: dict = info.StringTable[0].entries
                     # Access the Subject ID
-                    subject_id_value: None | str = version_info_dict.get(
+                    subject_id_bytes: bytes | None = version_info_dict.get(
                         b'SubjectID', None)
 
-                    if subject_id_value:
+                    if subject_id_bytes:
                         # Convert it to a string if needed
-                        subject_id_str: str = subject_id_value.decode('utf-8')
+                        subject_id_str: str = subject_id_bytes.decode('utf-8')
                         return subject_id_str
 
     return None
