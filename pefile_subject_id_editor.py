@@ -78,6 +78,6 @@ def edit_exe_subject_id(exe_file_path: str, new_subject_id: str, output_file_pat
 if __name__ == "__main__":
     edit_exe_subject_id(
         exe_file_path="package\\dist\\test.exe",
-        new_subject_id="023456789",
+        new_subject_id='"sample_24_char_SubjectId".sample_validation_signature',
         output_file_path="output.exe"
     )
