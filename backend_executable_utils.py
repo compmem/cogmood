@@ -1,9 +1,65 @@
 import logging
 import os
+import plistlib
+import shutil
 from typing import Optional
-from pefile import PE, DIRECTORY_ENTRY
 from pathlib import Path
 
+
+def edit_app_subject_id(app_path: str, new_subject_id: str, output_app_path: Optional[str] = None) -> None:
+    """
+    Modifies the 'SubjectID' field in the Info.plist of a macOS .app bundle.
+    
+    Args:
+        app_path (str): Path to the original .app bundle whose 'SubjectID' will be modified.
+        new_subject_id (str): New 'SubjectID' value to replace the existing one.
+        output_app_path (Optional[str]): Path to save the modified .app bundle. If not provided, 
+                                         the original bundle will be overwritten.
+    
+    Raises:
+        FileNotFoundError: If the specified .app bundle or Info.plist file does not exist.
+        ValueError: If the Info.plist file cannot be loaded or parsed.
+    """
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    # Construct the path to the Info.plist file inside the original .app bundle
+    plist_path = Path(app_path) / 'Contents' / 'Info.plist'
+
+    # Ensure the .app bundle and Info.plist exist
+    if not plist_path.exists():
+        raise FileNotFoundError(f"The file {plist_path} does not exist.")
+
+    try:
+        # If an output path is specified, copy the original .app bundle to the new location
+        if output_app_path:
+            output_path = Path(output_app_path)
+            if output_path.exists():
+                raise FileExistsError(f"The output path {output_app_path} already exists.")
+            shutil.copytree(app_path, output_app_path)
+            plist_path = output_path / 'Contents' / 'Info.plist'  # Update plist path to the new location
+        else:
+            logging.info("No output path specified. The original .app bundle will be modified.")
+
+        # Load the plist file
+        with plist_path.open('rb') as plist_file:
+            plist_data = plistlib.load(plist_file)
+
+        # Log current SubjectID, if present
+        current_subject_id = plist_data.get('SubjectID', None)
+        if current_subject_id:
+            logging.info(f"Current SubjectID: {current_subject_id}")
+
+        # Update the SubjectID
+        plist_data['SubjectID'] = new_subject_id
+
+        # Write the updated plist back
+        with plist_path.open('wb') as plist_file:
+            plistlib.dump(plist_data, plist_file)
+
+        logging.info(f"Successfully updated SubjectID to {new_subject_id}")
+
+    except Exception as e:
+        raise ValueError(f"Failed to modify the plist file: {e}")
 
 def edit_exe_subject_id(exe_file_path: str, new_subject_id: str, output_file_path: Optional[str] = None) -> None:
     """
@@ -76,8 +132,16 @@ def edit_exe_subject_id(exe_file_path: str, new_subject_id: str, output_file_pat
 
 
 if __name__ == "__main__":
-    edit_exe_subject_id(
-        exe_file_path="package\\dist\\test.exe",
-        new_subject_id='"sample_24_char_SubjectId".sample_validation_signature',
-        output_file_path="output.exe"
+    # Testing app SubjectID editing
+    edit_app_subject_id(
+        app_path="package/dist/SUPREME.app",
+        new_subject_id="new_subject_id_value",
+        # output_app_path="/path/to/output/app_bundle.app"  # Optional
     )
+    
+    # Testing exe SubjectID editing
+    # edit_exe_subject_id(
+    #     exe_file_path="package\\dist\\test.exe",
+    #     new_subject_id='"sample_24_char_SubjectId".sample_validation_signature',
+    #     output_file_path="output.exe"     # Optional
+    # )
