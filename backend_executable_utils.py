@@ -4,6 +4,7 @@ import plistlib
 import shutil
 from typing import Optional
 from pathlib import Path
+from pefile import PE, DIRECTORY_ENTRY
 
 
 def edit_app_subject_id(app_path: str, new_subject_id: str, output_app_path: Optional[str] = None) -> None:
@@ -20,7 +21,8 @@ def edit_app_subject_id(app_path: str, new_subject_id: str, output_app_path: Opt
         FileNotFoundError: If the specified .app bundle or Info.plist file does not exist.
         ValueError: If the Info.plist file cannot be loaded or parsed.
     """
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Construct the path to the Info.plist file inside the original .app bundle
     plist_path = Path(app_path) / 'Contents' / 'Info.plist'
@@ -34,11 +36,14 @@ def edit_app_subject_id(app_path: str, new_subject_id: str, output_app_path: Opt
         if output_app_path:
             output_path = Path(output_app_path)
             if output_path.exists():
-                raise FileExistsError(f"The output path {output_app_path} already exists.")
+                raise FileExistsError(
+                    f"The output path {output_app_path} already exists.")
             shutil.copytree(app_path, output_app_path)
-            plist_path = output_path / 'Contents' / 'Info.plist'  # Update plist path to the new location
+            # Update plist path to the new location
+            plist_path = output_path / 'Contents' / 'Info.plist'
         else:
-            logging.info("No output path specified. The original .app bundle will be modified.")
+            logging.info(
+                "No output path specified. The original .app bundle will be modified.")
 
         # Load the plist file
         with plist_path.open('rb') as plist_file:
@@ -60,6 +65,7 @@ def edit_app_subject_id(app_path: str, new_subject_id: str, output_app_path: Opt
 
     except Exception as e:
         raise ValueError(f"Failed to modify the plist file: {e}")
+
 
 def edit_exe_subject_id(exe_file_path: str, new_subject_id: str, output_file_path: Optional[str] = None) -> None:
     """
@@ -138,7 +144,7 @@ if __name__ == "__main__":
         new_subject_id="new_subject_id_value",
         # output_app_path="/path/to/output/app_bundle.app"  # Optional
     )
-    
+
     # Testing exe SubjectID editing
     # edit_exe_subject_id(
     #     exe_file_path="package\\dist\\test.exe",
