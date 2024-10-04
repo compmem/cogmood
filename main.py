@@ -1,5 +1,4 @@
 # General imports
-import pefile
 import os
 from os.path import join
 import sys
@@ -22,6 +21,7 @@ from smile.startup import InputSubject
 from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
+from executable_utils import read_app_subject_id, read_exe_subject_id
 from list_gen import gen_order
 import version
 
@@ -102,38 +102,18 @@ def ToOut(message, exp, post_urlFULL):
 # ----------------WRK_DIR EDITS HERE----------------
 # edited so the data_dir is the WRK_DIR if running from the packaged exe
 # otherwise the data_dir is '.'
-is_exe = False
-
+retrieved_subject_id = None
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    is_exe = True
+    if CogBatt_config.CURRENT_OS == 'Windows':
+        retrieved_subject_id = read_exe_subject_id()
+    elif CogBatt_config.CURRENT_OS == 'Darwin':
+        retrieved_subject_id = read_app_subject_id()
+        
     WRK_DIR = sys._MEIPASS
     resource_add_path(os.path.join(sys._MEIPASS))
 else:
     WRK_DIR = '.'
 
-
-def read_exe_subject_id() -> str | None:
-    # Get the path to the currently running executable
-    exe_file_path: str = sys.executable
-    pe = pefile.PE(exe_file_path, fast_load=True)
-    pe.parse_data_directories(
-        directories=[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_RESOURCE']])
-
-    if hasattr(pe, 'FileInfo'):
-        for file_info in pe.FileInfo:
-            for info in file_info:
-                if info.name == 'StringFileInfo':
-                    version_info_dict: dict = info.StringTable[0].entries
-                    # Access the Subject ID
-                    subject_id_bytes: bytes | None = version_info_dict.get(
-                        b'SubjectID', None)
-
-                    if subject_id_bytes:
-                        # Convert it to a string if needed
-                        subject_id_str: str = subject_id_bytes.decode('utf-8')
-                        return subject_id_str
-
-    return None
 
 # Different configs getting set for the different subject names. If their ID
 # ends in *b* then it is behavioral/eyetracking, if it ends in *e* it is
@@ -204,7 +184,7 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
 
-exp.subject_id = read_exe_subject_id() if is_exe else "Not running from exe, no Subject ID provided."
+exp.subject_id = retrieved_subject_id if retrieved_subject_id else "Not running from exe, no Subject ID provided."
 
 Label(text="Subject ID: " + exp.subject_id + "\nPress any key to continue.",
       text_size=(s(700), None),
@@ -232,7 +212,7 @@ with Parallel():
         # Demographics(CogBatt_config)
         # Wait(1.0)
 
-        # Present intial CogBatt instructions.
+        # Present initial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
               font_size=s(CogBatt_config.INST_FONT),
               text_size=(s(700), None))

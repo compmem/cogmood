@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+import platform
+
+CURRENT_OS: str = platform.system()
 
 EXP_NAME = "SUPREMEMOOD"
 
