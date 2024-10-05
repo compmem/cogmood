@@ -5,20 +5,36 @@ from typing import Optional
 from pefile import PE, DIRECTORY_ENTRY
 
 
+class NotInAppBundleError(Exception):
+    """Custom exception to be raised when executable is not in a macOS .app bundle."""
+    pass
+
+
 def read_app_subject_id() -> Optional[str]:
     """
-    Reads the 'SubjectID' from the Info.plist of the currently running .app bundle on macOS.
+    Reads the 'SubjectID' from the Info.plist of the currently running .app bundle,
+    handling both cases where the .app is launched or the executable is run directly from Contents/MacOS.
+
+    Raises:
+        NotInAppBundleError: If the executable is not part of a macOS .app bundle.
+        FileNotFoundError: If the Info.plist file is not found in the .app bundle.
+
 
     Returns:
         Optional[str]: The value of 'SubjectID' from Info.plist, if found. Returns None if not found.
     """
     exec_path: Path = Path(sys.executable).resolve()
 
-    # Append the .app extension if missing
-    app_bundle_path: Path = exec_path.with_name(
-        exec_path.name + '.app') if not exec_path.name.endswith('.app') else exec_path
+    # If running from Contents/MacOS, go up two directories to get to the .app root
+    if exec_path.parent.name == 'MacOS' and exec_path.parents[1].name == 'Contents':
+        # Go two levels up (from MacOS to .app root)
+        app_bundle_path = exec_path.parents[2]
+    else:
+        # If the executable is not within a macOS .app bundle, raise an exception
+        raise NotInAppBundleError(
+            "Executable is not inside a macOS .app bundle.")
 
-    # Navigate to the Info.plist file inside the app bundle
+    # Build the path to Info.plist
     plist_path: Path = app_bundle_path / 'Contents' / 'Info.plist'
 
     if not plist_path.exists():
