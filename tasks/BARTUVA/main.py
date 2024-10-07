@@ -5,14 +5,12 @@ from smile.scale import scale as s
 from smile.lsl import LSLPush
 from smile.clock import clock
 import smile.ref as ref
-from .happy import HappyQuest
-from .list_gen import add_air
-from .instruct import Instruct
-from .trial import BARTSub, GetResponse
+from happy import HappyQuest
+from list_gen import add_air
+from instruct import Instruct
+from trial import BARTSub, GetResponse
 
 import os
-
-from . import version
 
 
 @Subroutine
@@ -41,11 +39,7 @@ def BartuvaExp(self,
     else:
         cont_key_str = "SPACEBAR"
 
-    Log(name="BARTUVAinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="BARTUVAinfo")
 
     Wait(1.)
 
@@ -116,16 +110,16 @@ def BartuvaExp(self,
         self.block_tic = 0
 
         # HAPPY STUFF
-        self.start_happy = Func(clock.now).result
-        self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
-                                                       config.TIME_JITTER_HAPPY)
+        # self.start_happy = Func(clock.now).result
+        # self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
+        #                                                config.TIME_JITTER_HAPPY)
         # with Loop(bag.current) as balloon:
         with Loop(bags) as balloon:
-            with If(happy_mid):
-                Wait(.3)
-                with Parallel():
-                    Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
-                    HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
+            # with If(happy_mid):
+            #     Wait(.3)
+            #     with Parallel():
+            #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
+            #         HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
             Balloon = BARTSub(config,
                               balloon=balloon.current,
                               balloon_id=balloon.i,
@@ -180,7 +174,8 @@ if __name__ == "__main__":
 
     config.FLIP_BART = True
     exp = Experiment(name="BARTUVA_ONLY",
-                     background_color=((.35, .35, .35, 1.0)))
+                     background_color=((.35, .35, .35, 1.0)),
+                     scale_up = True, scale_down = True, scale_box = config.MONITOR_SIZE,)
 
     BartuvaExp(config,
                run_num=0,

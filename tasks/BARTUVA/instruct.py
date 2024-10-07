@@ -2,11 +2,11 @@
 
 from smile.common import *
 from smile.scale import scale as s
-from .inst.computer import computer_list
-from .inst.mobile import mobile_list
+from inst.computer import computer_list
+from inst.mobile import mobile_list
 
-from .list_gen import add_air
-from .trial import BARTSub, GetResponse
+from list_gen import add_air
+from trial import BARTSub, GetResponse
 
 import os
 
