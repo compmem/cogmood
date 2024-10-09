@@ -10,9 +10,9 @@ class NotInAppBundleError(Exception):
     pass
 
 
-def read_app_subject_id() -> Optional[str]:
+def read_app_worker_id() -> Optional[str]:
     """
-    Reads the 'SubjectID' from the Info.plist of the currently running .app bundle,
+    Reads the 'WorkerID' from the Info.plist of the currently running .app bundle,
     handling both cases where the .app is launched or the executable is run directly from Contents/MacOS.
 
     Raises:
@@ -21,7 +21,7 @@ def read_app_subject_id() -> Optional[str]:
 
 
     Returns:
-        Optional[str]: The value of 'SubjectID' from Info.plist, if found. Returns None if not found.
+        Optional[str]: The value of 'WorkerID' from Info.plist, if found. Returns None if not found.
     """
     exec_path: Path = Path(sys.executable).resolve()
 
@@ -43,7 +43,7 @@ def read_app_subject_id() -> Optional[str]:
     try:
         with plist_path.open('rb') as plist_file:
             plist_data: dict = plistlib.load(plist_file)
-        return plist_data.get('SubjectID')
+        return plist_data.get('WorkerID')
     except plistlib.InvalidFileException:
         print(f"Error: Invalid plist file at {plist_path}")
         return None
@@ -52,12 +52,12 @@ def read_app_subject_id() -> Optional[str]:
         return None
 
 
-def read_exe_subject_id() -> Optional[str]:
+def read_exe_worker_id() -> Optional[str]:
     """
-    Reads the 'SubjectID' from the version info resource of the currently running .exe file on Windows.
+    Reads the 'WorkerID' from the version info resource of the currently running .exe file on Windows.
 
     Returns:
-        Optional[str]: The value of 'SubjectID' from the version info resource if found. Returns None if not found.
+        Optional[str]: The value of 'WorkerID' from the version info resource if found. Returns None if not found.
     """
     exe_file_path: str = sys.executable
     try:
@@ -71,11 +71,11 @@ def read_exe_subject_id() -> Optional[str]:
                     if info.name == 'StringFileInfo':
                         version_info_dict: dict[bytes,
                                                 bytes] = info.StringTable[0].entries
-                        subject_id_bytes: Optional[bytes] = version_info_dict.get(
-                            b'SubjectID')
+                        worker_id_bytes: Optional[bytes] = version_info_dict.get(
+                            b'WorkerID')
 
-                        if subject_id_bytes:
-                            return subject_id_bytes.decode('utf-8')
+                        if worker_id_bytes:
+                            return worker_id_bytes.decode('utf-8')
     except Exception as e:
         print(
             f"An error occurred while reading the executable version info: {e}")
