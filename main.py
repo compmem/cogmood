@@ -21,7 +21,8 @@ from smile.startup import InputSubject
 from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
-from executable_utils import read_app_worker_id, read_exe_worker_id
+from utils import read_app_worker_id, read_exe_worker_id, \
+    get_blocks_to_run, upload_block
 from list_gen import gen_order
 import version
 
@@ -34,71 +35,6 @@ from tasks import RDMExp, RDM_config
 from tasks import AssBindExp, AssBind_config
 from tasks import BartuvaExp, Bartuva_config
 
-
-def zip_directory(folder_path, zip_path):
-    with zipfile.ZipFile(zip_path, mode='w') as zipf:
-        len_dir_path = len(folder_path)
-        for root, _, files in os.walk(folder_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                zipf.write(file_path, file_path[len_dir_path:])
-
-
-def ToOut(message, exp, post_urlFULL):
-    failed_post = False
-    failed_copy = False
-    print(exp._subject_dir)
-    to_zip = "data.zip"
-    print(to_zip)
-    try:
-        zip_directory(exp._session_dir, to_zip)
-    except BaseException as err:
-        print(f"Unexpected {err=}, Could not zip directory.{type(err)=}")
-        raise err
-
-    status_code = None
-    try:
-        with open(to_zip, 'rb') as f:
-            data = f.read()
-            print(post_urlFULL)
-            r = requests.post(post_urlFULL,
-                              data={'results': data},
-                              verify=os.path.join(WRK_DIR, "cert.pem"),
-                              allow_redirects=False,
-                              timeout=120)
-            print(r.status_code)
-            status_code = r.status_code
-    except BaseException as err:
-        print(f"Unexpected {err=}, {type(err)=}")
-        failed_post = True
-    if status_code != 200:
-        failed_post = True
-    m = 'e0000000000'
-    if (not (message is None)) & (not failed_post):
-        m = message['extra'][10:-5]
-        with open('confirmation_code.txt', 'w') as f:
-            f.write(message['extra'][10:-5])
-
-        try:
-            pyperclip.copy(message['extra'][10:-5])
-        except BaseException as err:
-            print(
-                f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
-            failed_copy = True
-    else:
-        with open(to_zip, 'rb') as f:
-            data = f.read()
-            m = "e" + hashlib.md5(data).hexdigest()[:10]
-        try:
-            pyperclip.copy(m)
-        except BaseException as err:
-            print(
-                f"Unexpected {err=}, Could not copy to clipboard: {type(err)=}")
-            failed_copy = True
-
-    return failed_post, failed_copy, m
-
-
 # ----------------WRK_DIR EDITS HERE----------------
 # edited so the data_dir is the WRK_DIR if running from the packaged exe
 # otherwise the data_dir is '.'
@@ -108,7 +44,7 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
         retrieved_worker_id = read_exe_worker_id()
     elif CogBatt_config.CURRENT_OS == 'Darwin':
         retrieved_worker_id = read_app_worker_id()
-        
+
     WRK_DIR = sys._MEIPASS
     resource_add_path(os.path.join(sys._MEIPASS))
 else:
@@ -153,29 +89,7 @@ pulse_server = None
 # task can repeat directly following itself.
 blocks = gen_order(CogBatt_config)
 print(blocks)
-# Do the get
-# print('About to get')
-# with open(os.path.join(WRK_DIR, 'serverinfo.txt'), 'r') as f:
-#     serverinfo = f.readline().strip()
-#     post_urlFULL = f.readline().strip()
-#     print(serverinfo, post_urlFULL)
 
-# try:
-#     r = requests.get(serverinfo, verify=os.path.join(WRK_DIR, "cert.pem"),
-#                      timeout=2)
-#     print(r.text)
-#     message = json.loads(r.text.replace("\'", "\""))
-#     post_urlFULL = post_urlFULL.format(message['platformid'],
-#                                        message['sqlid'])
-#     connected = True
-#     to_message = message['extra'][10:-5]
-# except:
-#     print("NO CONNECTION")
-#     message = None
-#     post_urlFULL = None
-#     connected = False
-#     to_message = "Yo"
-# print("connected: ", connected)
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
@@ -357,40 +271,3 @@ with Parallel():
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)
 exp.run()
-# with If(connected):
-#     Label(text="Thank you! Your data is about to be sent to our servers.\nOn one of the next screens, you will see your confirmation code!\nPress any key to continue",
-#           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-#     with UntilDone():
-#         KeyPress()
-#     # Start the experiment, everything above runs before the experiment even starts
-#     # since SMILE is a state machine. You must build it and then *.run()* it.
-
-#     Wait(.25)
-#     Label(text="Please wait, this could take several minutes...",
-#           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-#     with UntilDone():
-#         Wait(.033)
-#         to_server_resp = Func(ToOut, message, exp, post_urlFULL)
-#     with If(to_server_resp.result[1]):
-
-#         Label(text="Due to an error, we were unable to copy the code to your clipboard.\n\nPlease see confirmation_code.txt for your code and paste it into MTurk. In case you cannot find this file, the code again is:\n\n"+to_server_resp.result[2]+"\n\nPress any key to continue.",
-#               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-#         with UntilDone():
-#             KeyPress()
-#     with Else():
-#         Label(text="Your confirmation code was sent to your clipboard and saved in confirmation_code.txt.\n\nPlease paste it into MTurk. The code is:\n\n"+ to_server_resp.result[2] + "\n\nPlease write it down, then press any key to continue.",
-#               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-#         with UntilDone():
-#             KeyPress()
-#     with If(to_server_resp.result[0]):
-#         Label(text="Due to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nPress any key to exit.",
-#               text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-#         with UntilDone():
-#             KeyPress()
-# with Else():
-#     ret2 = Func(ToOut, message, exp, post_urlFULL)
-
-#     Label(text="Thank you!\n\nDue to an error with the server, we ask that you send your data to: dylan.nielson@nih.gov\n\nYour data is in a file called data.zip located the same place as this experiment, cogmood.exe.\n\nYour confirmation code for the experiment is\n\n" +ret2.result[2]+".\n\nPress any key to continue.",
-#           text_size=(s(900), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-#     with UntilDone():
-#         KeyPress()

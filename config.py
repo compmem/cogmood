@@ -4,6 +4,7 @@ import os
 import platform
 
 CURRENT_OS: str = platform.system()
+API_BASE_URL: str = 'http://localhost:5000'
 
 EXP_NAME = "SUPREMEMOOD"
 
