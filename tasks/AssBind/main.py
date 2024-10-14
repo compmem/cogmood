@@ -24,15 +24,13 @@ from smile.lsl import LSLPush
 from smile.clock import clock
 import smile.ref as ref
 
-from .happy import HappyQuest
+from happy import HappyQuest
 
 from math import log
 import os
-from .list_gen import make_trials
-from .instruct import Instruct
-from .GetResponse import GetResponse
-
-from . import version
+from list_gen import make_trials
+from instruct import Instruct
+from GetResponse import GetResponse
 
 
 # make_metric function takes subject's accuracy and RTs and converts them to a
@@ -86,11 +84,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     else:
         cont_key_str = str(config.CONT_KEY[0])
 
-    Log(name="AssBindinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="AssBindinfo")
 
     # get needed variables from config file
     num_attempts = config.NUM_ATTEMPTS
@@ -143,29 +137,39 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.accs = []
     self.rts = []
     with Parallel():
+        background = Image(source = 'cab_background.png', size = (exp.screen.width, exp.screen.height), allow_stretch = True, keep_ratio = False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
                       font_size=s(config.INST_TITLE_FONT_SIZE),
                       bottom = self.exp.screen.bottom + s(200),
-                      center_x = self.exp.screen.center_x - s(50))
+                      center_x = self.exp.screen.center_x - s(50),
+                      color = "black")
         old_rem = Label(text=TRIAL_REMIND_TEXT_R,  # 'H = Old',
                       font_size=s(config.INST_TITLE_FONT_SIZE),
                       top=new_rem.bottom,
-                      center_x=self.exp.screen.center_x + s(50))
+                      center_x=self.exp.screen.center_x + s(50),
+                      color = "black")
     with UntilDone():
         # loop through trials
         with Loop(trials) as trial:
-            with If((Func(clock.now).result >= self.end_happy) & (happy_mid)):
-                Wait(.3)
-                with Parallel():
-                    Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
-                    HappyQuest(config, task='CAB', block_num=block, trial_num=trial.i)
-                self.start_happy = Func(clock.now).result
-                self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
-                                                               config.TIME_JITTER_HAPPY)
+            # with If((Func(clock.now).result >= self.end_happy) & (happy_mid)):
+            #     Wait(.3)
+            #     with Parallel():
+            #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
+            #         HappyQuest(config, task='CAB', block_num=block, trial_num=trial.i)
+            #     self.start_happy = Func(clock.now).result
+            #     self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
+            #                                                    config.TIME_JITTER_HAPPY)
             # delay until next trial based on a base time plus a jitter
             Wait(config.ISI_BASE, jitter=config.ISI_JIT)
 
             with Parallel():
+                #adding in a border around the image to make them look like cards (more gamelike)
+                left_border = Image(source = "playing_card.png", width = (s(config.IMG_WIDTH) + s(100)), 
+                                    height = (s(config.IMG_HEIGHT) + s(100)), blocking = False
+                                , allow_stretch=True, right = self.exp.screen.center_x - s(25), keep_ratio = False)
+                right_border = Image(source = "playing_card.png", width = (s(config.IMG_WIDTH) + s(100)), 
+                                     height = (s(config.IMG_HEIGHT) + s(100)), allow_stretch = True,
+                                     left = left_border.right + s(25), blocking = False, keep_ratio = False)
                 # initialize a frame around the images
                 # (which is invisible until response)
                 resp_rect = Rectangle(size=(s(2*config.IMG_WIDTH +
@@ -174,20 +178,21 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                                               config.RESP_FRAME_SIZE)),
                                       color=(.35, .35, .35, 0.0),
                                       duration=config.STIM_PRES_TIME)
+                
                 # present pair of images
                 #left_image = Image(source=trial.current['img_L'],
                 Debug(L=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
                       R=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']))
                 left_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
                                    duration=config.STIM_PRES_TIME,
-                                   right=self.exp.screen.center_x,
+                                   center = left_border.center,
                                    width=s(config.IMG_WIDTH),
                                    height=s(config.IMG_HEIGHT),
                                    allow_stretch=True, keep_ratio=False)
                 #right_image = Image(source=trial.current['img_R'],
                 right_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']),
                                     duration=config.STIM_PRES_TIME,
-                                    left=left_image.right,
+                                    center = right_border.center,
                                     width=s(config.IMG_WIDTH),
                                     height=s(config.IMG_HEIGHT),
                                     allow_stretch=True, keep_ratio=False)
@@ -309,7 +314,7 @@ if __name__ == "__main__":
     exp = Experiment(background_color=(.35, .35, .35, 1.0),
                      name="CAB", scale_down=True, scale_box=(1200, 900))
 
-    InputSubject(exp_title="Associative Binding")
+    #InputSubject(exp_title="Associative Binding")
     with Loop(3) as lp:
         exp.rem_only = (lp.i != 0)
         AssBindExp(config,
