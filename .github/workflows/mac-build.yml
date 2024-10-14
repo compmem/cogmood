@@ -23,7 +23,7 @@ jobs:
         run: conda install -y kivy=2.0 pyinstaller=4.10 requests
       - name: pip installs
         shell: bash -l {0}
-        run: pip install pyo pyperclip
+        run: pip install pyo
       - name: install smile
         shell: bash -l {0}
         run: pip install -e smile

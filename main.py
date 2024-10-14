@@ -26,9 +26,6 @@ from utils import read_app_worker_id, read_exe_worker_id, \
 from list_gen import gen_order
 import version
 
-# pyperclip for copying to clipboard
-import pyperclip
-
 # Various task imports
 from tasks import FlankerExp, Flanker_config
 from tasks import RDMExp, RDM_config
