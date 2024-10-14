@@ -137,7 +137,10 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.accs = []
     self.rts = []
     with Parallel():
-        background = Image(source = 'cab_background.png', size = (self.screen.width, self.screen.height), allow_stretch = True, keep_ratio = False)
+        background = Image(source = Ref(os.path.join, config.TASK_DIR, 'cab_background.png'), 
+                           size = (self.exp.screen.width, self.exp.screen.height),
+                           allow_stretch = True, 
+                           keep_ratio = False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
                       font_size=s(config.INST_TITLE_FONT_SIZE),
                       bottom = self.exp.screen.bottom + s(200),
@@ -164,12 +167,20 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
 
             with Parallel():
                 #adding in a border around the image to make them look like cards (more gamelike)
-                left_border = Image(source = "playing_card.png", width = (s(config.IMG_WIDTH) + s(100)), 
-                                    height = (s(config.IMG_HEIGHT) + s(100)), blocking = False
-                                , allow_stretch=True, right = self.exp.screen.center_x - s(25), keep_ratio = False)
-                right_border = Image(source = "playing_card.png", width = (s(config.IMG_WIDTH) + s(100)), 
-                                     height = (s(config.IMG_HEIGHT) + s(100)), allow_stretch = True,
-                                     left = left_border.right + s(25), blocking = False, keep_ratio = False)
+                left_border = Image(source = Ref(os.path.join, config.TASK_DIR, "playing_card.png"), 
+                                    width = (s(config.IMG_WIDTH) + s(100)), 
+                                    height = (s(config.IMG_HEIGHT) + s(100)), 
+                                    blocking = False, 
+                                    allow_stretch=True, 
+                                    right = self.exp.screen.center_x - s(25), 
+                                    keep_ratio = False)
+                right_border = Image(source = Ref(os.path.join, config.TASK_DIR, "playing_card.png"), 
+                                     width = (s(config.IMG_WIDTH) + s(100)),
+                                     height = (s(config.IMG_HEIGHT) + s(100)),
+                                     blocking = False,
+                                     allow_stretch = True,
+                                     left = left_border.right + s(25), 
+                                     keep_ratio = False)
                 # initialize a frame around the images
                 # (which is invisible until response)
                 resp_rect = Rectangle(size=(s(2*config.IMG_WIDTH +
