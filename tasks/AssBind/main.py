@@ -4,7 +4,7 @@ This script presents stimuli for the associative binding task.
 The task presents pairs of objects to participants, who must decide whether
 each pair is "new" (i.e. not presented previously), or "old."
 
-Each pair is presented 3 times (an initial presention plus 2 repetitions), and
+Each pair is presented 3 times (an initial presentation plus 2 repetitions), and
 recombined with other pairs once.
 
 The order in which these events occur differs by "strength" condition.
@@ -24,13 +24,13 @@ from smile.lsl import LSLPush
 from smile.clock import clock
 import smile.ref as ref
 
-from happy import HappyQuest
+from .happy import HappyQuest
 
 from math import log
 import os
-from list_gen import make_trials
-from instruct import Instruct
-from GetResponse import GetResponse
+from .list_gen import make_trials
+from .instruct import Instruct
+from .GetResponse import GetResponse
 
 
 # make_metric function takes subject's accuracy and RTs and converts them to a
@@ -137,7 +137,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.accs = []
     self.rts = []
     with Parallel():
-        background = Image(source = 'cab_background.png', size = (exp.screen.width, exp.screen.height), allow_stretch = True, keep_ratio = False)
+        background = Image(source = 'cab_background.png', size = (self.screen.width, self.screen.height), allow_stretch = True, keep_ratio = False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
                       font_size=s(config.INST_TITLE_FONT_SIZE),
                       bottom = self.exp.screen.bottom + s(200),

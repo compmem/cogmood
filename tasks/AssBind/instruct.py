@@ -1,7 +1,7 @@
 from smile.common import *
 import os
 from smile.scale import scale as s
-from GetResponse import GetResponse
+from .GetResponse import GetResponse
 
 # present instructions
 @Subroutine
