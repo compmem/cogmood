@@ -1,7 +1,7 @@
 from smile.common import *
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-from .widget import Flanker
+from widget import Flanker
 
 
 @Subroutine

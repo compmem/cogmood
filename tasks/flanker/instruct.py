@@ -2,9 +2,9 @@
 from smile.common import *
 from smile.scale import scale as s
 
-from .widget import Flanker
+from widget import Flanker
 from kivy.utils import platform
-from .trial import Trial, GetResponse
+from trial import Trial, GetResponse
 from math import cos, sin, sqrt, pi, radians
 
 

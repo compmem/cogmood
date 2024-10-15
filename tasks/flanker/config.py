@@ -91,6 +91,7 @@ CONDITIONS = [
                             "dir": "L"},
                            ]"""
 
+STIM_DIRECTORY = "./stim/fish_"
 #EVIDENCE_CONDITIONS = [0., 45.]
 NUM_LOCS = 8
 DEF_SAT = [255.,255.,255.]

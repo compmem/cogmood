@@ -9,13 +9,13 @@ import smile.ref as ref
 
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-from .happy import HappyQuest
+from happy import HappyQuest
 import smile.ref as ref
-from .list_gen import gen_fblocks
+from list_gen import gen_fblocks
 from math import log
-from .trial import Trial, GetResponse
-from .instruct import Instruct
-from . import version
+from trial import Trial, GetResponse
+from instruct import Instruct
+#from . import version
 
 
 def _get_score(corr_trials, num_trials, rt_trials):
@@ -40,11 +40,11 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
     res = Func(gen_fblocks, config)
     self.f_blocks = res.result
 
-    Log(name="flankerinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="flankerinfo")
+        #version=version.__version__,
+        #author=version.__author__,
+        #date_time=version.__date__,
+        #email=version.__email__)
 
     Instruct(config, lang=lang)
     Wait(2.0)
