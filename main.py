@@ -83,10 +83,12 @@ else:
 # Requests list of tasks from the server. All tasks must be presented before
 # another is repeated, except BART which is repeated half as often. Also, no
 # task can repeat directly following itself.
-tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(CogBatt_config.API_BASE_URL, retrieved_worker_id)
+tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(
+    CogBatt_config.API_BASE_URL, retrieved_worker_id)
 
 # Formats tasks into [{'task_name': 'flkr', 'block_number': 0}] format
-tasks: list[dict[str, str]] = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
+tasks: list[dict[str, str]] | None = None if 'error' in tasks_from_api else [
+    {'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -96,6 +98,8 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
 
+# TODO: Error screen for no failed GET request to retrieve blocks
+# TODO: Error screen for no worker_id or default worker_id
 exp.worker_id = retrieved_worker_id if retrieved_worker_id else "Not running from exe, no Subject ID provided."
 
 Label(text="Worker ID: " + exp.worker_id + "\nPress any key to continue.",
@@ -217,9 +221,9 @@ with Parallel():
             with If(exp.task_name == "flkr"):
                 Wait(.5)
                 FlankerExp(Flanker_config,
-                            run_num=exp.block_number,
-                            lang='E',
-                            happy_mid=False)
+                           run_num=exp.block_number,
+                           lang='E',
+                           happy_mid=False)
             with Elif(exp.task_name == "cab"):
                 Wait(.5)
 
@@ -229,16 +233,16 @@ with Parallel():
                 else:
                     taskdir = os.path.join("tasks", "AssBind")
                 AssBindExp(AssBind_config,
-                            task_dir=taskdir,
-                            sub_dir=Ref.object(exp)._subject_dir,
-                            block=exp.block_number,
-                            happy_mid=False)
+                           task_dir=taskdir,
+                           sub_dir=Ref.object(exp)._subject_dir,
+                           block=exp.block_number,
+                           happy_mid=False)
             with Elif(exp.task_name == "rdm"):
                 Wait(.5)
                 RDMExp(RDM_config,
-                        run_num=exp.block_number,
-                        lang='E',
-                        happy_mid=False)
+                       run_num=exp.block_number,
+                       lang='E',
+                       happy_mid=False)
 
             with Elif(exp.task_name == "bart"):
                 Wait(.5)
@@ -248,21 +252,24 @@ with Parallel():
                 else:
                     task2dir = os.path.join("tasks", "BARTUVA")
                 BartuvaExp(Bartuva_config,
-                            run_num=exp.block_number,
-                            sub_dir=Ref.object(exp)._session_dir,
-                            practice=False,
-                            task_dir=task2dir,
-                            happy_mid=False)
+                           run_num=exp.block_number,
+                           sub_dir=Ref.object(exp)._session_dir,
+                           practice=False,
+                           task_dir=task2dir,
+                           happy_mid=False)
 
             Wait(1.0)
             Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
-                text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+                  text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
             with UntilDone():
+                # TODO: Add error screen for failed upload
                 task_data_upload_response = Func(upload_block,
-                     worker_id=retrieved_worker_id,
-                     block_name=exp.task_name+Ref(str, exp.block_number),
-                     data_directory=Ref.object(exp)._session_dir,
-                     slog_file_name='log_'+exp.task_name+'_'+Ref(str, exp.block_number)+'.slog')
+                                                 worker_id=retrieved_worker_id,
+                                                 block_name=exp.task_name +
+                                                 Ref(str, exp.block_number),
+                                                 data_directory=Ref.object(
+                                                     exp)._session_dir,
+                                                 slog_file_name='log_'+exp.task_name+'_'+Ref(str, exp.block_number)+'.slog')
                 KeyPress()
 
     KeyPress(['ESCAPE'], blocking=False)
