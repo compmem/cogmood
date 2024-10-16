@@ -9,6 +9,9 @@ RESP_KEYS = ['1', '4']
 CONT_KEY = ['1', '4']
 
 NUM_FLANKS = 2
+LAYERS = [{"condition": "=", "dir":"R", "layers":["R","L"]},{"condition":"~","dir":"R","layers":["L","R"]},{"condition": "=", "dir":"L", "layers":["L","R"]},{"condition":"~","dir":"L","layers":["R","L"]},{"condition": "+", "dir":"R", "layers":["R","R"]},{"condition":"+","dir":"L","layers":["L","L"]}]
+
+
 CONDITIONS = [
               # Mixed Easy R
               {"stim": "__<__\n" +

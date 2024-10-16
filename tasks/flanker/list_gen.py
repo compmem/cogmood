@@ -30,3 +30,6 @@ def gen_fblocks(config):
             random.shuffle(temp_block)
             flanker_blocks.append(temp_block)
     return flanker_blocks
+
+res = gen_fblocks(config=config)
+print(res)
