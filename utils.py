@@ -126,7 +126,6 @@ def read_app_worker_id() -> Optional[str]:
         NotInAppBundleError: If the executable is not part of a macOS .app bundle.
         FileNotFoundError: If the Info.plist file is not found in the .app bundle.
 
-
     Returns:
         Optional[str]: The value of 'WorkerID' from Info.plist, if found. Returns None if not found.
     """
@@ -150,13 +149,18 @@ def read_app_worker_id() -> Optional[str]:
     try:
         with plist_path.open('rb') as plist_file:
             plist_data: dict = plistlib.load(plist_file)
-        return plist_data.get('WorkerID')
+        worker_id = plist_data.get('WorkerID')
+        if worker_id:
+            logging.info(f"WorkerID found: {worker_id}")
+        else:
+            logging.warning("WorkerID not found in Info.plist")
+        return worker_id
     except plistlib.InvalidFileException:
-        print(f"Error: Invalid plist file at {plist_path}")
-        return None
+        logging.error(f"Invalid plist file at {plist_path}")
     except Exception as e:
-        print(f"An unexpected error occurred while reading {plist_path}: {e}")
-        return None
+        logging.error(
+            f"An unexpected error occurred while reading {plist_path}: {e}")
+    return None
 
 
 def read_exe_worker_id() -> Optional[str]:
@@ -182,9 +186,14 @@ def read_exe_worker_id() -> Optional[str]:
                             b'WorkerID')
 
                         if worker_id_bytes:
-                            return worker_id_bytes.decode('utf-8')
+                            worker_id = worker_id_bytes.decode('utf-8')
+                            logging.info(f"WorkerID found: {worker_id}")
+                            return worker_id
+                        else:
+                            logging.warning(
+                                "WorkerID not found in executable version info")
     except Exception as e:
-        print(
+        logging.error(
             f"An error occurred while reading the executable version info: {e}")
 
     return None
