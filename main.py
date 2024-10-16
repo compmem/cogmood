@@ -32,21 +32,6 @@ from tasks import RDMExp, RDM_config
 from tasks import AssBindExp, AssBind_config
 from tasks import BartuvaExp, Bartuva_config
 
-# ----------------WRK_DIR EDITS HERE----------------
-# edited so the data_dir is the WRK_DIR if running from the packaged exe
-# otherwise the data_dir is '.'
-retrieved_worker_id = None
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    if CogBatt_config.CURRENT_OS == 'Windows':
-        retrieved_worker_id = read_exe_worker_id()
-    elif CogBatt_config.CURRENT_OS == 'Darwin':
-        retrieved_worker_id = read_app_worker_id()
-
-    WRK_DIR = sys._MEIPASS
-    resource_add_path(os.path.join(sys._MEIPASS))
-else:
-    WRK_DIR = '.'
-
 
 # Different configs getting set for the different subject names. If their ID
 # ends in *b* then it is behavioral/eyetracking, if it ends in *e* it is
@@ -81,11 +66,28 @@ Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
 
 pulse_server = None
 
+# ----------------WRK_DIR EDITS HERE----------------
+# edited so the data_dir is the WRK_DIR if running from the packaged exe
+# otherwise the data_dir is '.'
+retrieved_worker_id = None
+if CogBatt_config.RUNNING_FROM_EXECUTABLE:
+    if CogBatt_config.CURRENT_OS == 'Windows':
+        retrieved_worker_id = read_exe_worker_id()
+    elif CogBatt_config.CURRENT_OS == 'Darwin':
+        retrieved_worker_id = read_app_worker_id()
+
+    WRK_DIR = sys._MEIPASS
+    resource_add_path(os.path.join(sys._MEIPASS))
+else:
+    WRK_DIR = '.'
+
 # Generates the block order for the tasks. All tasks must be presented before
 # another is repeated, except BART which is repeated half as often. Also, no
 # task can repeat directly following itself.
-blocks = gen_order(CogBatt_config)
-print(blocks)
+tasks_from_api = get_blocks_to_run(CogBatt_config.API_BASE_URL, retrieved_worker_id)
+# blocks = gen_order(CogBatt_config)
+tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
+print(tasks)
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -192,20 +194,13 @@ with Parallel():
             submit_time=submit.press_time,
             value=sld.value)
 
-        Wait(.3)
-        with Parallel():
-            Questionnaire(loq=CogBatt_config.CESD, font_size=s(25),
-                          width=s(1100),
-                          x=(exp.screen.width/2.) - s(1100)/2.)
-            MouseCursor(blocking=False)
-
         exp.practice = True
         exp.BART_practice = True
         Wait(1.0)
 
         # Log the block order
         Log(name="BLOCK_ORDER",
-            order=blocks)
+            order=tasks)
 
         Label(text="You will now start the experiments. Press any key to continue.",
               text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
@@ -217,53 +212,56 @@ with Parallel():
         exp.file_counter = 1
         exp.still_loop = True
 
-        with Loop(blocks) as BL:
-            with Loop(BL.current) as TL:
-                with If(TL.current[0] == "flkr"):
-                    Wait(.5)
-                    FlankerExp(Flanker_config,
-                               run_num=BL.i,
-                               lang='E',
-                               happy_mid=TL.current[1])
-                with Elif(TL.current[0] == "cab"):
-                    Wait(.5)
+        with Loop(tasks) as task:
+            exp.task_name = task.current['task_name']
+            exp.block_number = task.current['block_number']
+            # Debug(subject_dir=Ref.object(exp)._session_dir)
+            # Debug(path_to_slog='log_'+TL.current[0]+'_'+Ref(str, BL.i)+'.slog')
+            with If(exp.task_name == "flkr"):
+                Wait(.5)
+                FlankerExp(Flanker_config,
+                            run_num=exp.block_number,
+                            lang='E',
+                            happy_mid=False)
+            with Elif(exp.task_name == "cab"):
+                Wait(.5)
 
-                    if hasattr(sys, '_MEIPASS'):
-                        taskdir = os.path.join(os.path.join(
-                            sys._MEIPASS), "tasks", "AssBind")
-                    else:
-                        taskdir = os.path.join("tasks", "AssBind")
-                    AssBindExp(AssBind_config,
-                               task_dir=taskdir,
-                               sub_dir=Ref.object(exp)._subject_dir,
-                               block=BL.i,
-                               happy_mid=TL.current[1])
-                with Elif(TL.current[0] == "rdm"):
-                    Wait(.5)
-                    RDMExp(RDM_config,
-                           run_num=BL.i,
-                           lang='E',
-                           happy_mid=TL.current[1])
+                if CogBatt_config.RUNNING_FROM_EXECUTABLE:
+                    taskdir = os.path.join(os.path.join(
+                        sys._MEIPASS), "tasks", "AssBind")
+                else:
+                    taskdir = os.path.join("tasks", "AssBind")
+                AssBindExp(AssBind_config,
+                            task_dir=taskdir,
+                            sub_dir=Ref.object(exp)._subject_dir,
+                            block=exp.block_number,
+                            happy_mid=False)
+            with Elif(exp.task_name == "rdm"):
+                Wait(.5)
+                RDMExp(RDM_config,
+                        run_num=exp.block_number,
+                        lang='E',
+                        happy_mid=False)
 
-                with Elif(TL.current[0] == "bart"):
-                    Wait(.5)
-                    if hasattr(sys, '_MEIPASS'):
-                        task2dir = os.path.join(os.path.join(
-                            sys._MEIPASS), "tasks", "BARTUVA")
-                    else:
-                        task2dir = os.path.join("tasks", "BARTUVA")
-                    BartuvaExp(Bartuva_config,
-                               run_num=BL.i,
-                               sub_dir=Ref.object(exp)._session_dir,
-                               practice=False,
-                               task_dir=task2dir,
-                               happy_mid=TL.current[1])
+            with Elif(exp.task_name == "bart"):
+                Wait(.5)
+                if CogBatt_config.RUNNING_FROM_EXECUTABLE:
+                    task2dir = os.path.join(os.path.join(
+                        sys._MEIPASS), "tasks", "BARTUVA")
+                else:
+                    task2dir = os.path.join("tasks", "BARTUVA")
+                BartuvaExp(Bartuva_config,
+                            run_num=exp.block_number,
+                            sub_dir=Ref.object(exp)._session_dir,
+                            practice=False,
+                            task_dir=task2dir,
+                            happy_mid=False)
 
-                Wait(1.0)
-                Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
-                      text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-                with UntilDone():
-                    KeyPress()
+            Wait(1.0)
+            Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
+                text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+            with UntilDone():
+                KeyPress()
 
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import platform
 
 CURRENT_OS: str = platform.system()
 API_BASE_URL: str = 'http://localhost:5000'
-
+RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
 EXP_NAME = "SUPREMEMOOD"
 
 BACKGROUND_COLOR = (.35, .35, .35, 1.0)
@@ -24,7 +25,7 @@ DISPLAY_FONT = 45
 BUTTON_WH = 200
 
 TASKS = [[['cab', True], ['flkr', True], ['rdm', True], ['bart', True]],
-         [['cab', False], ['flkr', False], ['rdm', False], ['bart', False]],]
+         [['cab', False], ['flkr', False], ['rdm', False], ['bart', False]]]
 
 #TASKS = [[['rdmf', False], ['bart', False], ['barta', False],['barts', False], ]]
 NUM_REPS = 1
