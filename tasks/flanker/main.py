@@ -117,7 +117,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
 
                 # log what we need
                 Log(trial.current,
-                    name='FL',
+                    name='flkr',
                     run_num=run_num,
                     appear_time=ft.appear_time,
                     disappear_time=ft.disappear_time,

@@ -205,7 +205,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
 
             # log data
             Log(trial.current,
-                name="cont_ass_bind",
+                name="cab",
                 appearL=left_image.appear_time,
                 appearR=right_image.appear_time,
                 disappearL=left_image.disappear_time,

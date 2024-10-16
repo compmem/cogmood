@@ -138,7 +138,7 @@ def RDMExp(self, config, run_num=0, lang="E", pulse_server=None, practice=False,
 
                 # log what we need
                 Log(trial.current,
-                    name='MD',
+                    name='rdm',
                     run_num=run_num,
                     appear_time=mdt.appear_time,
                     disappear_time=mdt.disappear_time,

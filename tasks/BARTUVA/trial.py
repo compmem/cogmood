@@ -250,7 +250,7 @@ def BARTSub(self,
                         self.pressed_key = False
 
                 #Logging trial info
-                Log(name="OBART",
+                Log(name="bart",
                     subject=self.subject,
                     run_num=run_num,
                     balloon_number_session=balloon_number_session,
