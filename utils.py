@@ -1,10 +1,16 @@
+import os
 import sys
 import plistlib
+import zipfile
+import requests
+import logging
+from config import API_BASE_URL
+from hashlib import blake2b
+from io import BytesIO
 from pathlib import Path
 from typing import Optional
 from pefile import PE, DIRECTORY_ENTRY
-import requests
-import logging
+
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO,
@@ -53,54 +59,81 @@ def get_blocks_to_run(base_url: str, worker_id: str) -> list[str] | dict[str, st
     return {"error": f"Request failed"}
 
 
-def upload_block(base_url: str, worker_id: str, block_name: str, checksum: str, file_path: str) -> None:
+def hash_file(file_obj):
     """
-    Sends a POST request to upload a completed block along with its checksum and the associated zipped file.
+    Computes the blake2b hash of a file-like object.
 
     Args:
-        base_url (str): The base URL of the API server (e.g., "https://your-api-server.com").
+        file_obj: File-like object opened in binary mode.
+
+    Returns:
+        str: The hexadecimal representation of the hash.
+    """
+    hash_blake = blake2b()
+    file_obj.seek(0)  # Reset file pointer to the start
+    for chunk in iter(lambda: file_obj.read(4096), b""):
+        hash_blake.update(chunk)
+    return hash_blake.hexdigest()
+
+
+def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file_name: str) -> None:
+    """
+    Sends a POST request to upload a completed block along with its checksum and the associated zipped file.
+    Uses the config.API_BASE_URL to build the URL.
+
+    Args:
         worker_id (str): The unique identifier for the worker who is uploading the block.
         block_name (str): The name of the block being uploaded, typically in the format "taskname_runnumber".
-        checksum (str): The 128-character alphanumeric checksum representing the zipped file contents.
-        file_path (str): The path to the zipped file that is being uploaded for the block.
+        data_directory (str): The directory where the slog file is located.
+        slog_file_name (str): The name of the slog file.
 
     Behavior:
+        - Zips the slog file.
+        - Computes the checksum of the zipped file.
         - Sends the `worker_id`, `block_name`, and `checksum` in the form data.
         - Uploads the zipped file associated with the block in the `files` parameter.
-        - Handles successful upload with a status of 200.
-        - Handles checksum mismatch with a status of 409, indicating a conflict due to checksum mismatch.
-
-    Example:
-        upload_block("https://api.example.com", "worker_123", "task_1", "checksum_string", "/path/to/file.zip")
-
     """
-    # Define the POST request URL
-    url = f"{base_url}/taskcontrol"
+    url = f"{API_BASE_URL}/taskcontrol"
 
-    # Define the POST request payload
-    data = {
-        'worker_id': worker_id,
-        'block_name': block_name,
-        'checksum': checksum
-    }
+    slog_file_path = os.path.join(data_directory, slog_file_name)
+    if not os.path.isfile(slog_file_path):
+        logging.warning(
+            f"File '{slog_file_name}' does not exist at '{slog_file_path}'.")
+        return
 
-    # Define the files to upload (file should be a zip file for the block)
-    files = {
-        # Opening the file in binary mode for upload
-        'file': open(file_path, 'rb')
-    }
+    logging.info(
+        f"SLOG File Found: File '{slog_file_name}' exists at '{slog_file_path}'.")
 
-    # Send the POST request with form data and file
+    # Create a zip archive in memory
+    zip_buffer = BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        zip_file.write(slog_file_path, slog_file_name)
+
+    zip_buffer.seek(0)  # Reset buffer to the start
+    checksum = hash_file(zip_buffer)
+    zip_buffer.seek(0)  # Reset the buffer to the start again for upload
+
+    params = {'worker_id': worker_id}
+    data = {'block_name': block_name, 'checksum': checksum}
+    files = {'file': (f'{block_name}.zip', zip_buffer, 'application/zip')}
+
     try:
-        response = requests.post(url, data=data, files=files)
-        response.raise_for_status()  # Raise an error for non-2xx status codes
+        response = requests.post(url, params=params, data=data, files=files)
+        logging.info(f"Response Status Code: {response.status_code}")
+
         if response.status_code == 200:
             logging.info("Upload successful!")
+        elif response.status_code == 400:
+            error_message = response.json().get("error", "Unknown error")
+            logging.warning(f"Bad Request: {error_message}")
         elif response.status_code == 409:
+            error_message = response.json().get("error", "Unknown error")
             logging.warning("Checksum mismatch: checksums don't match")
-            logging.warning(response.json().get("error", "Unknown error"))
-    except requests.exceptions.HTTPError as http_error:
-        logging.error(f"HTTP Error: {http_error}")
+            logging.warning(f"Error: {error_message}")
+        else:
+            logging.error(
+                f"Unexpected response: {response.status_code} - {response.text}")
+
     except requests.exceptions.ConnectionError as connection_error:
         logging.error(f"Error Connecting: {connection_error}")
     except requests.exceptions.Timeout as timeout_error:
@@ -108,8 +141,7 @@ def upload_block(base_url: str, worker_id: str, block_name: str, checksum: str, 
     except requests.exceptions.RequestException as error:
         logging.error(f"An error occurred: {error}")
     finally:
-        # Close the file to release resources
-        files['file'].close()
+        zip_buffer.close()
 
 
 class NotInAppBundleError(Exception):
@@ -197,3 +229,10 @@ def read_exe_worker_id() -> Optional[str]:
             f"An error occurred while reading the executable version info: {e}")
 
     return None
+
+
+if __name__ == "__main__":
+    upload_block(worker_id='',
+                 block_name='flkr_1',
+                 data_directory='./SUPREMEMOOD/4/20241016_145350/',
+                 slog_file_name='log_flkr_0.slog')

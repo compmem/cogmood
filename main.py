@@ -80,12 +80,13 @@ if CogBatt_config.RUNNING_FROM_EXECUTABLE:
 else:
     WRK_DIR = '.'
 
-# Generates the block order for the tasks. All tasks must be presented before
+# Requests list of tasks from the server. All tasks must be presented before
 # another is repeated, except BART which is repeated half as often. Also, no
 # task can repeat directly following itself.
-tasks_from_api = get_blocks_to_run(CogBatt_config.API_BASE_URL, retrieved_worker_id)
-tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
-print(tasks)
+tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(CogBatt_config.API_BASE_URL, retrieved_worker_id)
+
+# Formats tasks into [{'task_name': 'flkr', 'block_number': 0}] format
+tasks: list[dict[str, str]] = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -213,8 +214,6 @@ with Parallel():
         with Loop(tasks) as task:
             exp.task_name = task.current['task_name']
             exp.block_number = task.current['block_number']
-            # Debug(subject_dir=Ref.object(exp)._session_dir)
-            # Debug(path_to_slog='log_'+TL.current[0]+'_'+Ref(str, BL.i)+'.slog')
             with If(exp.task_name == "flkr"):
                 Wait(.5)
                 FlankerExp(Flanker_config,
@@ -259,6 +258,11 @@ with Parallel():
             Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
                 text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
             with UntilDone():
+                task_data_upload_response = Func(upload_block,
+                     worker_id=retrieved_worker_id,
+                     block_name=exp.task_name+Ref(str, exp.block_number),
+                     data_directory=Ref.object(exp)._session_dir,
+                     slog_file_name='log_'+exp.task_name+'_'+Ref(str, exp.block_number)+'.slog')
                 KeyPress()
 
     KeyPress(['ESCAPE'], blocking=False)
