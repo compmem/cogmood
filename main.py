@@ -23,7 +23,6 @@ from kivy.resources import resource_add_path
 import config as CogBatt_config
 from utils import read_app_worker_id, read_exe_worker_id, \
     get_blocks_to_run, upload_block
-from list_gen import gen_order
 import version
 
 # Various task imports
@@ -85,7 +84,6 @@ else:
 # another is repeated, except BART which is repeated half as often. Also, no
 # task can repeat directly following itself.
 tasks_from_api = get_blocks_to_run(CogBatt_config.API_BASE_URL, retrieved_worker_id)
-# blocks = gen_order(CogBatt_config)
 tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
 print(tasks)
 

@@ -24,10 +24,6 @@ RECOUTHEIGHT = 800
 DISPLAY_FONT = 45
 BUTTON_WH = 200
 
-TASKS = [[['cab', True], ['flkr', True], ['rdm', True], ['bart', True]],
-         [['cab', False], ['flkr', False], ['rdm', False], ['bart', False]]]
-
-#TASKS = [[['rdmf', False], ['bart', False], ['barta', False],['barts', False], ]]
 NUM_REPS = 1
 FMRI_TASKS = [['cab', 'flkr', 'rdm', 'bart'],
               ['cab', 'flkr', 'rdm'],
