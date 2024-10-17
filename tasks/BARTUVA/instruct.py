@@ -125,6 +125,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                         # with Loop(bag.current) as balloon:
                         with Loop(bags) as balloon:
                             Balloon = BARTSub(config,
+                                              log_name='bart_practice',
                                               balloon=balloon.current,
                                               block=self.block_tic,
                                               set_number=self.set_number,

@@ -121,6 +121,7 @@ def BartuvaExp(self,
             #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
             #         HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
             Balloon = BARTSub(config,
+                              log_name='bart',
                               balloon=balloon.current,
                               balloon_id=balloon.i,
                               block=self.block_tic,

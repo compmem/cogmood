@@ -42,6 +42,7 @@ def GetResponse(self,
 @Subroutine
 def BARTSub(self,
             config,
+            log_name,
             balloon=[],
             balloon_id=0,
             block=0,
@@ -250,7 +251,7 @@ def BARTSub(self,
                         self.pressed_key = False
 
                 #Logging trial info
-                Log(name="bart",
+                Log(name=log_name,
                     subject=self.subject,
                     run_num=run_num,
                     balloon_number_session=balloon_number_session,
