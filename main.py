@@ -1,19 +1,11 @@
 # General imports
 import os
-from os.path import join
 import sys
-import requests
-import json
-import subprocess
-import zipfile
-import hashlib
 # Smile imports
-from smile.common import Experiment, Log, Wait, Func, UntilDone, ButtonPress, \
-    Button, Label, Loop, If, Elif, Else, KeyPress, Ref, \
-    Parallel, Slider, MouseCursor, Rectangle, Meanwhile, \
-    Serial, Debug, Screenshot, Questionnaire, UpdateWidget
+from smile.common import Experiment, Log, Wait, Func, UntilDone, \
+    Label, Loop, If, Elif, Else, KeyPress, Ref, \
+    Parallel, Slider, Serial, UpdateWidget
 from smile.clock import clock
-from smile.lsl import init_lsl_outlet, LSLPush
 from smile.scale import scale as s
 from smile.startup import InputSubject
 # from android.permissions import request_permissions, Permission
@@ -98,6 +90,7 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
 
+# TODO: Handle case where there are no more blocks to run
 # TODO: Error screen for no failed GET request to retrieve blocks
 # TODO: Error screen for no worker_id or default worker_id
 exp.worker_id = retrieved_worker_id if retrieved_worker_id else "Not running from exe, no Subject ID provided."
