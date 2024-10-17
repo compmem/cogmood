@@ -265,11 +265,10 @@ with Parallel():
                 # TODO: Add error screen for failed upload
                 task_data_upload_response = Func(upload_block,
                                                  worker_id=retrieved_worker_id,
-                                                 block_name=exp.task_name +
-                                                 Ref(str, exp.block_number),
+                                                 block_name=exp.task_name + Ref(str, exp.block_number),
                                                  data_directory=Ref.object(
                                                      exp)._session_dir,
-                                                 slog_file_name='log_'+exp.task_name+'_'+Ref(str, exp.block_number)+'.slog')
+                                                 slog_file_name='log_'+exp.task_name+'_'+'0.slog')
                 KeyPress()
 
     KeyPress(['ESCAPE'], blocking=False)
