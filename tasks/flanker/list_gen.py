@@ -16,13 +16,12 @@ def gen_fblocks(config):
                                   }
                     for s in config.CONDITIONS:
                         trial = temp_trial.copy()
-                        if s['dir'] == "L":
+                        if s['dir'] == "left":
                             key_resp = config.RESP_KEYS[0]
                         else:
                             key_resp = config.RESP_KEYS[-1]
                         # MIXED EASY RIGHT
                         trial.update({'condition': s['condition'],
-                                      'stim': s['stim'],
                                       'dir': s['dir'],
                                       'corr_resp': key_resp
                                       })
@@ -30,3 +29,6 @@ def gen_fblocks(config):
             random.shuffle(temp_block)
             flanker_blocks.append(temp_block)
     return flanker_blocks
+
+res = gen_fblocks(config)
+print(res)

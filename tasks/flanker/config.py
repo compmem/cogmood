@@ -9,90 +9,60 @@ RESP_KEYS = ['1', '4']
 CONT_KEY = ['1', '4']
 
 NUM_FLANKS = 2
-LAYERS = [{"condition": "=", "dir":"R", "layers":["R","L"]},{"condition":"~","dir":"R","layers":["L","R"]},{"condition": "=", "dir":"L", "layers":["L","R"]},{"condition":"~","dir":"L","layers":["R","L"]},{"condition": "+", "dir":"R", "layers":["R","R"]},{"condition":"+","dir":"L","layers":["L","L"]}]
+LAYERS = [{"condition": "=", "dir":"right", "layers":["right","left"]},{"condition":"~","dir":"right","layers":["right","left"]},{"condition": "=", "dir":"left", "layers":["left","right"]},{"condition":"~","dir":"left","layers":["right","left"]},{"condition": "+", "dir":"right", "layers":["right","right"]},{"condition":"+","dir":"left","layers":["left","left"]}]
 
 
 CONDITIONS = [
               # Mixed Easy R
-              {"stim": "__<__\n" +
-                       "_<><_\n" +
-                       "<>>><\n" +
-                       "_<><_\n" +
-                       "__<__\n",
-               "condition": "=",
-               "dir": "R"},
+              {"condition": "=",
+               "dir": "right"},
               # Mixed Hard R
-              {"stim": "__>__\n" +
-                       "_><>_\n" +
-                       "><><>\n" +
-                       "_><>_\n" +
-                       "__>__\n",
-               "condition": "~",
-               "dir": "R"},
+              { "condition": "~",
+               "dir": "right"},
               # Mixed Hard L
-              {"stim": "__<__\n" +
-                       "_<><_\n" +
-                       "<><><\n" +
-                       "_<><_\n" +
-                       "__<__\n",
-               "condition": "~",
-               "dir": "L"},
+              {"condition": "~",
+               "dir": "left"},
               # Mixed Easy L
-              {"stim": "__>__\n" +
-                       "_><>_\n" +
-                       "><<<>\n" +
-                       "_><>_\n" +
-                       "__>__\n",
-               "condition": "=",
-               "dir": "L"},
+              {"condition": "=",
+               "dir": "left"},
               # Congruent R
-              {"stim": "__>__\n" +
-                       "_>>>_\n" +
-                       ">>>>>\n" +
-                       "_>>>_\n" +
-                       "__>__\n",
-               "condition": "+",
-               "dir": "R"},
+              {"condition": "+",
+               "dir": "right"},
               # Congruent L
-              {"stim": "__<__\n" +
-                       "_<<<_\n" +
-                       "<<<<<\n" +
-                       "_<<<_\n" +
-                       "__<__\n",
-               "condition": "+",
-               "dir": "L"},
+              {"condition": "+",
+               "dir": "left"},
 
               ]
-# uNCOMMENT THIS LINE FOR EXTRA CONDITIONS
-"""CONDITIONS = CONDITIONS + [{"stim": "__>__\n" +
-                                    "_<><_\n" +
-                                    "<<><<\n" +
-                                    "_<><_\n" +
-                                    "__>__\n",
-                            "condition": "|",
-                            "dir": "R"},
-                           {"stim": "__<__\n" +
-                                    "_<<<_\n" +
-                                    ">>>>>\n" +
-                                    "_<<<_\n" +
-                                    "__<__\n",
-                            "condition": "--",
-                            "dir": "R"},
-                           {"stim": "__<__\n" +
-                                    "_><>_\n" +
-                                    ">><>>\n" +
-                                    "_><>_\n" +
-                                    "__<__\n",
-                            "condition": "|",
-                            "dir": "L"},
-                           {"stim": "__>__\n" +
-                                    "_>>>_\n" +
-                                    "<<<<<\n" +
-                                    "_>>>_\n" +
-                                    "__>__\n",
-                            "condition": "--",
-                            "dir": "L"},
-                           ]"""
+#  uNCOMMENT THIS LINE FOR EXTRA CONDITIONS
+# CONDITIONS = [{"stim": "__>__\n" +
+#                                     "_<><_\n" +
+#                                     "<<><<\n" +
+#                                     "_<><_\n" +
+#                                     "__>__\n",
+#                             "condition": "|",
+#                             "dir": "R"},
+#                            {"stim": "__<__\n" +
+#                                     "_<<<_\n" +
+#                                     ">>>>>\n" +
+#                                     "_<<<_\n" +
+#                                     "__<__\n",
+#                             "condition": "--",
+#                             "dir": "R"},
+#                            {"stim": "__<__\n" +
+#                                     "_><>_\n" +
+#                                     ">><>>\n" +
+#                                     "_><>_\n" +
+#                                     "__<__\n",
+#                             "condition": "|",
+#                             "dir": "L"},
+#                            {"stim": "__>__\n" +
+#                                     "_>>>_\n" +
+#                                     "<<<<<\n" +
+#                                     "_>>>_\n" +
+#                                     "__>__\n",
+#                             "condition": "--",
+#                             "dir": "L"},
+#                            ]
 
 STIM_DIRECTORY = "./stim/fish_"
 #EVIDENCE_CONDITIONS = [0., 45.]
@@ -105,6 +75,8 @@ NUM_REPS = 1
 RESPONSE_DURATION = 3.
 FROM_CENTER = 300
 FEEDBACK_TIME = 0.5
+
+IMAGE_SIZE = [100,100]
 
 SKIP_SIZE = [200, 50]
 SKIP_FONT_SIZE = 25
