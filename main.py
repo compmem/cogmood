@@ -4,10 +4,9 @@ import sys
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, \
     Label, Loop, If, Elif, Else, KeyPress, Ref, \
-    Parallel, Slider, Serial, UpdateWidget
+    Parallel, Slider, Serial, UpdateWidget, Debug, Meanwhile
 from smile.clock import clock
 from smile.scale import scale as s
-from smile.startup import InputSubject
 # from android.permissions import request_permissions, Permission
 # request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
 from kivy.resources import resource_add_path
@@ -22,6 +21,8 @@ from tasks import FlankerExp, Flanker_config
 from tasks import RDMExp, RDM_config
 from tasks import AssBindExp, AssBind_config
 from tasks import BartuvaExp, Bartuva_config
+
+from error_screen import error_screen
 
 
 # Different configs getting set for the different subject names. If their ID
@@ -52,35 +53,44 @@ AssBind_config.CONT_KEY = CogBatt_config.CONT_KEY
 Bartuva_config.RESP_KEYS = CogBatt_config.RESP_KEYS[:]
 Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
 
+WORKER_ID_PLACEHOLDER_VALUE = '"------------------------".---------------------------'
 
 # If we have an eeg experiment, then we need to initialize the lsl outlet.
 
 pulse_server = None
 
-# ----------------WRK_DIR EDITS HERE----------------
-# edited so the data_dir is the WRK_DIR if running from the packaged exe
-# otherwise the data_dir is '.'
-retrieved_worker_id = None
+# Define default WRK_DIR as current directory
+WRK_DIR = '.'
+retrieved_worker_id = '123'
+
+# Check if running from an executable
 if CogBatt_config.RUNNING_FROM_EXECUTABLE:
+    # Update WRK_DIR to the location of the executable
+    WRK_DIR = sys._MEIPASS
+    resource_add_path(WRK_DIR)
+
+    # Retrieve worker ID based on the OS
     if CogBatt_config.CURRENT_OS == 'Windows':
         retrieved_worker_id = read_exe_worker_id()
     elif CogBatt_config.CURRENT_OS == 'Darwin':
         retrieved_worker_id = read_app_worker_id()
 
-    WRK_DIR = sys._MEIPASS
-    resource_add_path(os.path.join(sys._MEIPASS))
-else:
-    WRK_DIR = '.'
+tasks = None
+number_of_tasks = 0
 
-# Requests list of tasks from the server. All tasks must be presented before
-# another is repeated, except BART which is repeated half as often. Also, no
-# task can repeat directly following itself.
-tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(
-    CogBatt_config.API_BASE_URL, retrieved_worker_id)
+# Proceed if a valid worker ID is retrieved and it's not a placeholder
+if retrieved_worker_id and retrieved_worker_id != WORKER_ID_PLACEHOLDER_VALUE:
+    tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(retrieved_worker_id)
 
-# Formats tasks into [{'task_name': 'flkr', 'block_number': 0}] format
-tasks: list[dict[str, str]] | None = None if 'error' in tasks_from_api else [
-    {'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])} for task in tasks_from_api]
+    if isinstance(tasks_from_api, list):
+        # Format tasks into [{'task_name': 'flkr', 'block_number': 0}]
+        tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])}
+                 for task in tasks_from_api]
+        number_of_tasks = len(tasks)
+    else:
+        # Handle error message case
+        tasks = tasks_from_api
+
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -90,20 +100,9 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
 
-# TODO: Handle case where there are no more blocks to run
-# TODO: Error screen for no failed GET request to retrieve blocks
-# TODO: Error screen for no worker_id or default worker_id
-exp.worker_id = retrieved_worker_id if retrieved_worker_id else "Not running from exe, no Subject ID provided."
+# exp.tasks = [{'task_name': 'flkr', 'block_number': 0}]
+exp.enable_error_handling = True
 
-Label(text="Worker ID: " + exp.worker_id + "\nPress any key to continue.",
-      text_size=(s(700), None),
-      font_size=s(CogBatt_config.INST_FONT),
-      halign="center")
-
-with UntilDone():
-    KeyPress()
-
-InputSubject(exp_title="Supreme")
 with Parallel():
     with Serial(blocking=False):
         # Log all of the info about the subject and the CogBatt version
@@ -114,12 +113,24 @@ with Parallel():
             email=version.__email__)
 
         Wait(.5)
-
-        # Give participants the option to record demographic information, but only on
-        # their first visit, the behavioral visit.
-
-        # Demographics(CogBatt_config)
-        # Wait(1.0)
+        
+        with If(exp.enable_error_handling):
+            # Handles case where retrieval of worker id fails
+            with If(retrieved_worker_id == None):
+                error_screen(error='Failed to Retrieve Identifier',
+                                message='Contact Dylan Nielson')
+            # Handles case where retrieval of worker id is default placeholder
+            with Elif(retrieved_worker_id == '"------------------------".---------------------------'):
+                error_screen(error='Non-Unique Identifier',
+                                message='Contact Dylan Nielson')
+            # Error screen for failed GET request to retrieve blocks
+            with Elif('error' in exp.tasks):
+                error_screen(error='Failed to retrieve tasks.',
+                                message=exp.tasks['error'])
+            # Handles case where there are no more blocks to run
+            with Elif(number_of_tasks == 0):
+                error_screen(error='No tasks to run.',
+                                message='Press next in the browser or return to the website via the link from prolific if that window is no longer open.')
 
         # Present initial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
@@ -196,7 +207,7 @@ with Parallel():
 
         # Log the block order
         Log(name="BLOCK_ORDER",
-            order=tasks)
+            order=exp.tasks)
 
         Label(text="You will now start the experiments. Press any key to continue.",
               text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
@@ -208,7 +219,7 @@ with Parallel():
         exp.file_counter = 1
         exp.still_loop = True
 
-        with Loop(tasks) as task:
+        with Loop(exp.tasks) as task:
             exp.task_name = task.current['task_name']
             exp.block_number = task.current['block_number']
             with If(exp.task_name == "flkr"):
@@ -252,17 +263,24 @@ with Parallel():
                            happy_mid=False)
 
             Wait(1.0)
-            Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
-                  text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-            with UntilDone():
-                # TODO: Add error screen for failed upload
-                task_data_upload_response = Func(upload_block,
-                                                 worker_id=retrieved_worker_id,
-                                                 block_name=exp.task_name + Ref(str, exp.block_number),
-                                                 data_directory=Ref.object(
-                                                     exp)._session_dir,
-                                                 slog_file_name='log_'+exp.task_name+'_'+'0.slog')
-                KeyPress()
+            # Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
+            #       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+            
+            exp.task_data_upload = Func(upload_block,
+                                        worker_id=retrieved_worker_id,
+                                        block_name=exp.task_name + Ref(str, exp.block_number),
+                                        data_directory=Ref.object(
+                                            exp)._session_dir,
+                                        slog_file_name='log_'+exp.task_name+'_'+'0.slog')
+            Wait(until=exp.task_data_upload.result)
+            with Meanwhile():
+                Label(text="Uploading data...",
+                    text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+            
+            # TODO: Add error screen for failed upload
+            with If('error' in exp.task_data_upload.result):
+                error_screen(error='Error During Upload',
+                            message=exp.task_data_upload.result['error'])
 
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)
