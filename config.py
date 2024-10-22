@@ -7,6 +7,10 @@ import platform
 CURRENT_OS: str = platform.system()
 API_BASE_URL: str = 'http://localhost:5000'
 RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+# WORKER_ID_PLACEHOLDER_VALUE is the placeholder value assigned to the WorkerID field
+# in the executables when we build them. It should be replaced by actual ID when
+# the executable is prepared for distribution.
+WORKER_ID_PLACEHOLDER_VALUE = '"------------------------".---------------------------'
 EXP_NAME = "SUPREMEMOOD"
 
 BACKGROUND_COLOR = (.35, .35, .35, 1.0)

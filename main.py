@@ -53,15 +53,13 @@ AssBind_config.CONT_KEY = CogBatt_config.CONT_KEY
 Bartuva_config.RESP_KEYS = CogBatt_config.RESP_KEYS[:]
 Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
 
-WORKER_ID_PLACEHOLDER_VALUE = '"------------------------".---------------------------'
-
 # If we have an eeg experiment, then we need to initialize the lsl outlet.
 
 pulse_server = None
 
 # Define default WRK_DIR as current directory
 WRK_DIR = '.'
-retrieved_worker_id = '123'
+retrieved_worker_id = None
 
 # Check if running from an executable
 if CogBatt_config.RUNNING_FROM_EXECUTABLE:
@@ -79,7 +77,7 @@ tasks = None
 number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
-if retrieved_worker_id and retrieved_worker_id != WORKER_ID_PLACEHOLDER_VALUE:
+if retrieved_worker_id and retrieved_worker_id != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
     tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(retrieved_worker_id)
 
     if isinstance(tasks_from_api, list):
@@ -100,6 +98,7 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
 
+exp.tasks = tasks
 # exp.tasks = [{'task_name': 'flkr', 'block_number': 0}]
 exp.enable_error_handling = True
 
@@ -120,7 +119,7 @@ with Parallel():
                 error_screen(error='Failed to Retrieve Identifier',
                                 message='Contact Dylan Nielson')
             # Handles case where retrieval of worker id is default placeholder
-            with Elif(retrieved_worker_id == '"------------------------".---------------------------'):
+            with Elif(retrieved_worker_id == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
                 error_screen(error='Non-Unique Identifier',
                                 message='Contact Dylan Nielson')
             # Error screen for failed GET request to retrieve blocks
