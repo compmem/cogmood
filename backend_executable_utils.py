@@ -6,23 +6,24 @@ from typing import Optional
 from pathlib import Path
 from pefile import PE, DIRECTORY_ENTRY
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def edit_app_worker_id(app_path: str, new_worker_id: str, output_app_path: Optional[str] = None) -> None:
     """
     Modifies the 'WorkerID' field in the Info.plist of a macOS .app bundle.
-    
+
     Args:
         app_path (str): Path to the original .app bundle whose 'WorkerID' will be modified.
         new_worker_id (str): New 'WorkerID' value to replace the existing one.
         output_app_path (Optional[str]): Path to save the modified .app bundle. If not provided, 
                                          the original bundle will be overwritten.
-    
+
     Raises:
         FileNotFoundError: If the specified .app bundle or Info.plist file does not exist.
         ValueError: If the Info.plist file cannot be loaded or parsed.
     """
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
 
     # Construct the path to the Info.plist file inside the original .app bundle
     plist_path = Path(app_path) / 'Contents' / 'Info.plist'
@@ -82,9 +83,6 @@ def edit_exe_worker_id(exe_file_path: str, new_worker_id: str, output_file_path:
         FileNotFoundError: If the specified executable does not exist.
         ValueError: If the PE file cannot be loaded or parsed.
     """
-
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
 
     if not os.path.exists(exe_file_path):
         raise FileNotFoundError(f"The file {exe_file_path} does not exist.")
