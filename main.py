@@ -89,6 +89,7 @@ if retrieved_worker_id and retrieved_worker_id != CogBatt_config.WORKER_ID_PLACE
         # Handle error message case
         tasks = tasks_from_api
 
+error_retrieving_tasks = 'error' in tasks
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -99,7 +100,6 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  working_dir=WRK_DIR)
 
 exp.tasks = tasks
-# exp.tasks = [{'task_name': 'flkr', 'block_number': 0}]
 exp.enable_error_handling = True
 
 with Parallel():
@@ -123,7 +123,7 @@ with Parallel():
                 error_screen(error='Non-Unique Identifier',
                                 message='Contact Dylan Nielson')
             # Error screen for failed GET request to retrieve blocks
-            with Elif('error' in exp.tasks):
+            with Elif(error_retrieving_tasks):
                 error_screen(error='Failed to retrieve tasks.',
                                 message=exp.tasks['error'])
             # Handles case where there are no more blocks to run
