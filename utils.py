@@ -42,7 +42,7 @@ def get_blocks_to_run(worker_id: str) -> list[str] | dict[str, str]:
          # Format tasks from ['flkr_0] into [{'task_name': 'flkr', 'block_number': 0}]
         reformatted_tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])}
                  for task in tasks]
-        logging.info(f'Reformatted tasks: {reformatted_tasks}')
+        logging.info(f'Reformatted task list: {reformatted_tasks}')
         return {'status': 'success', 'content': reformatted_tasks}
     except requests.exceptions.HTTPError as http_error:
         logging.error(f'HTTP Error: {http_error}')
