@@ -4,7 +4,7 @@ import zipfile
 import requests
 import logging
 import time
-from config import API_BASE_URL
+from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS
 from hashlib import blake2b
 from io import BytesIO
 from pathlib import Path
@@ -150,33 +150,45 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
         zip_buffer.close()
 
 
-def read_app_worker_id() -> Optional[str]:
+def retrieve_worker_id() -> dict[str, str]:
     """
-    Reads the 'WorkerID' from the Info.plist of the currently running .app bundle,
-    handling both cases where the .app is launched or the executable is run directly from Contents/MacOS.
+    Retrieves the worker ID based on the current OS and executable context.
+    
+    Returns:
+        dict: A dictionary with 'status' and 'content' containing the worker ID or error message.
+    """
+    if RUNNING_FROM_EXECUTABLE:
+        # Select appropriate worker ID retrieval function based on OS
+        os_worker_id_function = {
+            'Windows': _read_exe_worker_id,
+            'Darwin': _read_app_worker_id
+        }.get(CURRENT_OS, lambda: {'status': 'error', 'content': 'Unsupported OS'})
+        
+        return os_worker_id_function()
 
-    Logs warnings instead of raising exceptions in case of errors.
+    return {'status': 'error', 'content': 'Not running from an executable'}
+
+
+def _read_app_worker_id() -> dict[str, str]:
+    """
+    Reads the 'WorkerID' from the Info.plist of the currently running .app bundle.
 
     Returns:
-        Optional[str]: The value of 'WorkerID' from Info.plist, if found. Returns None if not found.
+        dict: A dictionary containing 'status' and 'content' (either the 'WorkerID' or an error message).
     """
     exec_path: Path = Path(sys.executable).resolve()
 
-    # If running from Contents/MacOS, go up two directories to get to the .app root
     if exec_path.parent.name == 'MacOS' and exec_path.parents[1].name == 'Contents':
-        # Go two levels up (from MacOS to .app root)
         app_bundle_path = exec_path.parents[2]
     else:
-        # Log a warning if the executable is not within a macOS .app bundle
         logging.warning("Executable is not inside a macOS .app bundle.")
-        return None
+        return {"status": "error", "content": "Executable is not inside a macOS .app bundle"}
 
-    # Build the path to Info.plist
     plist_path: Path = app_bundle_path / 'Contents' / 'Info.plist'
 
     if not plist_path.exists():
         logging.warning(f"Info.plist not found at {plist_path}")
-        return None
+        return {"status": "error", "content": "Info.plist not found"}
 
     try:
         with plist_path.open('rb') as plist_file:
@@ -184,23 +196,24 @@ def read_app_worker_id() -> Optional[str]:
         worker_id = plist_data.get('WorkerID')
         if worker_id:
             logging.info(f"WorkerID found: {worker_id}")
+            return {"status": "success", "content": worker_id}
         else:
             logging.warning("WorkerID not found in Info.plist")
-        return worker_id
+            return {"status": "error", "content": "WorkerID not found in Info.plist"}
     except plistlib.InvalidFileException:
         logging.error(f"Invalid plist file at {plist_path}")
+        return {"status": "error", "content": "Invalid plist file"}
     except Exception as e:
-        logging.error(
-            f"An unexpected error occurred while reading {plist_path}: {e}")
-    return None
+        logging.error(f"An unexpected error occurred while reading {plist_path}: {e}")
+        return {"status": "error", "content": str(e)}
 
 
-def read_exe_worker_id() -> Optional[str]:
+def _read_exe_worker_id() -> dict[str, str]:
     """
     Reads the 'WorkerID' from the version info resource of the currently running .exe file on Windows.
 
     Returns:
-        Optional[str]: The value of 'WorkerID' from the version info resource if found. Returns None if not found.
+        dict: A dictionary containing 'status' and 'content' (either the 'WorkerID' or an error message).
     """
     exe_file_path: str = sys.executable
     try:
@@ -212,23 +225,19 @@ def read_exe_worker_id() -> Optional[str]:
             for file_info in pe.FileInfo:
                 for info in file_info:
                     if info.name == 'StringFileInfo':
-                        version_info_dict: dict[bytes,
-                                                bytes] = info.StringTable[0].entries
-                        worker_id_bytes: Optional[bytes] = version_info_dict.get(
-                            b'WorkerID')
+                        version_info_dict: dict[bytes, bytes] = info.StringTable[0].entries
+                        worker_id_bytes: Optional[bytes] = version_info_dict.get(b'WorkerID')
 
                         if worker_id_bytes:
                             worker_id = worker_id_bytes.decode('utf-8')
                             logging.info(f"WorkerID found: {worker_id}")
-                            return worker_id
+                            return {"status": "success", "content": worker_id}
                         else:
-                            logging.warning(
-                                "WorkerID not found in executable version info")
+                            logging.warning("WorkerID not found in executable version info")
+                            return {"status": "error", "content": "WorkerID not found"}
     except Exception as e:
-        logging.error(
-            f"An error occurred while reading the executable version info: {e}")
-
-    return None
+        logging.error(f"An error occurred while reading the executable version info: {e}")
+        return {"status": "error", "content": str(e)}
 
 
 if __name__ == "__main__":

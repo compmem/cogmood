@@ -12,7 +12,7 @@ from smile.scale import scale as s
 from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
-from utils import read_app_worker_id, read_exe_worker_id, \
+from utils import retrieve_worker_id, \
     get_blocks_to_run, upload_block
 import version
 
@@ -56,7 +56,6 @@ Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
 
 # Define default WRK_DIR as current directory
 WRK_DIR = '.'
-retrieved_worker_id = None
 
 # Check if running from an executable
 if CogBatt_config.RUNNING_FROM_EXECUTABLE:
@@ -64,30 +63,26 @@ if CogBatt_config.RUNNING_FROM_EXECUTABLE:
     WRK_DIR = sys._MEIPASS
     resource_add_path(WRK_DIR)
 
-    # Retrieve worker ID based on the OS
-    if CogBatt_config.CURRENT_OS == 'Windows':
-        retrieved_worker_id = read_exe_worker_id()
-    elif CogBatt_config.CURRENT_OS == 'Darwin':
-        retrieved_worker_id = read_app_worker_id()
-
-tasks = None
+retrieved_worker_id = retrieve_worker_id()
+tasks_from_api = {'status': 'pending', 'content': ''}
 number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
-if retrieved_worker_id and retrieved_worker_id != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
-    tasks = get_blocks_to_run(retrieved_worker_id)
-    number_of_tasks = 0 if tasks['status'] == 'error' else len(tasks['content'])
+if retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
+    tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
+    number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
+
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
-                 scale_down=True, scale_box=(1000, 1000), debug=False,
+                 scale_down=True, scale_box=(1000, 1000), debug=True,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
 
-exp.tasks = tasks
-exp.enable_error_handling = True
+exp.tasks_from_api = tasks_from_api
+exp.worker_id_dict = retrieved_worker_id
 
 with Parallel():
     with Serial(blocking=False):
@@ -100,23 +95,23 @@ with Parallel():
 
         Wait(.5)
 
-        with If(exp.enable_error_handling):
+        with If(CogBatt_config.RUNNING_FROM_EXECUTABLE):
             # Handles case where retrieval of worker id fails
-            with If(retrieved_worker_id == None):
-                error_screen(error='Failed to Retrieve Identifier',
-                             message='Contact Dylan Nielson')
+            with If(exp.worker_id_dict['status'] == 'error'):
+                error_screen(error='Failed to Retrieve Identifier: ' + exp.worker_id_dict['content'],
+                            message='Contact Dylan Nielson')
             # Handles case where retrieval of worker id is default placeholder
-            with Elif(retrieved_worker_id == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
+            with Elif(exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
                 error_screen(error='Non-Unique Identifier',
-                             message='Contact Dylan Nielson')
-            # Error screen for failed GET request to retrieve blocks
-            with Elif(exp.tasks['status'] == 'error'):
-                error_screen(error='Failed to retrieve tasks.',
-                             message=exp.tasks['content'])
-            # Handles case where there are no more blocks to run
-            with Elif(number_of_tasks == 0):
-                error_screen(error='No tasks to run.',
-                             message='Press next in the browser or return to the website via the link from prolific if that window is no longer open.')
+                            message='Contact Dylan Nielson')
+        # Error screen for failed GET request to retrieve blocks
+        with If(exp.tasks_from_api['status'] == 'error'):
+            error_screen(error='Failed to retrieve tasks.',
+                            message=exp.tasks_from_api['content'])
+        # Handles case where there are no more blocks to run
+        with Elif(number_of_tasks == 0):
+            error_screen(error='No tasks to run.',
+                            message='Press next in the browser or return to the website via the link from prolific if that window is no longer open.')
 
         # Present initial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
@@ -193,7 +188,7 @@ with Parallel():
 
         # Log the block order
         Log(name="BLOCK_ORDER",
-            order=exp.tasks)
+            order=exp.tasks_from_api['content'])
 
         Label(text="You will now start the experiments. Press any key to continue.",
               text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
@@ -205,7 +200,7 @@ with Parallel():
         exp.file_counter = 1
         exp.still_loop = True
 
-        with Loop(exp.tasks['content']) as task:
+        with Loop(exp.tasks_from_api['content']) as task:
             exp.task_name = task.current['task_name']
             exp.block_number = task.current['block_number']
             with If(exp.task_name == "flkr"):
@@ -253,7 +248,7 @@ with Parallel():
             #       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
 
             exp.task_data_upload = Func(upload_block,
-                                        worker_id=retrieved_worker_id,
+                                        worker_id=exp.worker_id_dict['content'],
                                         block_name=exp.task_name + '_' + Ref(str, exp.block_number),
                                         data_directory=Ref.object(
                                             exp)._session_dir,
