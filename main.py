@@ -68,7 +68,7 @@ tasks_from_api = {'status': 'pending', 'content': ''}
 number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
-if retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
+if True or (retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
     tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
     number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
 
@@ -243,20 +243,17 @@ with Parallel():
                            task_dir=task2dir,
                            happy_mid=False)
 
-            Wait(1.0)
-            # Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
-            #       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-
-            exp.task_data_upload = Func(upload_block,
-                                        worker_id=exp.worker_id_dict['content'],
-                                        block_name=exp.task_name + '_' + Ref(str, exp.block_number),
-                                        data_directory=Ref.object(
-                                            exp)._session_dir,
-                                        slog_file_name='log_'+exp.task_name+'_'+'0.slog')
-            Wait(until=exp.task_data_upload.result)
-            with Meanwhile():
-                Label(text="Uploading data...",
+            Label(text="Uploading data...",
                       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+            with UntilDone():
+                with Parallel():
+                    exp.task_data_upload = Func(upload_block,
+                                                worker_id=exp.worker_id_dict['content'],
+                                                block_name=exp.task_name + '_' + Ref(str, exp.block_number),
+                                                data_directory=Ref.object(
+                                                    exp)._session_dir,
+                                                slog_file_name='log_'+exp.task_name+'_'+'0.slog')
+                    Wait(5)
 
             # Error screen for failed upload
             with If(exp.task_data_upload.result['status'] == 'error'):
