@@ -53,9 +53,6 @@ AssBind_config.CONT_KEY = CogBatt_config.CONT_KEY
 Bartuva_config.RESP_KEYS = CogBatt_config.RESP_KEYS[:]
 Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
 
-# If we have an eeg experiment, then we need to initialize the lsl outlet.
-
-pulse_server = None
 
 # Define default WRK_DIR as current directory
 WRK_DIR = '.'
@@ -78,18 +75,8 @@ number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
 if retrieved_worker_id and retrieved_worker_id != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
-    tasks_from_api: list[str] | dict[str, str] = get_blocks_to_run(retrieved_worker_id)
-
-    if isinstance(tasks_from_api, list):
-        # Format tasks into [{'task_name': 'flkr', 'block_number': 0}]
-        tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])}
-                 for task in tasks_from_api]
-        number_of_tasks = len(tasks)
-    else:
-        # Handle error message case
-        tasks = tasks_from_api
-
-error_retrieving_tasks = 'error' in tasks
+    tasks = get_blocks_to_run(retrieved_worker_id)
+    number_of_tasks = 0 if tasks['status'] == 'error' else len(tasks['content'])
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -112,24 +99,24 @@ with Parallel():
             email=version.__email__)
 
         Wait(.5)
-        
+
         with If(exp.enable_error_handling):
             # Handles case where retrieval of worker id fails
             with If(retrieved_worker_id == None):
                 error_screen(error='Failed to Retrieve Identifier',
-                                message='Contact Dylan Nielson')
+                             message='Contact Dylan Nielson')
             # Handles case where retrieval of worker id is default placeholder
             with Elif(retrieved_worker_id == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
                 error_screen(error='Non-Unique Identifier',
-                                message='Contact Dylan Nielson')
+                             message='Contact Dylan Nielson')
             # Error screen for failed GET request to retrieve blocks
-            with Elif(error_retrieving_tasks):
+            with Elif(exp.tasks['status'] == 'error'):
                 error_screen(error='Failed to retrieve tasks.',
-                                message=exp.tasks['error'])
+                             message=exp.tasks['content'])
             # Handles case where there are no more blocks to run
             with Elif(number_of_tasks == 0):
                 error_screen(error='No tasks to run.',
-                                message='Press next in the browser or return to the website via the link from prolific if that window is no longer open.')
+                             message='Press next in the browser or return to the website via the link from prolific if that window is no longer open.')
 
         # Present initial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
@@ -218,7 +205,7 @@ with Parallel():
         exp.file_counter = 1
         exp.still_loop = True
 
-        with Loop(exp.tasks) as task:
+        with Loop(exp.tasks['content']) as task:
             exp.task_name = task.current['task_name']
             exp.block_number = task.current['block_number']
             with If(exp.task_name == "flkr"):
@@ -264,22 +251,22 @@ with Parallel():
             Wait(1.0)
             # Label(text="You may take a short break!\n\nPress any key when you would like to continue to the next experiment. ",
             #       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-            
+
             exp.task_data_upload = Func(upload_block,
                                         worker_id=retrieved_worker_id,
-                                        block_name=exp.task_name + Ref(str, exp.block_number),
+                                        block_name=exp.task_name + '_' + Ref(str, exp.block_number),
                                         data_directory=Ref.object(
                                             exp)._session_dir,
                                         slog_file_name='log_'+exp.task_name+'_'+'0.slog')
             Wait(until=exp.task_data_upload.result)
             with Meanwhile():
                 Label(text="Uploading data...",
-                    text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
-            
-            # TODO: Add error screen for failed upload
-            with If('error' in exp.task_data_upload.result):
+                      text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+
+            # Error screen for failed upload
+            with If(exp.task_data_upload.result['status'] == 'error'):
                 error_screen(error='Error During Upload',
-                            message=exp.task_data_upload.result['error'])
+                             message=exp.task_data_upload.result['content'])
 
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)

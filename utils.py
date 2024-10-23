@@ -1,9 +1,9 @@
-import os
 import sys
 import plistlib
 import zipfile
 import requests
 import logging
+import time
 from config import API_BASE_URL
 from hashlib import blake2b
 from io import BytesIO
@@ -22,43 +22,40 @@ def get_blocks_to_run(worker_id: str) -> list[str] | dict[str, str]:
     Sends a GET request to retrieve the list of blocks that are yet to be run by the worker.
 
     Args:
-        base_url (str): The base URL of the API server (e.g., "https://your-api-server.com").
         worker_id (str): The unique identifier for the worker whose blocks are being fetched.
 
     Returns:
-        list: A list of blocks that the worker has yet to run. If an error occurs, a dictionary containing the error code and details is returned.
-
-    Example:
-        blocks_to_run = get_blocks_to_run("https://api.example.com", "worker_123")
+        dict: A dictionary with 'status' as success or error, and 'content' containing either the blocks list or an error message.
     """
     # Define the GET request URL
-    url = f"{API_BASE_URL}/taskcontrol"
+    url = f'{API_BASE_URL}/taskcontrol'
 
     # Define the request parameters (query string)
-    params = {
-        'worker_id': worker_id
-    }
+    params = {'worker_id': worker_id}
 
     # Send the GET request
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()  # Raise an error for non-2xx status codes
-        # Success: return the blocks to run
-        logging.info(
-            f"Blocks to run: {response.json().get('blocks_to_run', [])}")
-        return response.json().get('blocks_to_run', [])
+        tasks = response.json().get('blocks_to_run', [])
+        logging.info(f'Tasks to run: {tasks}')
+         # Format tasks from ['flkr_0] into [{'task_name': 'flkr', 'block_number': 0}]
+        reformatted_tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])}
+                 for task in tasks]
+        logging.info(f'Reformatted tasks: {reformatted_tasks}')
+        return {'status': 'success', 'content': reformatted_tasks}
     except requests.exceptions.HTTPError as http_error:
-        logging.error(f"HTTP Error: {http_error}")
-        return {"error": "HTTP Error"}
+        logging.error(f'HTTP Error: {http_error}')
+        return {'status': 'error', 'content': f'HTTP Error: {http_error}'}
     except requests.exceptions.ConnectionError as error_connecting:
-        logging.error(f"Error Connecting: {error_connecting}")
-        return {"error": "Error Connecting"}
+        logging.error(f'Error Connecting: {error_connecting}')
+        return {'status': 'error', 'content': 'Error Connecting'}
     except requests.exceptions.Timeout as timeout_error:
-        logging.error(f"Timeout Error: {timeout_error}")
-        return {"error": "Timeout Error"}
+        logging.error(f'Timeout Error: {timeout_error}')
+        return {'status': 'error', 'content': 'Timeout Error'}
     except requests.exceptions.RequestException as error:
-        logging.error(f"An error occurred: {error}")
-        return {"error": "Unspecified Error"}
+        logging.error(f'An error occurred: {error}')
+        return {'status': 'error', 'content': 'Unspecified Error'}
 
 
 def hash_file(file_obj):
@@ -95,65 +92,60 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
         - Sends the `worker_id`, `block_name`, and `checksum` in the form data.
         - Uploads the zipped file associated with the block in the `files` parameter.
 
-    Returns:
-        dict: A dictionary containing a 'success' key with a message if the upload is successful,
-              or an 'error' key with the type of error encountered.
-              Example return values:
-              {'success': 'Data upload successful.'} on successful upload.
-              {'error': 'Checksum mismatch'} if the checksum does not match.
-              {'error': 'Connection error'} if there is a connection issue.
+     Returns:
+        dict: A dictionary with 'status' ('success' or 'error') and 'content' (message or error details).
     """
     url = f"{API_BASE_URL}/taskcontrol"
-
-    slog_file_path = os.path.join(data_directory, slog_file_name)
-    if not os.path.isfile(slog_file_path):
+    slog_file_path = Path(data_directory) / slog_file_name
+    
+    if not slog_file_path.is_file():
         logging.warning(f"File '{slog_file_name}' does not exist at '{slog_file_path}'.")
-        return {"error": "Log file not found"}
-
+        return {"status": "error", "content": "Log file not found"}
+    
     logging.info(f"SLOG File Found: File '{slog_file_name}' exists at '{slog_file_path}'.")
 
-    # Create a zip archive in memory
     zip_buffer = BytesIO()
     try:
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             zip_file.write(slog_file_path, slog_file_name)
 
-        zip_buffer.seek(0)  # Reset buffer to the start
+        zip_buffer.seek(0)
         checksum = hash_file(zip_buffer)
-        zip_buffer.seek(0)  # Reset the buffer to the start again for upload
+        zip_buffer.seek(0)
+
+        current_time_ms = int(time.time() * 1000)
+        zip_file_name_with_timestamp = f'{block_name}_{current_time_ms}.zip'
 
         params = {'worker_id': worker_id}
         data = {'block_name': block_name, 'checksum': checksum}
-        files = {'file': (f'{block_name}.zip', zip_buffer, 'application/zip')}
+        files = {'file': (zip_file_name_with_timestamp, zip_buffer, 'application/zip')}
 
         response = requests.post(url, params=params, data=data, files=files)
         logging.info(f"Response Status Code: {response.status_code}")
 
         if response.status_code == 200:
             logging.info("Upload successful!")
-            return {'success': 'Data upload successful.'}  # Indicating success
+            return {"status": "success", "content": "Data upload successful."}
         elif response.status_code == 400:
             error_message = response.json().get("error", "Unknown error")
             logging.warning(f"Bad Request: {error_message}")
-            return {"error": error_message}
+            return {"status": "error", "content": error_message}
         elif response.status_code == 409:
-            error_message = response.json().get("error", "Unknown error")
             logging.warning("Checksum mismatch: checksums don't match")
-            logging.warning(f"Error: {error_message}")
-            return {"error": "Checksum mismatch"}
+            return {"status": "error", "content": "Checksum mismatch"}
         else:
             logging.error(f"Unexpected response: {response.status_code} - {response.text}")
-            return {"error": f"Unexpected response: {response.status_code}"}
-
+            return {"status": "error", "content": f"Unexpected response: {response.status_code}"}
+    
     except requests.exceptions.ConnectionError as connection_error:
         logging.error(f"Error Connecting: {connection_error}")
-        return {"error": "Connection error"}
+        return {"status": "error", "content": "Connection error"}
     except requests.exceptions.Timeout as timeout_error:
         logging.error(f"Timeout Error: {timeout_error}")
-        return {"error": "Timeout error"}
+        return {"status": "error", "content": "Timeout error"}
     except requests.exceptions.RequestException as error:
         logging.error(f"An error occurred: {error}")
-        return {"error": "Request error"}
+        return {"status": "error", "content": "Request error"}
     finally:
         zip_buffer.close()
 
