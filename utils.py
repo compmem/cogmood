@@ -27,35 +27,38 @@ def get_blocks_to_run(worker_id: str) -> list[str] | dict[str, str]:
     Returns:
         dict: A dictionary with 'status' as success or error, and 'content' containing either the blocks list or an error message.
     """
-    # Define the GET request URL
     url = f'{API_BASE_URL}/taskcontrol'
-
-    # Define the request parameters (query string)
     params = {'worker_id': worker_id}
 
-    # Send the GET request
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()  # Raise an error for non-2xx status codes
         tasks = response.json().get('blocks_to_run', [])
         logging.info(f'Tasks to run: {tasks}')
-         # Format tasks from ['flkr_0] into [{'task_name': 'flkr', 'block_number': 0}]
+        
+        # Format tasks from ['flkr_0] into [{'task_name': 'flkr', 'block_number': 0}]
         reformatted_tasks = [{'task_name': task.split('_')[0], 'block_number': int(task.split('_')[1])}
-                 for task in tasks]
+                             for task in tasks]
         logging.info(f'Reformatted task list: {reformatted_tasks}')
         return {'status': 'success', 'content': reformatted_tasks}
+    
     except requests.exceptions.HTTPError as http_error:
-        logging.error(f'HTTP Error: {http_error}')
-        return {'status': 'error', 'content': f'HTTP Error: {http_error}'}
+        error_message = response.json().get('error', 'HTTP Error')
+        logging.error(f'HTTP Error: {http_error} - {error_message}')
+        return {'status': 'error', 'content': error_message}
+    
     except requests.exceptions.ConnectionError as error_connecting:
         logging.error(f'Error Connecting: {error_connecting}')
         return {'status': 'error', 'content': 'Error Connecting'}
+    
     except requests.exceptions.Timeout as timeout_error:
         logging.error(f'Timeout Error: {timeout_error}')
         return {'status': 'error', 'content': 'Timeout Error'}
+    
     except requests.exceptions.RequestException as error:
         logging.error(f'An error occurred: {error}')
-        return {'status': 'error', 'content': 'Unspecified Error'}
+        error_message = response.json().get('error', 'Unspecified Error')
+        return {'status': 'error', 'content': error_message}
 
 
 def hash_file(file_obj):
