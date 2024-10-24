@@ -5,7 +5,7 @@ from smile.scale import scale as s
 from smile.lsl import LSLPush
 from smile.clock import clock
 import smile.ref as ref
-from .happy import HappyQuest
+from ..happy import HappyQuest
 from .list_gen import add_air
 from .instruct import Instruct
 from .trial import BARTSub, GetResponse

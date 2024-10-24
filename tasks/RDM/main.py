@@ -8,7 +8,7 @@ from smile.scale import scale as s
 from smile.lsl import LSLPush
 import smile.ref as ref
 from smile.clock import clock
-from .happy import HappyQuest
+from ..happy import HappyQuest
 
 
 from .list_gen import gen_moving_dot_trials

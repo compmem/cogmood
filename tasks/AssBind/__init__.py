@@ -2,4 +2,3 @@
 #import recog_main
 from .main import AssBindExp
 from . import config as AssBind_config
-from .happy import HappyQuest

@@ -9,7 +9,7 @@ import smile.ref as ref
 
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-from .happy import HappyQuest
+from ..happy import HappyQuest
 import smile.ref as ref
 from .list_gen import gen_fblocks
 from math import log
