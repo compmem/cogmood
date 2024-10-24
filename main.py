@@ -68,7 +68,7 @@ tasks_from_api = {'status': 'pending', 'content': ''}
 number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
-if True or (retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
+if retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
     tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
     number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
 
@@ -195,11 +195,8 @@ with Parallel():
         with UntilDone():
             KeyPress()
         Wait(.3)
+        
         # Main loop for the experiment
-        exp.cal_counter = 0
-        exp.file_counter = 1
-        exp.still_loop = True
-
         with Loop(exp.tasks_from_api['content']) as task:
             exp.task_name = task.current['task_name']
             exp.block_number = task.current['block_number']
