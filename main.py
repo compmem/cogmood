@@ -21,6 +21,7 @@ from tasks import FlankerExp, Flanker_config
 from tasks import RDMExp, RDM_config
 from tasks import AssBindExp, AssBind_config
 from tasks import BartuvaExp, Bartuva_config
+from tasks import HappyQuest
 
 from error_screen import error_screen
 
@@ -68,7 +69,7 @@ tasks_from_api = {'status': 'pending', 'content': ''}
 number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
-if retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
+if True or retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
     tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
     number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
 
@@ -125,62 +126,10 @@ with Parallel():
               font_size=s(CogBatt_config.INST_FONT))
         with UntilDone():
             KeyPress()
+            
         Wait(.3)
-        with Parallel():
-            Label(text="Taken all together, how happy are you with your life these days?\nPress F to move left, Press J to move right.",
-                  font_size=s(CogBatt_config.HAPPY_FONT_SIZE),
-                  halign='center',
-                  center_y=exp.screen.center_y + s(300))
-            sld = Slider(min=-10, max=10, value=0,
-                         width=s(CogBatt_config.SLIDER_WIDTH))
-            Label(text="unhappy", font_size=s(CogBatt_config.HAPPY_FONT_SIZE),
-                  center_x=sld.left, center_y=sld.center_y - s(100))
-            Label(text="happy", font_size=s(CogBatt_config.HAPPY_FONT_SIZE),
-                  center_x=sld.right, center_y=sld.center_y - s(100))
-            Label(text='Press Spacebar to lock-in your response.',
-                  top=sld.bottom - s(250), font_size=s(CogBatt_config.HAPPY_FONT_SIZE))
-
-        with UntilDone():
-            exp.happy_start_time = Ref(clock.now)
-            exp.last_check = exp.happy_start_time
-            exp.happy_dur = 0.0
-            exp.HAPPY_SPEED = CogBatt_config.HAPPY_INC_BASE
-            exp.first_press_time = None
-            with Loop():
-                ans = KeyPress(keys=CogBatt_config.RESP_HAPPY)
-                with If(exp.first_press_time == None):
-                    exp.first_press_time = ans.press_time
-                with If(ans.press_time['time'] - exp.last_check <
-                        CogBatt_config.NON_PRESS_INT):
-                    exp.HAPPY_SPEED = (CogBatt_config.HAPPY_INC_BASE * (Ref(clock.now) -
-                                       exp.happy_start_time) * CogBatt_config.HAPPY_MOD) + CogBatt_config.HAPPY_INC_START
-
-                with Else():
-                    exp.HAPPY_SPEED = CogBatt_config.HAPPY_INC_START
-                    exp.happy_start_time = Ref(clock.now)
-                exp.last_check = Ref(clock.now)
-
-                with If(ans.pressed == CogBatt_config.RESP_HAPPY[0]):
-                    with If(sld.value - exp.HAPPY_SPEED <= (-1 * CogBatt_config.HAPPY_RANGE)):
-                        UpdateWidget(
-                            sld, value=(-1 * CogBatt_config.HAPPY_RANGE))
-                    with Else():
-                        UpdateWidget(sld, value=sld.value - exp.HAPPY_SPEED)
-                with Elif(ans.pressed == CogBatt_config.RESP_HAPPY[1]):
-                    with If(sld.value + exp.HAPPY_SPEED >= CogBatt_config.HAPPY_RANGE):
-                        UpdateWidget(sld, value=CogBatt_config.HAPPY_RANGE)
-                    with Else():
-                        UpdateWidget(sld, value=sld.value + exp.HAPPY_SPEED)
-
-                # Wait(.005)
-            with UntilDone():
-                submit = KeyPress(keys=['SPACEBAR'])
-        Log(name="happy",
-            task='main',
-            slider_appear=sld.appear_time,
-            first_press=exp.first_press_time,
-            submit_time=submit.press_time,
-            value=sld.value)
+        
+        HappyQuest(config=CogBatt_config, task='main', block_num=-1, trial_num=-1)
 
         exp.practice = True
         exp.BART_practice = True
@@ -239,6 +188,8 @@ with Parallel():
                            practice=False,
                            task_dir=task2dir,
                            happy_mid=False)
+            
+            Wait(1)
 
             Label(text="Uploading data...",
                       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
