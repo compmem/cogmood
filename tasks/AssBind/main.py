@@ -125,7 +125,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
             #     Wait(.3)
             #     with Parallel():
             #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
-            #         HappyQuest(config, task='CAB', block_num=block, trial_num=trial.i)
+            #         HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
             #     self.start_happy = Func(clock.now).result
             #     self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
             #                                                    config.TIME_JITTER_HAPPY)
@@ -219,7 +219,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                 fmri_tr_time=self.trkp_press_time,
                 eeg_pulse_time=self.eeg_pulse_time)
     Wait(.5)
-    HappyQuest(config, task='CAB', block_num=block, trial_num=trial.i)
+    HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
 
     # Press 6 to say we are done recording then show them their score.
     if config.FMRI:

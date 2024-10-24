@@ -69,7 +69,7 @@ tasks_from_api = {'status': 'pending', 'content': ''}
 number_of_tasks = 0
 
 # Proceed if a valid worker ID is retrieved and it's not a placeholder
-if True or retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
+if retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
     tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
     number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
 
@@ -129,7 +129,7 @@ with Parallel():
             
         Wait(.3)
         
-        HappyQuest(config=CogBatt_config, task='main', block_num=-1, trial_num=-1)
+        HappyQuest(task='main', block_num=-1, trial_num=-1)
 
         exp.practice = True
         exp.BART_practice = True
@@ -189,7 +189,7 @@ with Parallel():
                            task_dir=task2dir,
                            happy_mid=False)
             
-            Wait(1)
+            Wait(.5)
 
             Label(text="Uploading data...",
                       text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
@@ -201,7 +201,7 @@ with Parallel():
                                                 data_directory=Ref.object(
                                                     exp)._session_dir,
                                                 slog_file_name='log_'+exp.task_name+'_'+'0.slog')
-                    Wait(5)
+                    Wait(3)
 
             # Error screen for failed upload
             with If(exp.task_data_upload.result['status'] == 'error'):

@@ -34,7 +34,6 @@ FMRI_TASKS = [['cab', 'flkr', 'rdm', 'bart'],
               ['cab', 'flkr', 'rdm']]
 FMRI_REPS = 1
 SHUFFLE_TASKS = True
-HAPPY_SPEED = .5
 RESP_KEYS = ['F', 'J']
 CONT_KEY = ['SPACEBAR']
 FMRI_TR = ['T']
@@ -60,16 +59,6 @@ MMIDB = os.path.join("assets", "buttons", "pressed_STW.png")
 
 TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
-HAPPY_FONT_SIZE = 25
-HAPPY_INC_BASE = .02
-HAPPY_INC_START = .2
-HAPPY_MOD = 20.
-HAPPY_RANGE = 10
-NON_PRESS_INT = .1
-PRESS_INT = .016
-SLIDER_WIDTH = 1000
-RESP_HAPPY = ["F", "J"]
-
 
 INST_FONT = 25
 INST_TEXT = "You will perform 4 tasks in this experiment, and some of the tasks more than once. Instructions will be displayed prior to each task. Please read the instructions for each task very carefully.\n\nFor each task, you will make responses by pressing the %s button with one hand, and the %s button with your other hand.\n\nSet aside 40 minutes to an hour. You are able to take short breaks between each task.\n\nOnce the experiment fully begins, you may end the experiment by pressing the escape key. The window will close, and your data up till that point will be sent to us and your payment will be forfeit. Press any key to proceed."

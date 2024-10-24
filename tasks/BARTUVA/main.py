@@ -119,7 +119,7 @@ def BartuvaExp(self,
             #     Wait(.3)
             #     with Parallel():
             #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
-            #         HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
+            #         HappyQuest(task='BART', block_num=run_num, trial_num=balloon.i)
             Balloon = BARTSub(config,
                               log_name='bart',
                               balloon=balloon.current,
@@ -138,7 +138,7 @@ def BartuvaExp(self,
 
         self.set_number += 1
     Wait(.5)
-    HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
+    HappyQuest(task='BART', block_num=run_num, trial_num=balloon.i)
     # Press 6 to say we are done recording then show them their score.
     if config.FMRI:
         self.keep_tr_checking = True

@@ -120,17 +120,6 @@ EEG_CODES = {"new":14,
 
 TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
-HAPPY_FONT_SIZE = 25
-HAPPY_INC_BASE = .02
-HAPPY_INC_START = .2
-HAPPY_MOD = 20.
-HAPPY_RANGE = 10
-NON_PRESS_INT = .1
-PRESS_INT = .016
-SLIDER_WIDTH = 1000
-RESP_HAPPY = ["F", "J"]
-
-
 
 # function to retrieve correct image paths
 def resource_path(relative_path):

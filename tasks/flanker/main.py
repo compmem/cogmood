@@ -88,7 +88,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                     with Parallel():
                         Rectangle(blocking=False, color=(.35, .35, .35, 1.0),
                                   size=self.exp.screen.size)
-                        HappyQuest(config, task='FLANKER', block_num=run_num, trial_num=trial.i)
+                        HappyQuest(task='FLANKER', block_num=run_num, trial_num=trial.i)
                     self.start_happy = Func(clock.now).result
                     self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
                                                                    config.TIME_JITTER_HAPPY)
@@ -131,7 +131,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                     eeg_pulse_time=ft.eeg_pulse_time)
 
     Wait(.5)
-    HappyQuest(config, task='FLANKER', block_num=run_num, trial_num=trial.i)
+    HappyQuest(task='FLANKER', block_num=run_num, trial_num=trial.i)
 
     if config.FMRI:
         self.keep_tr_checking = True

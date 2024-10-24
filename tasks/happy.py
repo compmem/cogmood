@@ -1,10 +1,10 @@
 from smile.common import *
 from smile.scale import scale as s
 from smile.clock import clock
-
+from . import happy_config as default_happy_config
 
 @Subroutine
-def HappyQuest(self, config, task, block_num, trial_num):
+def HappyQuest(self, task, block_num, trial_num, config=default_happy_config):
     with Parallel():
         Label(text="How happy are you at this moment?\nPress F to move left, Press J to move right.",
               font_size=s(config.HAPPY_FONT_SIZE),
@@ -22,7 +22,7 @@ def HappyQuest(self, config, task, block_num, trial_num):
         self.happy_start_time = Ref(clock.now)
         self.last_check = self.happy_start_time
         self.happy_dur = 0.0
-        self.HAPPY_SPEED = config.HAPPY_INC_BASE
+        self.happy_speed = config.HAPPY_INC_BASE
         self.first_press_time = None
         with Loop():
             ans = KeyPress(keys=config.RESP_HAPPY)
@@ -30,22 +30,22 @@ def HappyQuest(self, config, task, block_num, trial_num):
                 self.first_press_time = ans.press_time
             with If(ans.press_time['time'] - self.last_check <
                     config.NON_PRESS_INT):
-                self.HAPPY_SPEED = (config.HAPPY_INC_BASE * (Ref(clock.now) -
+                self.happy_speed = (config.HAPPY_INC_BASE * (Ref(clock.now) -
                                     self.happy_start_time) * config.HAPPY_MOD) + config.HAPPY_INC_START
             with Else():
-                self.HAPPY_SPEED = config.HAPPY_INC_START
+                self.happy_speed = config.HAPPY_INC_START
                 self.happy_start_time = Ref(clock.now)
             self.last_check = Ref(clock.now)
             with If(ans.pressed == config.RESP_HAPPY[0]):
-                with If(sld.value - self.HAPPY_SPEED <= (-1*config.HAPPY_RANGE)):
+                with If(sld.value - self.happy_speed <= (-1*config.HAPPY_RANGE)):
                     UpdateWidget(sld, value=(-1*config.HAPPY_RANGE))
                 with Else():
-                    UpdateWidget(sld, value=sld.value - self.HAPPY_SPEED)
+                    UpdateWidget(sld, value=sld.value - self.happy_speed)
             with Elif(ans.pressed == config.RESP_HAPPY[1]):
-                with If(sld.value + self.HAPPY_SPEED >= config.HAPPY_RANGE):
+                with If(sld.value + self.happy_speed >= config.HAPPY_RANGE):
                     UpdateWidget(sld, value=config.HAPPY_RANGE)
                 with Else():
-                    UpdateWidget(sld, value=sld.value + self.HAPPY_SPEED)
+                    UpdateWidget(sld, value=sld.value + self.happy_speed)
         with UntilDone():
             submit = KeyPress(keys=['SPACEBAR'])
     Log(name="happy",
