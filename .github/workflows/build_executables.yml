@@ -49,11 +49,12 @@ jobs:
             Write-Host "Mesa3D DLL does not exist."
           }
 
-      - name: Add Mesa3D to Path
-        run: |
-          echo "$Env:UserProfile\mesa3d\mesa3d-22.1.5-release-mingw\libglapi.dll" >> $Env:Path
-          echo "$Env:UserProfile\mesa3d\mesa3d-22.1.5-release-mingw\opengl32.dll" >> $Env:Path
+      - name: Add Mesa3D to PATH
         shell: pwsh
+        run: |
+          $mesaDir = "$Env:USERPROFILE\mesa3d\mesa3d-22.1.5-release-mingw"
+          $Env:Path += ";$mesaDir"
+          Write-Host "Mesa3D added to PATH"
 
       - name: Build executable with PyInstaller
         run: |
