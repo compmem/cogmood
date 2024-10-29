@@ -26,6 +26,18 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt
 
+            - name: Set up Mesa3D OpenGL DLL
+              run: |
+                  curl -L -o opengl32.dll https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
+                  7z x mesa3d-22.1.5-release-mingw.7z -o$Env:UserProfile\mesa3d
+              shell: pwsh
+            
+            - name: Add Mesa3D to Path
+              run: |
+                  echo "$Env:UserProfile\mesa3d\mesa3d-22.1.5-release-mingw\libglapi.dll" >> $Env:Path
+                  echo "$Env:UserProfile\mesa3d\mesa3d-22.1.5-release-mingw\opengl32.dll" >> $Env:Path
+              shell: pwsh
+
             - name: Build executable with PyInstaller
               run: |
                   cd package
@@ -50,6 +62,11 @@ jobs:
               with:
                   python-version: "3.10" # Specify your Python version
                   cache: 'pip' # caching pip dependencies
+
+            - name: Install Homebrew dependencies
+              run: |
+                  brew update
+                  brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
 
             - name: Install dependencies
               run: |
