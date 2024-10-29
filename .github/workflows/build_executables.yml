@@ -26,35 +26,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Download and Extract Mesa3D
-        shell: pwsh # Specify PowerShell as the shell
+      # Download and extract Mesa3D
+      - name: Download Mesa3D
         run: |
-          curl -L -o mesa3d-22.1.5-release-mingw.7z https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
-          
-          # Check if the file was downloaded
-          if (Test-Path "mesa3d-22.1.5-release-mingw.7z") {
-            # Extract the archive
-            7z x mesa3d-22.1.5-release-mingw.7z -aoa  # -aoa to overwrite files if they exist
-          } else {
-            Write-Error "Failed to download Mesa3D archive."
-            exit 1
-          }
+          curl -L -o mesa3d.7z https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
 
-      - name: Check for Mesa3D DLL
-        shell: pwsh
+      - name: Extract Mesa3D
+        shell: bash
         run: |
-          if (Test-Path "./mesa3d/opengl32.dll") {
-            Write-Host "Mesa3D DLL exists."
-          } else {
-            Write-Host "Mesa3D DLL does not exist."
-          }
+          7z x mesa3d.7z -omesa3d
+          echo "Extracted Mesa3D files"
 
+      # Add Mesa3D to the system PATH
       - name: Add Mesa3D to PATH
-        shell: pwsh
         run: |
-          $mesaDir = "$Env:USERPROFILE\mesa3d\mesa3d-22.1.5-release-mingw"
-          $Env:Path += ";$mesaDir"
-          Write-Host "Mesa3D added to PATH"
+          echo "C:\path\to\mesa3d" >> $Env:GITHUB_PATH
 
       - name: Build executable with PyInstaller
         run: |
