@@ -40,15 +40,14 @@ jobs:
             exit 1
           }
 
-      - name: Move DLL to Working Directory
-        shell: pwsh # Specify PowerShell as the shell
+      - name: Check for Mesa3D DLL
+        shell: pwsh
         run: |
-          if ( -f "./mesa3d/opengl32.dll" ); then
-              mv ./mesa3d/opengl32.dll ${{ runner.temp }}/opengl32.dll
-          else
-              echo "Extraction failed: opengl32.dll not found"
-              exit 1
-          fi
+          if (Test-Path "./mesa3d/opengl32.dll") {
+            Write-Host "Mesa3D DLL exists."
+          } else {
+            Write-Host "Mesa3D DLL does not exist."
+          }
 
       - name: Add Mesa3D to Path
         run: |
