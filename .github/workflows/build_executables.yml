@@ -28,8 +28,8 @@ jobs:
 
             - name: Build executable with PyInstaller
               run: |
-                  cd "$(pwd)/package"
-                  make
+                  cd package
+                  pyinstaller --noconfirm --upx-dir upx/windows_upx.exe cogmood_windows.spec
 
             - name: Upload Windows executable
               uses: actions/upload-artifact@v4
@@ -58,8 +58,8 @@ jobs:
 
             - name: Build executable with PyInstaller
               run: |
-                  cd "$(pwd)/package"
-                  make
+                  cd package
+                  pyinstaller --noconfirm cogmood_mac.spec
 
             - name: Upload macOS executable
               uses: actions/upload-artifact@v4
