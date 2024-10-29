@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
       # Download and extract Mesa3D
       - name: Download Mesa3D
@@ -45,7 +45,7 @@ jobs:
       - name: Build executable with PyInstaller
         run: |
           cd package
-          pyinstaller --noconfirm --upx-dir upx/windows_upx.exe cogmood_windows.spec
+          python -m pyinstaller --noconfirm --upx-dir upx/windows_upx.exe cogmood_windows.spec
 
       - name: Upload Windows executable
         uses: actions/upload-artifact@v4
@@ -89,7 +89,7 @@ jobs:
       - name: Build executable with PyInstaller
         run: |
           cd package
-          pyinstaller --noconfirm cogmood_mac.spec
+          python -m pyinstaller --noconfirm cogmood_mac.spec
 
       - name: Upload macOS executable
         uses: actions/upload-artifact@v4
