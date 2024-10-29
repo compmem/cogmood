@@ -12,6 +12,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  submodules: recursive # Initializes and updates submodules
 
             - name: Set up Python
               uses: actions/setup-python@v5
@@ -40,6 +42,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  submodules: recursive # Initializes and updates submodules
 
             - name: Set up Python
               uses: actions/setup-python@v5
