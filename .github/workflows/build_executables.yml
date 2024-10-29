@@ -26,11 +26,25 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install -r requirements.txt
 
-            - name: Set up Mesa3D OpenGL DLL
+            - name: Download Mesa3D
               run: |
-                  curl -L -o opengl32.dll https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
-                  7z x mesa3d-22.1.5-release-mingw.7z -o$Env:UserProfile\mesa3d
-              shell: pwsh
+                  curl -L -o mesa3d-22.1.5-release-mingw.7z https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
+                  if [ -f "mesa3d-22.1.5-release-mingw.7z" ]; then
+                      7z x mesa3d-22.1.5-release-mingw.7z -o./mesa3d
+                  else
+                      echo "Download failed: mesa3d-22.1.5-release-mingw.7z not found"
+                      exit 1
+                  fi
+        
+            - name: Move DLL to Working Directory
+              run: |
+                  if [ -f "./mesa3d/opengl32.dll" ]; then
+                      mv ./mesa3d/opengl32.dll ${{ runner.temp }}/opengl32.dll
+                  else
+                      echo "Extraction failed: opengl32.dll not found"
+                      exit 1
+                  fi
+                
             
             - name: Add Mesa3D to Path
               run: |
