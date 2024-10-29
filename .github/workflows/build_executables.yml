@@ -75,7 +75,7 @@ jobs:
             - name: Build executable with PyInstaller
               run: |
                   cd package
-                  pyinstaller --noconfirm --target-arch universal2 cogmood_mac.spec
+                  pyinstaller --noconfirm cogmood_mac.spec
 
             - name: Upload macOS executable
               uses: actions/upload-artifact@v4
