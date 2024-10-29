@@ -75,6 +75,16 @@ jobs:
               uses: actions/setup-python@v5
               with:
                   python-version: "3.10" # Specify your Python version
+            
+            - name: Check if Python is a fat binary
+              run: |
+                  if lipo -info $(which python3) | grep -q "Architectures in the fat file"; then
+                      lipo -info $(which python3)
+                      echo "Python is a fat binary."
+                  else
+                      echo "Python is NOT a fat binary."
+                      exit 1  # Optional: Exit with error if you require a fat binary
+                  fi
 
             - name: Install Homebrew dependencies
               run: |
