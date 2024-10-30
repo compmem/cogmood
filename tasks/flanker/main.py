@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # load all the states
-from smile.common import Log, Label, Wait, Ref, Rectangle, Func, Debug, Loop, \
-                         UntilDone, If, Else, Parallel, Subroutine, KeyPress, \
-                         UpdateWidget
+from smile.common import *
 from smile.clock import clock
 import smile.ref as ref
 
@@ -75,7 +73,11 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
     with Loop(self.f_blocks) as block:
 
         # put up the fixation cross
-        fix = Label(text='+', color=config.CROSS_COLOR,
+        with Parallel():
+            Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False)
+            fix = Label(text='+', color=config.CROSS_COLOR,
               font_size=s(config.CROSS_FONTSIZE))
         with UntilDone():
 
