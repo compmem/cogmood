@@ -13,8 +13,8 @@ from happy import HappyQuest
 import smile.ref as ref
 from list_gen import gen_fblocks
 from math import log
-from trial import Trial, GetResponse
-from instruct import Instruct
+from trial_copy import Trial, GetResponse
+from instruct_copy import Instruct
 #from . import version
 
 
@@ -29,7 +29,7 @@ def _get_score(corr_trials, num_trials, rt_trials):
 
 @Subroutine
 def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
-               happy_mid=True):
+               happy_mid=False):
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + \
@@ -97,8 +97,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                 Wait(config.ITI, jitter=.25)
 
                 # do the trial
-                ft = Trial(config,
-                           stim=trial.current['stim'],
+                ft = Trial(config, direct = trial.current["dir"],
                            center_x=self.exp.screen.center_x + trial.current['loc_x']*s(config.FROM_CENTER),
                            center_y=self.exp.screen.center_y + trial.current['loc_y']*s(config.FROM_CENTER),
                            correct_resp=trial.current['corr_resp'],
@@ -198,7 +197,7 @@ if __name__ == "__main__":
     exp = Experiment(name="FLANKERONLY",
                      background_color=((.35, .35, .35, 1.0)),
                      scale_down=True, scale_box=(1200, 900))
-    InputSubject(exp_title="Flanker")
+    # InputSubject(exp_title="Flanker")
     Wait(1.0)
     FlankerExp(config, run_num=0, lang="E",
                pulse_server=pulse_server)
