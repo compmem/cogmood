@@ -3,13 +3,13 @@
 from smile.common import *
 from smile.scale import scale as s
 
-from .trial import Trial, GetResponse
-from .list_gen import gen_practice_trials
+from trial import Trial, GetResponse
+from list_gen import gen_practice_trials
 
 
 # Text for instructions
-top_text = {'E':'Your goal is to determine the direction that\n' +
-                '[i]MOST[/i] of the dots are moving.\n' +
+top_text = {'E':'You are an astronaut and your goal is to determine the direction that\n' +
+                '[i]MOST[/i] of the satellites are moving through the sky.\n' +
                 'Please respond quickly and accurately.',
             'S':'Su objetivo es determinar la dirección que la\n' +
                 '[b]MAYORÍA[/b] de los puntos se están moviendo.\n' +
@@ -166,8 +166,12 @@ def Instruct(self, config, lang="E", practice=False):
 
                 # do the practice block
                 with Loop(self.md_blocks) as block:
+                    with Parallel():
                     # put up the fixation cross
-                    cross = Label(text='+', color=config.CROSS_COLOR,
+                        Background = Image(source = "./NIGHT_SKY.png", size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
+                        Border= Ellipse(size = (s((config.RADIUS)*1.2*2),(s((config.RADIUS)*1.2*2))), color = (.55,.55,.55,1))
+                        Telescope = Ellipse(size = (s((config.RADIUS)*1.1*2),(s((config.RADIUS)*1.1*2))), color = (.35, .35, .35, 1.0))
+                        cross = Label(text='+', color=config.CROSS_COLOR,
                                   font_size=s(config.CROSS_FONTSIZE))
                     with UntilDone():
                         # loop over trials
