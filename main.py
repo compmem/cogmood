@@ -65,13 +65,9 @@ if CogBatt_config.RUNNING_FROM_EXECUTABLE:
     resource_add_path(WRK_DIR)
 
 retrieved_worker_id = retrieve_worker_id()
-tasks_from_api = {'status': 'pending', 'content': ''}
-number_of_tasks = 0
 
-# Proceed if a valid worker ID is retrieved and it's not a placeholder
-if retrieved_worker_id['status'] == 'success' and retrieved_worker_id['content'] != CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE:
-    tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
-    number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
+tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
+number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
 
 
 # Initialize the SMILE experiment.
