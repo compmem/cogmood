@@ -36,7 +36,7 @@ from .GetResponse import GetResponse
 @Subroutine
 def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
-               conditions=None, happy_mid=True):
+               conditions=None, happy_mid=False):
     TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
                                          list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
     TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(config.RESP_KEYS.keys())[list(
