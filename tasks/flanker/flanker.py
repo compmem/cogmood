@@ -1,12 +1,6 @@
 from smile.common import *
 from smile.scale import scale as s 
-import config as config
-from list_gen import gen_fblocks
 
-from smile.common import *
-from smile.scale import scale as s 
-import config as config
-from list_gen import gen_fblocks
 
 @Subroutine
 def Flanker(self, config, center_x, center_y, direction, condition, layers, num_layers = 2, background = True):
@@ -27,7 +21,7 @@ def Flanker(self, config, center_x, center_y, direction, condition, layers, num_
 
     with Parallel():
         with Parallel():
-            Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+            background_image = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False)
             center_image = Image(source = self.center_image, center = (self.center_x, self.center_y), size = (s(50),s(50)), allow_stretch = True, keep_ratio = False)
@@ -69,25 +63,27 @@ def Flanker(self, config, center_x, center_y, direction, condition, layers, num_
                         center = (add_left.center_x, add_left.center_y - s(50*(mult+1))))
                     self.layer = self.layer + 1
         with If(background == False):
-            Background.update(color = (1,1,1,0))
+            background_image.update(color = (1,1,1,0))
         with Serial():
             Wait(until=center_image.appear_time)
             self.stim_appear_time = center_image.appear_time
             # self.stim_disappear_time = center_image.disappear_time
 
 
-# blocks = gen_fblocks(config)
-# exp = Experiment()
-# with Loop(blocks) as block:
-#     with Loop(block.current) as trial:
-#         fl = Flanker(config, 
-#                              center_x = exp.screen.center_x + trial.current['loc_x']*s(config.FROM_CENTER),
-#                              center_y = exp.screen.center_y + trial.current['loc_y']*s(config.FROM_CENTER),
-#                              direction = trial.current["dir"],
-#                              condition = trial.current['condition'],
-#                              layers = config.LAYERS)
-#         with UntilDone():
-#             Wait(until=fl.stim_appear_time)
-#             Wait(3)
-# exp.run()
-    
+if __name__ == "__main__":
+    import config as config
+    from list_gen import gen_fblocks
+    blocks = gen_fblocks(config)
+    exp = Experiment()
+    with Loop(blocks) as block:
+        with Loop(block.current) as trial:
+            fl = Flanker(config, 
+                                center_x = exp.screen.center_x + trial.current['loc_x']*s(config.FROM_CENTER),
+                                center_y = exp.screen.center_y + trial.current['loc_y']*s(config.FROM_CENTER),
+                                direction = trial.current["dir"],
+                                condition = trial.current['condition'],
+                                layers = config.LAYERS)
+            with UntilDone():
+                Wait(until=fl.stim_appear_time)
+                Wait(3)
+    exp.run()

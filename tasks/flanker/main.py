@@ -9,10 +9,10 @@ from smile.scale import scale as s
 from smile.lsl import LSLPush
 from ..happy import HappyQuest
 import smile.ref as ref
-from list_gen import gen_fblocks
+from .list_gen import gen_fblocks
 from math import log
-from trial_copy import Trial, GetResponse
-from instruct_copy import Instruct
+from .trial import Trial, GetResponse
+from .instruct import Instruct
 #from . import version
 
 
@@ -74,7 +74,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
 
         # put up the fixation cross
         with Parallel():
-            Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+            Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False)
             fix = Label(text='+', color=config.CROSS_COLOR,

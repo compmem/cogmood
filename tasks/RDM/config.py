@@ -1,4 +1,12 @@
-# config
+
+from pathlib import Path
+
+# Define the base directory as the directory containing the current file
+BASE_DIR = Path(__file__).resolve().parent
+
+# Background image path
+BACKGROUND_IMAGE = str(BASE_DIR / "NIGHT_SKY.png")
+
 NUM_BLOCKS = 1
 NUM_DOTS = 100
 

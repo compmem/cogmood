@@ -9,10 +9,10 @@ from smile.clock import clock
 from ..happy import HappyQuest
 
 
-from list_gen import gen_moving_dot_trials
+from .list_gen import gen_moving_dot_trials
 from math import log
-from trial import Trial, GetResponse
-from instruct import Instruct
+from .trial import Trial, GetResponse
+from .instruct import Instruct
 # from . import version
 
 
@@ -88,7 +88,7 @@ def RDMExp(self, config, run_num=0, lang="E", pulse_server=None, practice=False,
     with Loop(self.md_blocks) as block:
         with Parallel():
         # put up the fixation cross
-            Background = Image(source = "./NIGHT_SKY.png", size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
+            Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
             Border= Ellipse(size = (s((config.RADIUS)*1.2*2),(s((config.RADIUS)*1.2*2))), color = (.55,.55,.55,1))
             Telescope = Ellipse(size = (s((config.RADIUS)*1.1*2),(s((config.RADIUS)*1.1*2))), color = (.35, .35, .35, 1.0))
             cross = Label(text='+', color=config.CROSS_COLOR,

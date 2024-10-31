@@ -55,22 +55,15 @@ def Trial(self,
     self.eeg_pulse_time = None
     
     with Parallel():
-        Background = Image(source = "./NIGHT_SKY.png", size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
-        Border = Ellipse(color = (1,1,1,0))
-        Telescope = Ellipse(color = (1,1,1,0))
+        background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
+        border = Ellipse(color = (1,1,1,0))
+        telescope = Ellipse(color = (1,1,1,0))
     with UntilDone():
 
         with Serial():
-            # with Parallel():
-            #     Background = Image(source = "./NIGHT_SKY.png", size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
-            #     Border = Ellipse(color = (1,1,1,0))
-            #     Telescope = Ellipse(color = (1,1,1,0))
             # present the dots
             with Parallel():
                 cross.update(color=(.35, .35, .35, 1.0))
-                # Background = Image(source = "./NIGHT_SKY.png", size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
-                # Border = Ellipse(color = (1,1,1,0))
-                # Telescope = Ellipse(color = (1,1,1,0))
                 md = MovingDots(color=color, scale=s(config.SCALE),
                                 num_dots=num_dots, radius=s(config.RADIUS),
                                 motion_props=[{"coherence": right_coherence,
@@ -82,8 +75,8 @@ def Trial(self,
                                 lifespan=config.LIFESPAN,
                                 lifespan_variance=config.LIFESPAN_VAR,
                                 speed=s(config.SPEED))
-                Border.update(center = md.center, size = (md.width*1.2, md.height*1.2), color = (.55,.55,.55,1))
-                Telescope.update(center = md.center, size = (md.width*1.1, md.height*1.1), color = (.35, .35, .35, 1.0))
+                border.update(center = md.center, size = (md.width*1.2, md.height*1.2), color = (.55,.55,.55,1))
+                telescope.update(center = md.center, size = (md.width*1.1, md.height*1.1), color = (.35, .35, .35, 1.0))
             with UntilDone():
                 # Collect key response
                 Wait(until=md.appear_time)

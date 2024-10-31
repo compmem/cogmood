@@ -1,4 +1,14 @@
-#from numpy import linspace
+from pathlib import Path
+
+# Define the base directory as the directory containing the current file
+BASE_DIR = Path(__file__).resolve().parent
+
+# Use BASE_DIR / "stim" / "fish_" to define the STIM_DIRECTORY path
+STIM_DIRECTORY = str(BASE_DIR / "stim" / "fish_")
+
+# Background image path
+BACKGROUND_IMAGE = str(BASE_DIR / "ocean_background.png")
+
 # FLANKER VARIABLES
 NUM_TRIALS = 1 # (len(evidence_conditions)-1) * 4 + 2 * num_trials
 NUM_BLOCKS = 1
@@ -33,38 +43,7 @@ CONDITIONS = [
                "dir": "left"},
 
               ]
-#  uNCOMMENT THIS LINE FOR EXTRA CONDITIONS
-# CONDITIONS = [{"stim": "__>__\n" +
-#                                     "_<><_\n" +
-#                                     "<<><<\n" +
-#                                     "_<><_\n" +
-#                                     "__>__\n",
-#                             "condition": "|",
-#                             "dir": "R"},
-#                            {"stim": "__<__\n" +
-#                                     "_<<<_\n" +
-#                                     ">>>>>\n" +
-#                                     "_<<<_\n" +
-#                                     "__<__\n",
-#                             "condition": "--",
-#                             "dir": "R"},
-#                            {"stim": "__<__\n" +
-#                                     "_><>_\n" +
-#                                     ">><>>\n" +
-#                                     "_><>_\n" +
-#                                     "__<__\n",
-#                             "condition": "|",
-#                             "dir": "L"},
-#                            {"stim": "__>__\n" +
-#                                     "_>>>_\n" +
-#                                     "<<<<<\n" +
-#                                     "_>>>_\n" +
-#                                     "__>__\n",
-#                             "condition": "--",
-#                             "dir": "L"},
-#                            ]
 
-STIM_DIRECTORY = "./stim/fish_"
 #EVIDENCE_CONDITIONS = [0., 45.]
 NUM_LOCS = 8
 DEF_SAT = [255.,255.,255.]
