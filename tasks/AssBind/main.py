@@ -104,8 +104,8 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.rts = []
     with Parallel():
         background = Image(source=Ref(os.path.join, config.TASK_DIR, 'cab_background.png'),
-                           size=(self.exp.screen.width,
-                                 self.exp.screen.height),
+                           size=(self.exp.screen.width * 1.1,
+                                 self.exp.screen.height * 1.1),
                            allow_stretch=True,
                            keep_ratio=False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',

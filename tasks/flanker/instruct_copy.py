@@ -2,9 +2,11 @@
 from smile.common import *
 from smile.scale import scale as s
 
-from widget import Flanker
+import config
+
+from flanker import Flanker
 from kivy.utils import platform
-from trial import Trial, GetResponse
+from trial_copy import Trial, GetResponse
 from math import cos, sin, sqrt, pi, radians
 
 
@@ -18,7 +20,7 @@ def get_instructions(config):
     inst = {}
     inst['top_text'] = 'You will be presented with a group of symbols. \n' + \
                        'You will be asked to indicate the direction that the \n' + \
-                       '[b]middle arrow is pointing[/b], while ignoring any other symbols. \n\n'
+                       '[b]middle symbol is pointing[/b], while ignoring any other symbols. \n\n'
 
     inst['inst_1'] = '[b]Practice 1:[/b] \n \n' + \
                      'Respond to the arrow in the red circle while ignoring the other symbols. \n'
@@ -82,42 +84,59 @@ def Instruct(self, config, lang="E"):
                                font_size=s(config.INST_FONT_SIZE))
 
                 # upper left
-                Flanker(center_x=self.exp.screen.center_x - s(400),
+                Flanker(config, center_x=self.exp.screen.center_x - s(400),
                         center_y=toplbl.top + s(125),
-                        box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                        line_width=s(config.LW),
-                        stim="__<__\n_<<<_\n<<<<<\n_<<<_\n__<__\n")
-                # upper middle
-                Flanker(center_x=self.exp.screen.center_x,
-                        center_y=toplbl.top + s(125),
-                        box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                        line_width=s(config.LW),
-                        stim="__>__\n_><>_\n><<<>\n_><>_\n__>__\n")
-                # upper right
-                Flanker(center_x=self.exp.screen.center_x + s(400),
-                        center_y=toplbl.top + s(125),
-                        box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                        line_width=s(config.LW),
-                        stim="__<__\n_<><_\n<><><\n_<><_\n__<__\n")
+                        direction = "left",
+                        condition = "+",
+                        layers = config.LAYERS,
+                        background = False)
 
-                # lower left
-                Flanker(center_x=self.exp.screen.center_x - s(400),
+                        #stim="__<__\n_<<<_\n<<<<<\n_<<<_\n__<__\n")
+                # upper middle
+                Flanker(config, center_x=self.exp.screen.center_x,
+                        center_y=toplbl.top + s(125),
+                        direction = "left",
+                        condition = "=",
+                        layers = config.LAYERS,
+                        background = False)
+
+                        #stim="__>__\n_><>_\n><<<>\n_><>_\n__>__\n")
+                # upper right
+                Flanker(config, center_x=self.exp.screen.center_x + s(400),
+                        center_y=toplbl.top + s(125),
+                        direction = "left",
+                        condition = "~",
+                        layers = config.LAYERS,
+                        background = False)
+
+
+                        #stim="__<__\n_<><_\n<><><\n_<><_\n__<__\n")
+
+                # # lower left
+                Flanker(config, center_x=self.exp.screen.center_x - s(400),
                         center_y=toplbl.bottom - s(125),
-                        box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                        line_width=s(config.LW),
-                        stim="__<__\n_<><_\n<><><\n_<><_\n__<__\n")
-                # lower middle
-                Flanker(center_x=self.exp.screen.center_x,
+                        direction = "left",
+                        condition = "~",
+                        layers = config.LAYERS,
+                        background = False)
+                #         stim="__<__\n_<><_\n<><><\n_<><_\n__<__\n")
+                #WONDERING IF THIS IS AN ERROR BECAUSE IT SHOWS THE SAME ONE TWICE, I DIDN'T WRITE THIS PART
+                # # lower middle
+                Flanker(config, center_x=self.exp.screen.center_x,
                         center_y=toplbl.bottom - s(125),
-                        box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                        line_width=s(config.LW),
-                        stim="__>__\n_><>_\n><><>\n_><>_\n__>__\n")
-                # lower right
-                Flanker(center_x=self.exp.screen.center_x + s(400),
+                        direction = "right",
+                        condition = "~",
+                        layers = config.LAYERS,
+                        background = False)
+                        # stim="__>__\n_><>_\n><><>\n_><>_\n__>__\n")
+                # # lower right
+                Flanker(config, center_x=self.exp.screen.center_x + s(400),
                         center_y=toplbl.bottom - s(125),
-                        box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                        line_width=s(config.LW),
-                        stim="__<__\n_<><_\n<>>><\n_<><_\n__<__\n")
+                        direction = "right",
+                        condition = "=",
+                        layers = config.LAYERS,
+                        background = False)
+                        # stim="__<__\n_<><_\n<>>><\n_<><_\n__<__\n")
 
             with UntilDone():
                 Wait(until=toplbl.appear_time)
@@ -125,18 +144,18 @@ def Instruct(self, config, lang="E"):
 
             Wait(1.0)
 
-            with Loop([["__<__\n_<<<_\n<<<<<\n_<<<_\n__<__\n", config.RESP_KEYS[0]],
-                       ["__>__\n_><>_\n><<<>\n_><>_\n__>__\n", config.RESP_KEYS[0]],
-                       ["__<__\n_<><_\n<>>><\n_<><_\n__<__\n", config.RESP_KEYS[-1]],
-                       ["__>__\n_><>_\n><><>\n_><>_\n__>__\n", config.RESP_KEYS[-1]]]) as prac_ev:
-                Wait(1.0)
+            with Loop([["left", config.RESP_KEYS[0]],
+                       ["left", config.RESP_KEYS[0]],
+                       ["right", config.RESP_KEYS[-1]],
+                       ["right", config.RESP_KEYS[-1]]]) as prac_ev:
                 p2 = Trial(config,
-                           stim=prac_ev.current[0],
+                           direct=prac_ev.current[0],
                            center_x=self.exp.screen.center_x,
                            center_y=self.exp.screen.center_y,
-                           correct_resp=prac_ev.current[1], condition='+')
+                           correct_resp=prac_ev.current[1], condition='+',
+                           background = False)
                 with If(p2.correct):
-                    # They got it right
+    #         #         # They got it right
                     Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           font_name='DejaVuSans.ttf')
@@ -168,21 +187,24 @@ def Instruct(self, config, lang="E"):
                 GetResponse(keys=config.CONT_KEY)
 
 
-            with Loop([["__<__\n_<><_\n<>>><\n_<><_\n__<__\n", config.RESP_KEYS[1],
+            with Loop([["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*5)), sin(radians((360./config.NUM_LOCS)*5))],
-                       ["__<__\n_<><_\n<><><\n_<><_\n__<__\n", config.RESP_KEYS[0],
+                       ["left", config.RESP_KEYS[0],
                         cos(radians((360./config.NUM_LOCS)*1)), sin(radians((360./config.NUM_LOCS)*1))],
-                       ["__>__\n_><>_\n><><>\n_><>_\n__>__\n", config.RESP_KEYS[1],
+                       ["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*3.)), sin(radians((360./config.NUM_LOCS)*3.))],
-                       ["__>__\n_><>_\n><><>\n_><>_\n__>__\n", config.RESP_KEYS[1],
+                       ["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*4.)), sin(radians((360./config.NUM_LOCS)*4.))],
-                       ["__>__\n_>>>_\n>>>>>\n_>>>_\n__>__\n", config.RESP_KEYS[1],
+                       ["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*0)), sin(radians((360./config.NUM_LOCS)*0))],
-                       ["__>__\n_><>_\n><<<>\n_><>_\n__>__\n", config.RESP_KEYS[0],
+                       ["left", config.RESP_KEYS[0],
                         cos(radians((360./config.NUM_LOCS)*2)), sin(radians((360./config.NUM_LOCS)*2))]
                       ]) as prac_ev:
-                Wait(1.0)
+                # Wait(1.0)
                 with Parallel():
+                    Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False, blocking = False)
                     Ellipse(color='red', size=(s(55),s(55)),
                             center_x=self.exp.screen.center_x + prac_ev.current[2]*s(config.FROM_CENTER),
                             center_y=self.exp.screen.center_y + prac_ev.current[3]*s(config.FROM_CENTER),
@@ -191,18 +213,28 @@ def Instruct(self, config, lang="E"):
                             center_x=self.exp.screen.center_x + prac_ev.current[2]*s(config.FROM_CENTER),
                             center_y=self.exp.screen.center_y + prac_ev.current[3]*s(config.FROM_CENTER),
                             blocking=False)
-                    p4 = Trial(config,stim=prac_ev.current[0],
+                    p4 = Trial(config,direct=prac_ev.current[0],
                                center_x=self.exp.screen.center_x + prac_ev.current[2]*s(config.FROM_CENTER),
                                center_y=self.exp.screen.center_y + prac_ev.current[3]*s(config.FROM_CENTER),
-                               correct_resp=prac_ev.current[1], condition='+')
+                               correct_resp=prac_ev.current[1], condition='+',
+                               background = False)
                 with If(p4.correct):
+                    with Parallel():
                     # They got it right
-                    Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
+                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False, blocking = False)
+                        Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           font_name='DejaVuSans.ttf')
+                        
                 with Else():
+                    with Parallel():
+                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False, blocking = False)
                     # they got it wrong
-                    Label(text=u"\u2717", color='red',
+                        Label(text=u"\u2717", color='red',
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           duration=config.FEEDBACK_TIME, font_name='DejaVuSans.ttf')
 
@@ -227,32 +259,45 @@ def Instruct(self, config, lang="E"):
                 GetResponse(keys=config.CONT_KEY)
 
 
-            with Loop([["__<__\n_<><_\n<>>><\n_<><_\n__<__\n", config.RESP_KEYS[1],
+            with Loop([["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*5)), sin(radians((360./config.NUM_LOCS)*5))],
-                       ["__<__\n_<><_\n<><><\n_<><_\n__<__\n", config.RESP_KEYS[0],
+                       ["left", config.RESP_KEYS[0],
                         cos(radians((360./config.NUM_LOCS)*1)), sin(radians((360./config.NUM_LOCS)*1))],
-                       ["__>__\n_><>_\n><><>\n_><>_\n__>__", config.RESP_KEYS[1],
+                       ["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*3)), sin(radians((360./config.NUM_LOCS)*3))],
-                       ["__>__\n_>>>_\n>>>>>\n_>>>_\n__>__\n", config.RESP_KEYS[1],
+                       ["right", config.RESP_KEYS[1],
                         cos(radians((360./config.NUM_LOCS)*6)), sin(radians((360./config.NUM_LOCS)*6))],
-                       ["__>__\n_><>_\n><<<>\n_><>_\n__>__\n", config.RESP_KEYS[0],
+                       ["left", config.RESP_KEYS[0],
                         cos(radians((360./config.NUM_LOCS)*2)), sin(radians((360./config.NUM_LOCS)*2))]
                       ]) as prac_ev:
-                Wait(1.0)
-                p5 = Trial(config, stim=prac_ev.current[0],
+                # Wait(1.0)
+                with Parallel():
+                    Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False, blocking = False)
+                    p5 = Trial(config, direct=prac_ev.current[0],
                            center_x=self.exp.screen.center_x + prac_ev.current[2]*s(config.FROM_CENTER),
                            center_y=self.exp.screen.center_y + prac_ev.current[3]*s(config.FROM_CENTER),
-                           correct_resp=prac_ev.current[1], condition='+')
+                           correct_resp=prac_ev.current[1], condition='+',
+                           background = False)
 
                 with If(p5.correct):
                     # They got it right
-                    Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
+                    with Parallel():
+                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False, blocking = False)
+                        Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           center_y=self.exp.screen.center_y + s(50),
                           font_name='DejaVuSans.ttf')
                 with Else():
                     # they got it wrong
-                    Label(text=u"\u2717", color='red',
+                    with Parallel():
+                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False, blocking = False)
+                        Label(text=u"\u2717", color='red',
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           center_y=self.exp.screen.center_y + s(50),
                           duration=config.FEEDBACK_TIME, font_name='DejaVuSans.ttf')

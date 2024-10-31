@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # load all the states
-from smile.common import Log, Label, Wait, Ref, Rectangle, Func, Debug, Loop, \
-                         UntilDone, If, Else, Parallel, Subroutine, KeyPress, \
-                         UpdateWidget
+from smile.common import *
 from smile.scale import scale as s
 from smile.lsl import LSLPush
 import smile.ref as ref
@@ -11,11 +9,11 @@ from smile.clock import clock
 from ..happy import HappyQuest
 
 
-from .list_gen import gen_moving_dot_trials
+from list_gen import gen_moving_dot_trials
 from math import log
-from .trial import Trial, GetResponse
-from .instruct import Instruct
-from . import version
+from trial import Trial, GetResponse
+from instruct import Instruct
+# from . import version
 
 
 def _get_score(config, corr_trials, num_trials, rt_trials):
@@ -40,7 +38,7 @@ def _get_score(config, corr_trials, num_trials, rt_trials):
 
 @Subroutine
 def RDMExp(self, config, run_num=0, lang="E", pulse_server=None, practice=False,
-           happy_mid=True):
+           happy_mid=False):
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + \
@@ -50,11 +48,11 @@ def RDMExp(self, config, run_num=0, lang="E", pulse_server=None, practice=False,
 
     res = Func(gen_moving_dot_trials, config)
 
-    Log(name="RDMinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="RDMinfo")
+        # version=version.__version__,
+        # author=version.__author__,
+        # date_time=version.__date__,
+        # email=version.__email__)
 
     self.md_blocks = res.result
 
@@ -88,9 +86,13 @@ def RDMExp(self, config, run_num=0, lang="E", pulse_server=None, practice=False,
 
     # loop over blocks
     with Loop(self.md_blocks) as block:
+        with Parallel():
         # put up the fixation cross
-        cross = Label(text='+', color=config.CROSS_COLOR,
-                      font_size=s(config.CROSS_FONTSIZE))
+            Background = Image(source = "./NIGHT_SKY.png", size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
+            Border= Ellipse(size = (s((config.RADIUS)*1.2*2),(s((config.RADIUS)*1.2*2))), color = (.55,.55,.55,1))
+            Telescope = Ellipse(size = (s((config.RADIUS)*1.1*2),(s((config.RADIUS)*1.1*2))), color = (.35, .35, .35, 1.0))
+            cross = Label(text='+', color=config.CROSS_COLOR,
+                                  font_size=s(config.CROSS_FONTSIZE))
         with UntilDone():
             # loop over trials
             with Loop(block.current) as trial:

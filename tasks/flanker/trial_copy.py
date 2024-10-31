@@ -1,7 +1,9 @@
 from smile.common import *
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-from widget import Flanker
+from flanker import Flanker
+from list_gen import gen_fblocks
+import config
 
 
 @Subroutine
@@ -42,23 +44,23 @@ def GetResponse(self,
 @Subroutine
 def Trial(self,
           config,
-          stim,
+          direct,
           center_x,
           center_y,
           condition,
           correct_resp=None,
           color='white',
-          pulse_server=None):
+          pulse_server=None,
+          background = True):
 
     self.eeg_pulse_time = None
     # present the dots
-    fl = Flanker(center_x=center_x, center_y=center_y,
-                 box=s(config.CONFIG_BOX), around=s(config.CONFIG_AROUND),
-                 line_width=s(config.LW),
-                 stim=stim)
+    fl = Flanker(config, center_x= center_x, center_y = center_y, direction = direct, condition = condition, layers = config.LAYERS,
+                 background = background)
+
     with UntilDone():
         # Collect key response
-        Wait(until=fl.appear_time)
+        Wait(until=fl.stim_appear_time)
         if config.EEG:
             pulse_fn = LSLPush(server=pulse_server,
                                val=Ref.getitem(config.EEG_CODES, condition))
@@ -66,7 +68,7 @@ def Trial(self,
                 start_time=pulse_fn.push_time)
             self.eeg_pulse_time = pulse_fn.push_time
         gr = GetResponse(correct_resp=correct_resp,
-                         base_time=fl.appear_time['time'],
+                         base_time=fl.stim_appear_time["time"],
                          duration=config.RESPONSE_DURATION,
                          keys=config.RESP_KEYS)
 
@@ -76,5 +78,21 @@ def Trial(self,
     self.correct = gr.correct
 
     # save vars
-    self.appear_time = fl.appear_time
-    self.disappear_time = fl.disappear_time
+    self.appear_time = fl.stim_appear_time
+    self.disappear_time = fl.stim_disappear_time
+
+# blocks = gen_fblocks(config)
+# print(blocks)
+
+
+# exp = Experiment()
+# blocks = Func(gen_fblocks,config)
+# res = blocks.result
+# with Loop(res) as block:
+#     with Loop(block.current) as trial:
+#         Trial(config, direct = trial.current["dir"],
+#                            center_x=exp.screen.center_x + trial.current['loc_x']*s(config.FROM_CENTER),
+#                            center_y=exp.screen.center_y + trial.current['loc_y']*s(config.FROM_CENTER),
+#                            correct_resp=trial.current['corr_resp'],
+#                            condition=trial.current['condition'])
+# exp.run()
