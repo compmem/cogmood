@@ -129,14 +129,14 @@ jobs:
             mkdir python_packages
             python3 -m pip install --upgrade pip
             python3 -m pip install --target $PWD/python_packages --only-binary=:all: --platform macosx_10_13_universal2 -r requirements.txt
-            export PYTHON_PATH=$PWD/python_packages:$PYTHONPATH
+            export PYTHONPATH=$PWD/python_packages:$PYTHONPATH
             
             
 
         - name: Build executable with PyInstaller
           run: |
             export PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/bin:$PATH
-            export PYTHON_PATH=$PWD/python_packages:$PYTHONPATH
+            export PYTHONPATH=$PWD/python_packages:$PYTHONPATH
             cd package
             python3 -m PyInstaller --noconfirm cogmood_mac.spec
 
