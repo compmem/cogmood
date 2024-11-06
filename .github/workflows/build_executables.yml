@@ -1,6 +1,15 @@
 name: Build Executables
 
 on:
+
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
+
     push:
         branches: [2024-data-collection-updates]
     pull_request:
@@ -10,6 +19,12 @@ jobs:
     build-windows:
         runs-on: windows-latest
         steps:
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              with:
+                detached: true
+              if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
             - name: Checkout code
               uses: actions/checkout@v4
               with:
@@ -52,6 +67,12 @@ jobs:
     build-macos:
         runs-on: macos-latest
         steps:
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+              with:
+                detached: true
+              if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
             - name: Checkout code
               uses: actions/checkout@v4
               with:
