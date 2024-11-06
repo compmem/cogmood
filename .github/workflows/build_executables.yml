@@ -48,7 +48,7 @@ jobs:
               run: echo $SI > serverinfo.txt && echo $ULCRT > cert.pem
             - name: package cogmood
               shell: bash -l {0}
-              run: cd package && python -m PyInstaller cogmood_winkivy20.spec
+              run: cd package && python -m PyInstaller cogmood_winkivy.spec
             - name: save exe
               uses: actions/upload-artifact@v3
               with:
@@ -86,7 +86,7 @@ jobs:
 #                  path: dist/SUPREME.exe # Path to your Windows executable
 
     build-macos:
-        runs-on: macos-latest
+        runs-on: macos-13
         steps:
             - name: Setup tmate session
               uses: mxschmitt/action-tmate@v3
@@ -121,7 +121,7 @@ jobs:
               run: echo "$SIMAC" > serverinfo.txt && echo "$ULCRTMAC" > cert.pem
             - name: package cogmood
               shell: bash -l {0}
-              run: cd package && python -m PyInstaller cogmood_mackivy20.spec
+              run: cd package && python -m PyInstaller cogmood_mackivy.spec
             - name: save exe
               uses: actions/upload-artifact@v3
               with:
