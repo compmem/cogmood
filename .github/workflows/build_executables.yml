@@ -10,10 +10,10 @@ on:
         required: false
         default: false
 
-    push:
-        branches: [2024-data-collection-updates]
-    pull_request:
-        branches: [2024-data-collection-updates]
+  push:
+      branches: [2024-data-collection-updates]
+  pull_request:
+      branches: [2024-data-collection-updates]
 
 jobs:
     build-windows:
