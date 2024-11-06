@@ -90,50 +90,50 @@ jobs:
 
     build-macos:
       runs-on: macos-14
-        steps:
-          - name: Setup tmate session
-            uses: mxschmitt/action-tmate@v3
-            with:
-              detached: true
-            # if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+      steps:
+        - name: Setup tmate session
+          uses: mxschmitt/action-tmate@v3
+          with:
+            detached: true
+          # if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
-          - name: Checkout code
-            uses: actions/checkout@v4
-            with:
-              submodules: recursive # Initializes and updates submodules
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            submodules: recursive # Initializes and updates submodules
 
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: "3.10" # Specify your Python version
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: "3.10" # Specify your Python version
 
-          - name: Check if Python is a fat binary
-            run: |
-              if lipo -info $(which python3) | grep -q "Architectures in the fat file"; then
-                  lipo -info $(which python3)
-                  echo "Python is a fat binary."
-              else
-                  echo "Python is NOT a fat binary."
-                  exit 1  # Optional: Exit with error if you require a fat binary
-              fi
+        - name: Check if Python is a fat binary
+          run: |
+            if lipo -info $(which python3) | grep -q "Architectures in the fat file"; then
+                lipo -info $(which python3)
+                echo "Python is a fat binary."
+            else
+                echo "Python is NOT a fat binary."
+                exit 1  # Optional: Exit with error if you require a fat binary
+            fi
 
-          - name: Install Homebrew dependencies
-            run: |
-              brew update
-              brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
-  
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              python -m pip install -r requirements.txt
+        - name: Install Homebrew dependencies
+          run: |
+            brew update
+            brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
 
-          - name: Build executable with PyInstaller
-            run: |
-              cd package
-              python -m pyinstaller --noconfirm cogmood_mac.spec
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            python -m pip install -r requirements.txt
 
-          - name: Upload macOS executable
-            uses: actions/upload-artifact@v4
-            with:
-              name: SUPREME
-              path: dist/SUPREME
+        - name: Build executable with PyInstaller
+          run: |
+            cd package
+            python -m pyinstaller --noconfirm cogmood_mac.spec
+
+        - name: Upload macOS executable
+          uses: actions/upload-artifact@v4
+          with:
+            name: SUPREME
+            path: dist/SUPREME
