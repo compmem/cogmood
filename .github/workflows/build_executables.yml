@@ -23,7 +23,7 @@ jobs:
               uses: mxschmitt/action-tmate@v3
               with:
                 detached: true
-              if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+              # if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
             - name: Checkout code
               uses: actions/checkout@v4
@@ -71,7 +71,7 @@ jobs:
               uses: mxschmitt/action-tmate@v3
               with:
                 detached: true
-              if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+              # if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
 
             - name: Checkout code
               uses: actions/checkout@v4
