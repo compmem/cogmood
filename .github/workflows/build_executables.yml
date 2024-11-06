@@ -48,7 +48,7 @@ jobs:
               run: echo $SI > serverinfo.txt && echo $ULCRT > cert.pem
             - name: package cogmood
               shell: bash -l {0}
-              run: cd package && python -m PyInstaller cogmood_winkivy.spec
+              run: cd package && python -m PyInstaller cogmood_windows.spec
             - name: save exe
               uses: actions/upload-artifact@v3
               with:
@@ -121,7 +121,7 @@ jobs:
               run: echo "$SIMAC" > serverinfo.txt && echo "$ULCRTMAC" > cert.pem
             - name: package cogmood
               shell: bash -l {0}
-              run: cd package && python -m PyInstaller cogmood_mackivy.spec
+              run: cd package && python -m PyInstaller cogmood_mac.spec
             - name: save exe
               uses: actions/upload-artifact@v3
               with:
