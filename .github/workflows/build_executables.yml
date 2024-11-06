@@ -117,6 +117,7 @@ jobs:
             if lipo -info $(which python3) | grep -q "Architectures in the fat file"; then
                 lipo -info $(which python3)
                 echo "Python is a fat binary."
+                export PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/bin:$PATH
             else
                 echo "Python is NOT a fat binary."
                 exit 1  # Optional: Exit with error if you require a fat binary
