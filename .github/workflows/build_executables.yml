@@ -36,7 +36,7 @@ jobs:
                   submodules: recursive # Initializes and updates submodules
             - name: create env
               shell: bash -l {0}
-              run: conda install -y kivy=2.0 pyinstaller=4.10 requests
+              run: conda install -y kivy=2.3 pyinstaller=4.10 requests
             - name: pip installs
               shell: bash -l {0}
               run: pip install kivy-deps.sdl2 kivy-deps.glew pyo
@@ -106,7 +106,7 @@ jobs:
                   submodules: recursive # Initializes and updates submodules
             - name: create env
               shell: bash -l {0}
-              run: conda install -y kivy=2.0 pyinstaller=4.10 requests
+              run: conda install -y kivy=2.3 pyinstaller=4.10 requests
             - name: pip installs
               shell: bash -l {0}
               run: pip install pyo
