@@ -56,7 +56,7 @@ jobs:
               uses: actions/upload-artifact@v3
               with:
                 name: SUPREME
-                path: dist/SUPREME.exe
+                path: package/dist/SUPREME.exe
 #            - name: Set up Python
 #              uses: actions/setup-python@v5
 #              with:
@@ -102,6 +102,11 @@ jobs:
           with:
             submodules: recursive # Initializes and updates submodules
 
+        - name: Install Homebrew dependencies
+          run: |
+            brew update
+            brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
+
         - name: Set up Python
           uses: actions/setup-python@v5
           with:
@@ -117,23 +122,18 @@ jobs:
                 exit 1  # Optional: Exit with error if you require a fat binary
             fi
 
-        - name: Install Homebrew dependencies
-          run: |
-            brew update
-            brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
-
         - name: Install dependencies
           run: |
-            python -m pip install --upgrade pip
-            python -m pip install -r requirements.txt
+            python3 -m pip install --upgrade pip
+            python3 -m pip install -r requirements.txt
 
         - name: Build executable with PyInstaller
           run: |
             cd package
-            python -m pyinstaller --noconfirm cogmood_mac.spec
+            python3 -m pyinstaller --noconfirm cogmood_mac.spec
 
         - name: Upload macOS executable
           uses: actions/upload-artifact@v4
           with:
             name: SUPREME
-            path: dist/SUPREME
+            path: package/dist/SUPREME
