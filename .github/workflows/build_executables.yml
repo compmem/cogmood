@@ -36,7 +36,7 @@ jobs:
                   submodules: recursive # Initializes and updates submodules
             - name: create env
               shell: bash -l {0}
-              run: conda install -y kivy=2.3 pyinstaller=4.10 requests
+              run: conda install -y kivy=2.3 pyinstaller=4.10 requests glfw
             - name: pip installs
               shell: bash -l {0}
               run: pip install kivy-deps.sdl2 kivy-deps.glew pyo
@@ -121,7 +121,7 @@ jobs:
               run: echo "$SIMAC" > serverinfo.txt && echo "$ULCRTMAC" > cert.pem
             - name: package cogmood
               shell: bash -l {0}
-              run: cd package && python -m PyInstaller cogmood_mac.spec
+              run: cd package && python -m PyInstaller --noconfirm --target-arch universal2 cogmood_mac.spec
             - name: save exe
               uses: actions/upload-artifact@v3
               with:
