@@ -128,7 +128,7 @@ jobs:
             export PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/bin:$PATH
             mkdir python_packages
             python3 -m pip install --upgrade pip
-            python3 -m pip install --target $PWD/python_packages --platform macosx_10_13_universal2 -r requirements.txt
+            python3 -m pip install --target $PWD/python_packages --only-binary=:all: --platform macosx_10_13_universal2 -r requirements.txt
             export PYTHON_PATH=$PWD/python_packages:$PYTHONPATH
             
             
