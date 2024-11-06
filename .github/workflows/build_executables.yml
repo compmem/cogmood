@@ -24,45 +24,66 @@ jobs:
               with:
                 detached: true
               # if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
-
+            - uses: conda-incubator/setup-miniconda@v2
+              with:
+                auto-update-conda: true
+                activate-environment: kivy20
+                python-version: 3.9
+                channels: conda-forge
             - name: Checkout code
               uses: actions/checkout@v4
               with:
                   submodules: recursive # Initializes and updates submodules
-
-            - name: Set up Python
-              uses: actions/setup-python@v5
+            - name: create env
+              shell: bash -l {0}
+              run: conda install -y kivy=2.0 pyinstaller=4.10 requests
+            - name: pip installs
+              shell: bash -l {0}
+              run: pip install kivy-deps.sdl2 kivy-deps.glew pyo
+            - name: install smile
+              shell: bash -l {0}
+              run: pip install -e smile
+            - name: create files
+              shell: bash -l {0}
+              run: echo $SI > serverinfo.txt && echo $ULCRT > cert.pem
+            - name: package cogmood
+              shell: bash -l {0}
+              run: cd package && python -m PyInstaller cogmood_winkivy20.spec
+            - name: save exe
+              uses: actions/upload-artifact@v3
               with:
-                  python-version: "3.10" # Specify your Python version
-                  cache: 'pip' # caching pip dependencies
-
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install -r requirements.txt
-
-            - name: Set up Mesa3D OpenGL DLL
-              run: |
-                  curl -L -o mesa3d-22.1.5-release-mingw.7z https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
-                  7z x mesa3d-22.1.5-release-mingw.7z -o$Env:UserProfile\mesa3d
-              shell: pwsh
-            
-            - name: Add Mesa3D to Path
-              run: |
-                  echo "$Env:UserProfile\mesa3d\mesa3d-22.1.5-release-mingw\libglapi.dll" >> $Env:Path
-                  echo "$Env:UserProfile\mesa3d\mesa3d-22.1.5-release-mingw\opengl32.dll" >> $Env:Path
-              shell: pwsh
-
-            - name: Build executable with PyInstaller
-              run: |
-                  cd package
-                  pyinstaller --noconfirm --upx-dir upx/windows_upx.exe cogmood_windows.spec
-
-            - name: Upload Windows executable
-              uses: actions/upload-artifact@v4
-              with:
-                  name: SUPREME
-                  path: dist/SUPREME.exe # Path to your Windows executable
+                name: SUPREME
+                path: dist/SUPREME.exe
+#            - name: Set up Python
+#              uses: actions/setup-python@v5
+#              with:
+#                  python-version: "3.10" # Specify your Python version
+#                  cache: 'pip' # caching pip dependencies
+#
+#            - name: Install dependencies
+#              run: |
+#                  python -m pip install --upgrade pip
+#                  pip install -r requirements.txt
+#
+#            - name: Set up Mesa3D OpenGL DLL
+#              run: |
+#                  curl -L -o mesa3d-22.1.5-release-mingw.7z https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
+#                  7z x mesa3d-22.1.5-release-mingw.7z -o$HOME/mesa3d
+#
+#            - name: Add Mesa3D to Path
+#              run: |
+#                  export PATH=$HOME/mesa3d/x86/:$PATH
+#
+#            - name: Build executable with PyInstaller
+#              run: |
+#                  cd package
+#                  pyinstaller --noconfirm --upx-dir upx/windows_upx.exe cogmood_windows.spec
+#
+#            - name: Upload Windows executable
+#              uses: actions/upload-artifact@v4
+#              with:
+#                  name: SUPREME
+#                  path: dist/SUPREME.exe # Path to your Windows executable
 
     build-macos:
         runs-on: macos-latest
@@ -72,35 +93,62 @@ jobs:
               with:
                 detached: true
               # if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
-
+            - uses: conda-incubator/setup-miniconda@v2
+              with:
+                auto-update-conda: true
+                activate-environment: kivy20
+                python-version: 3.9
+                channels: conda-forge
             - name: Checkout code
               uses: actions/checkout@v4
               with:
                   submodules: recursive # Initializes and updates submodules
-
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.10" # Specify your Python version
-
-            - name: Install Homebrew dependencies
-              run: |
-                  brew update
-                  brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
-
-            - name: Install dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install pyinstaller
-                  pip install --target . --platform=macosx_10_9_universal2 --only-binary=:all: -r requirements.txt
-
-            - name: Build executable with PyInstaller
-              run: |
-                  cd package
-                  pyinstaller --noconfirm --target-arch universal2 cogmood_mac.spec
-
-            - name: Upload macOS executable
-              uses: actions/upload-artifact@v4
+            - name: create env
+              shell: bash -l {0}
+              run: conda install -y kivy=2.0 pyinstaller=4.10 requests
+            - name: pip installs
+              shell: bash -l {0}
+              run: pip install pyo
+            - name: install smile
+              shell: bash -l {0}
+              run: pip install -e smile
+            - name: create files
+              shell: bash -l {0}
+              env:
+                SIMAC: ${{ secrets.SIMAC }}
+                ULCRTMAC: ${{ secrets.ULCRTMAC }}
+              run: echo "$SIMAC" > serverinfo.txt && echo "$ULCRTMAC" > cert.pem
+            - name: package cogmood
+              shell: bash -l {0}
+              run: cd package && python -m PyInstaller cogmood_mackivy20.spec
+            - name: save exe
+              uses: actions/upload-artifact@v3
               with:
                   name: SUPREME
                   path: dist/SUPREME
+#            - name: Set up Python
+#              uses: actions/setup-python@v5
+#              with:
+#                  python-version: "3.10" # Specify your Python version
+#
+#            - name: Install Homebrew dependencies
+#              run: |
+#                  brew update
+#                  brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
+#
+#            - name: Install dependencies
+#              run: |
+#                  python -m pip install --upgrade pip
+#                  pip install pyinstaller
+#                  pip install --target . --platform=macosx_10_9_universal2 --only-binary=:all: -r requirements.txt
+#
+#            - name: Build executable with PyInstaller
+#              run: |
+#                  cd package
+#                  pyinstaller --noconfirm --target-arch universal2 cogmood_mac.spec
+#
+#            - name: Upload macOS executable
+#              uses: actions/upload-artifact@v4
+#              with:
+#                  name: SUPREME
+#                  path: dist/SUPREME
