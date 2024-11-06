@@ -125,13 +125,14 @@ jobs:
 
         - name: Install dependencies
           run: |
-            python3 -m pip install --upgrade pip
-            python3 -m pip install -r requirements.txt
+            export PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/bin:$PATH
+            python3 -m pip install --platform macosx_10_9_universal2 --upgrade pip
+            python3 -m pip install --platform macosx_10_9_universal2 -r requirements.txt
 
         - name: Build executable with PyInstaller
           run: |
             cd package
-            python3 -m pyinstaller --noconfirm cogmood_mac.spec
+            python3 -m PyInstaller --noconfirm cogmood_mac.spec
 
         - name: Upload macOS executable
           uses: actions/upload-artifact@v4
