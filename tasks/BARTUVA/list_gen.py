@@ -40,7 +40,7 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
     bag_ID=0 #counter used to identify what bag a balloon is in
     balloon_counter = 0     #A counter used to mark the balloon's number out of the total number of balloons
   
-    colors = ["red", "green", "pink", "yellow", "teal", "grey", "indigo", "purple"]
+    colors = ["red", "pink", "yellow", "teal", "grey", "indigo", "purple"]
     random.shuffle(colors)
 
     for balloon_set in x:
