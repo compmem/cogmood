@@ -22,7 +22,7 @@ def BartuvaExp(self,
                full_instructions=True,
                practice=False,
                pulse_server=None,
-               happy_mid=True):
+               happy_mid=False):
 
     if task_dir is not None:
         config.TASK_DIR = task_dir
