@@ -19,7 +19,7 @@ RESP_KEYS = ['1', '4']
 CONT_KEY = ['1', '4']
 
 NUM_FLANKS = 2
-LAYERS = [{"condition": "=", "dir":"right", "layers":["right","left"]},{"condition":"~","dir":"right","layers":["right","left"]},{"condition": "=", "dir":"left", "layers":["left","right"]},{"condition":"~","dir":"left","layers":["right","left"]},{"condition": "+", "dir":"right", "layers":["right","right"]},{"condition":"+","dir":"left","layers":["left","left"]}]
+LAYERS = [{"condition": "=", "dir":"right", "layers":["right","left"]},{"condition":"~","dir":"right","layers":["left","right"]},{"condition": "=", "dir":"left", "layers":["left","right"]},{"condition":"~","dir":"left","layers":["right","left"]},{"condition": "+", "dir":"right", "layers":["right","right"]},{"condition":"+","dir":"left","layers":["left","left"]}]
 
 
 CONDITIONS = [
@@ -55,7 +55,8 @@ RESPONSE_DURATION = 3.
 FROM_CENTER = 300
 FEEDBACK_TIME = 0.5
 
-IMAGE_SIZE = [100,100]
+STIM_SIZE = 50
+PADDING = 5
 
 SKIP_SIZE = [200, 50]
 SKIP_FONT_SIZE = 25

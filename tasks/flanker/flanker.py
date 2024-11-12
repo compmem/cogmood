@@ -24,43 +24,43 @@ def Flanker(self, config, center_x, center_y, direction, condition, layers, num_
             background_image = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False)
-            center_image = Image(source = self.center_image, center = (self.center_x, self.center_y), size = (s(50),s(50)), allow_stretch = True, keep_ratio = False)
+            center_image = Image(source = self.center_image, center = (self.center_x, self.center_y), size = (s(config.STIM_SIZE), s(config.STIM_SIZE)), allow_stretch = True, keep_ratio = False)
             # self.stim_appear_time = center_image.appear_time
             self.outer_layer = 0
             for i in range(num_layers):
                 self.stim_direction = self.layer_list[Ref(int,self.outer_layer)]
                 self.stim_image = config.STIM_DIRECTORY + Ref(str, self.stim_direction) + ".png"
                 self.outer_layer = self.outer_layer + 1
-                add_right = Image(source = self.stim_image, size = (s(50),s(50)),
+                add_right = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                                                     keep_ratio = False, allow_stretch = True,
-                                                    center = (self.center_x + s(50*(self.outer_layer)), self.center_y))
-                add_left = Image(source = self.stim_image, size = (s(50),s(50)),
+                                                    center = (self.center_x + (s(config.STIM_SIZE + config.PADDING)*(self.outer_layer)), self.center_y))
+                add_left = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                                         keep_ratio = False, allow_stretch = True,
-                                        center = (self.center_x - s(50*(self.outer_layer)), self.center_y))
-                add_up = Image(source = self.stim_image, size = (s(50),s(50)),
+                                        center = (self.center_x - (s(config.STIM_SIZE + config.PADDING)*(self.outer_layer)), self.center_y))
+                add_up = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                                         keep_ratio = False, allow_stretch = True,
-                                        center = (self.center_x, self.center_y + s(50*(self.outer_layer))))
-                add_down = Image(source = self.stim_image, size = (s(50),s(50)),
+                                        center = (self.center_x, self.center_y + (s(config.STIM_SIZE + config.PADDING)*(self.outer_layer))))
+                add_down = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                                         keep_ratio = False, allow_stretch = True,
-                                        center = (self.center_x, self.center_y - s(50*(self.outer_layer))))
+                                        center = (self.center_x, self.center_y - (s(config.STIM_SIZE + config.PADDING)*(self.outer_layer))))
                 # #Need to add in actual stim rules here -- this needs to be the opposite of whatever happens in the top depending on condition
                 self.layer = self.outer_layer
                 for mult in range(num_layers - (i+1)):
                     self.stim_direction = self.layer_list[Ref(int,self.layer)]
                     self.stim_image = config.STIM_DIRECTORY + Ref(str, self.stim_direction) + ".png"
 
-                    add_right_up = Image(source = self.stim_image, size = (s(50),s(50)),
+                    add_right_up = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                         keep_ratio = False, allow_stretch = True,
-                        center = (add_right.center_x, add_right.center_y + s(50*(mult+1))))
-                    add_right_down = Image(source = self.stim_image, size = (s(50),s(50)),
+                        center = (add_right.center_x, add_right.center_y + s(config.STIM_SIZE + config.PADDING)*(mult+1)))
+                    add_right_down = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                         keep_ratio = False, allow_stretch = True,
-                        center = (add_right.center_x, add_right.center_y - s(50*(mult+1))))
-                    add_left_up = Image(source = self.stim_image, size = (s(50),s(50)),
+                        center = (add_right.center_x, add_right.center_y - s(config.STIM_SIZE + config.PADDING)*(mult+1)))
+                    add_left_up = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                         keep_ratio = False, allow_stretch = True,
-                        center = (add_left.center_x, add_left.center_y + s(50*(mult+1))))
-                    add_left_down = Image(source = self.stim_image, size = (s(50),s(50)),
+                        center = (add_left.center_x, add_left.center_y + s(config.STIM_SIZE + config.PADDING)*(mult+1)))
+                    add_left_down = Image(source = self.stim_image, size = (s(config.STIM_SIZE), s(config.STIM_SIZE)),
                         keep_ratio = False, allow_stretch = True,
-                        center = (add_left.center_x, add_left.center_y - s(50*(mult+1))))
+                        center = (add_left.center_x, add_left.center_y - s(config.STIM_SIZE + config.PADDING)*(mult+1)))
                     self.layer = self.layer + 1
         with If(background == False):
             background_image.update(color = (1,1,1,0))

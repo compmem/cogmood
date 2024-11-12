@@ -103,9 +103,11 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.accs = []
     self.rts = []
     with Parallel():
-        background = Image(source=Ref(os.path.join, config.TASK_DIR, 'cab_background.png'),
-                           size=(self.exp.screen.width * 1.1,
-                                 self.exp.screen.height * 1.1),
+        background_rect = Rectangle(color = "white",size=(self.exp.screen.width * 1.1,
+                                 self.exp.screen.height * 1.1))
+        background = Image(source=Ref(os.path.join, config.TASK_DIR, 'card_table.png'),
+                           size=(self.exp.screen.width,
+                                 self.exp.screen.height),
                            allow_stretch=True,
                            keep_ratio=False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
@@ -150,10 +152,10 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                                      keep_ratio=False)
                 # initialize a frame around the images
                 # (which is invisible until response)
-                resp_rect = Rectangle(size=(s(2*config.IMG_WIDTH +
-                                              config.RESP_FRAME_SIZE),
-                                            s(config.IMG_HEIGHT +
-                                              config.RESP_FRAME_SIZE)),
+                self.width = right_border.right - left_border.left
+                self.height = right_border.top - right_border.bottom
+                resp_rect = Rectangle(width = self.width, center_x = self.exp.screen.center_x - s(25/2),
+                                      top = left_border.top, height = self.height,
                                       color=(.35, .35, .35, 0.0),
                                       duration=config.STIM_PRES_TIME)
 

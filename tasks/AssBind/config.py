@@ -84,7 +84,7 @@ IMG_HEIGHT = 256
 RESP_FRAME_SIZE = 25
 
 # color of response-indicating rectangle
-COLOR_RECT = (0.0, 0.0, 0.0)
+COLOR_RECT = (0.0, 0.0, 0.0,0.5)
 
 # color of score announcement rectangle
 COLOR_SCORE_RECT = (144./255., 175./255., 197./255.)

@@ -86,9 +86,9 @@ def BARTSub(self,
     with Parallel():
         Landscape = Image(source = BACKGROUND_IMG, bottom = self.exp.screen.bottom, size = (self.exp.screen.width * 1.1, self.exp.screen.height * 1.1), allow_stretch = True)
         Air_pump = Image(source = AIRPUMP_IMG, bottom = self.exp.screen.bottom + s(75), height = s(config.AIRPUMP_HEIGHT), 
-                        width = s(config.AIRPUMP_WIDTH), center_x = (self.exp.screen.center_x + s(20)), allow_stretch = True)
+                        width = s(config.AIRPUMP_WIDTH), center_x = (self.exp.screen.center_x - s(150)), allow_stretch = True)
         Balloon = Image(source = BALLOON_IMG, size = (s(self.curr_balloon_size), s(self.curr_balloon_size)), allow_stretch = True, bottom = Air_pump.top - s(5), center_x = Air_pump.center_x - s(5))
-        Bank = Image(source= BANK_IMG, size =(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch = True, left = Air_pump.right + s(50), top = self.exp.screen.top - s(25))
+        Bank = Image(source= BANK_IMG, size =(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch = True, left = Air_pump.right - s(25), top = Balloon.top - s(50))
         Gtotal = Label(text=Ref('${:0,.2f}'.format, self.grand_total),
                       font_size=s(config.TOTAL_FONT_SIZE),
                       center = (Bank.center_x + s(10), Bank.center_y - s(50)))
@@ -98,12 +98,12 @@ def BARTSub(self,
                       center=Balloon.center)
         LChoice_label = Label(text='%s to pump'%config.KEY_TEXT[0],
                               font_size=s(config.TRIAL_FONT_SIZE),
-                              color='white', halign="center",
+                              color='black', halign="center",
                               bottom =Air_pump.bottom, center_x = Air_pump.center_x
                               )
         RChoice_label = Label(text='%s to collect'%config.KEY_TEXT[1],
                           font_size=s(config.TRIAL_FONT_SIZE),
-                          color='white', halign="center",
+                          color='black', halign="center",
                           center_x=Bank.center_x,
                           top=Bank.bottom - s(1))
 
