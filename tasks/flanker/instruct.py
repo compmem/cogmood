@@ -202,7 +202,7 @@ def Instruct(self, config, lang="E"):
                       ]) as prac_ev:
                 # Wait(1.0)
                 with Parallel():
-                    Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                    Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
                     Ellipse(color='red', size=(s(55),s(55)),
@@ -221,7 +221,7 @@ def Instruct(self, config, lang="E"):
                 with If(p4.correct):
                     with Parallel():
                     # They got it right
-                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                        Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
                         Label(text=u"\u2713", color='lime', duration=config.FEEDBACK_TIME,
@@ -230,7 +230,7 @@ def Instruct(self, config, lang="E"):
                         
                 with Else():
                     with Parallel():
-                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                        Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
                     # they got it wrong
@@ -272,7 +272,7 @@ def Instruct(self, config, lang="E"):
                       ]) as prac_ev:
                 # Wait(1.0)
                 with Parallel():
-                    Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                    Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
                     p5 = Trial(config, direct=prac_ev.current[0],
@@ -284,7 +284,7 @@ def Instruct(self, config, lang="E"):
                 with If(p5.correct):
                     # They got it right
                     with Parallel():
-                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                        Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
                         Label(text=u"\u2713", color='lime', duration=config.FEEDBACK_TIME,
@@ -294,7 +294,7 @@ def Instruct(self, config, lang="E"):
                 with Else():
                     # they got it wrong
                     with Parallel():
-                        Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
+                        Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
                         Label(text=u"\u2717", color='red',
