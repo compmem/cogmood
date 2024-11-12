@@ -6,7 +6,7 @@ import config
 
 from .flanker import Flanker
 from kivy.utils import platform
-from tasks.flanker.trial import Trial, GetResponse
+from .trial import Trial, GetResponse
 from math import cos, sin, sqrt, pi, radians
 
 
@@ -112,28 +112,28 @@ def Instruct(self, config, lang="E"):
 
                         #stim="__<__\n_<><_\n<><><\n_<><_\n__<__\n")
 
-                # # lower left
+                # lower left
                 Flanker(config, center_x=self.exp.screen.center_x - s(400),
                         center_y=toplbl.bottom - s(125),
-                        direction = "left",
-                        condition = "~",
+                        direction = "right",
+                        condition = "+",
                         layers = config.LAYERS,
                         background = False)
                 #         stim="__<__\n_<><_\n<><><\n_<><_\n__<__\n")
-                #WONDERING IF THIS IS AN ERROR BECAUSE IT SHOWS THE SAME ONE TWICE, I DIDN'T WRITE THIS PART
-                # # lower middle
+                # WONDERING IF THIS IS AN ERROR BECAUSE IT SHOWS THE SAME ONE TWICE, I DIDN'T WRITE THIS PART
+                # lower middle
                 Flanker(config, center_x=self.exp.screen.center_x,
                         center_y=toplbl.bottom - s(125),
                         direction = "right",
-                        condition = "~",
+                        condition = "=",
                         layers = config.LAYERS,
                         background = False)
                         # stim="__>__\n_><>_\n><><>\n_><>_\n__>__\n")
-                # # lower right
+                # lower right
                 Flanker(config, center_x=self.exp.screen.center_x + s(400),
                         center_y=toplbl.bottom - s(125),
                         direction = "right",
-                        condition = "=",
+                        condition = "~",
                         layers = config.LAYERS,
                         background = False)
                         # stim="__<__\n_<><_\n<>>><\n_<><_\n__<__\n")
@@ -155,8 +155,8 @@ def Instruct(self, config, lang="E"):
                            correct_resp=prac_ev.current[1], condition='+',
                            background = False)
                 with If(p2.correct):
-    #         #         # They got it right
-                    Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
+                    # They got it right
+                    Label(text=u"\u2713", color='lime', duration=config.FEEDBACK_TIME,
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           font_name='DejaVuSans.ttf')
                 with Else():
@@ -224,7 +224,7 @@ def Instruct(self, config, lang="E"):
                         Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
-                        Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
+                        Label(text=u"\u2713", color='lime', duration=config.FEEDBACK_TIME,
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           font_name='DejaVuSans.ttf')
                         
@@ -287,7 +287,7 @@ def Instruct(self, config, lang="E"):
                         Background = Image(source = "ocean_background.png", size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
-                        Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
+                        Label(text=u"\u2713", color='lime', duration=config.FEEDBACK_TIME,
                           font_size=s(config.FEEDBACK_FONT_SIZE),
                           center_y=self.exp.screen.center_y + s(50),
                           font_name='DejaVuSans.ttf')
