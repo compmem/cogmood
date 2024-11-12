@@ -1,5 +1,40 @@
 # SUPREMEMOOD
 
+## Updated Non-Conda Build Instructions
+**Note:** Must use Git Bash or WSL on Windows for compatibility with Make
+
+
+Create virtual environment: 
+```bash
+python -m venv .venv
+```
+
+Activate venv:
+- Windows:
+```bash
+source .venv/Scripts/activate
+```
+
+- Mac:
+```bash
+source .venv/bin/activate
+```
+
+Install requirements:
+```bash
+pip install -r requirements.txt
+```
+
+Go to package directory:
+```bash
+cd package
+```
+
+Use Makefile to call PyInstaller (The Makefile will check for MacOS or Windows or other & call PyInstaller or output message if OS not supported):
+```bash
+make
+```
+
 ## Windows build instructions
 ### Kivy 2.0
 Pysinstaller 5.0 took out some tk hooks that kivy 2.0 depends on. kivy 2.1 fixes that, and could be used with pyinstaller 5.0, but there's a mouse issue with kivy 2.1.
