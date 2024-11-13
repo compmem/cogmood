@@ -205,6 +205,8 @@ def Instruct(self, config, lang="E"):
                     Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
+                    fix = Label(text='+', color=config.CROSS_COLOR,
+                                font_size=s(config.CROSS_FONTSIZE), blocking = False)
                     Ellipse(color='red', size=(s(55),s(55)),
                             center_x=self.exp.screen.center_x + prac_ev.current[2]*s(config.FROM_CENTER),
                             center_y=self.exp.screen.center_y + prac_ev.current[3]*s(config.FROM_CENTER),
@@ -275,6 +277,9 @@ def Instruct(self, config, lang="E"):
                     Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
                                                                     self.exp.screen.size[1] * 1.1),
                         allow_stretch = True, keep_ratio = False, blocking = False)
+                    fix = Label(text='+', color=config.CROSS_COLOR,
+                                font_size=s(config.CROSS_FONTSIZE),
+                                blocking=False)
                     p5 = Trial(config, direct=prac_ev.current[0],
                            center_x=self.exp.screen.center_x + prac_ev.current[2]*s(config.FROM_CENTER),
                            center_y=self.exp.screen.center_y + prac_ev.current[3]*s(config.FROM_CENTER),
