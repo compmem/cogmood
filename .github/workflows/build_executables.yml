@@ -57,36 +57,7 @@ jobs:
               with:
                 name: SUPREME
                 path: package/dist/SUPREME.exe
-#            - name: Set up Python
-#              uses: actions/setup-python@v5
-#              with:
-#                  python-version: "3.10" # Specify your Python version
-#                  cache: 'pip' # caching pip dependencies
-#
-#            - name: Install dependencies
-#              run: |
-#                  python -m pip install --upgrade pip
-#                  pip install -r requirements.txt
-#
-#            - name: Set up Mesa3D OpenGL DLL
-#              run: |
-#                  curl -L -o mesa3d-22.1.5-release-mingw.7z https://github.com/pal1000/mesa-dist-win/releases/download/22.1.5/mesa3d-22.1.5-release-mingw.7z
-#                  7z x mesa3d-22.1.5-release-mingw.7z -o$HOME/mesa3d
-#
-#            - name: Add Mesa3D to Path
-#              run: |
-#                  export PATH=$HOME/mesa3d/x86/:$PATH
-#
-#            - name: Build executable with PyInstaller
-#              run: |
-#                  cd package
-#                  pyinstaller --noconfirm --upx-dir upx/windows_upx.exe cogmood_windows.spec
-#
-#            - name: Upload Windows executable
-#              uses: actions/upload-artifact@v4
-#              with:
-#                  name: SUPREME
-#                  path: dist/SUPREME.exe # Path to your Windows executable
+
 
     build-macos:
       runs-on: macos-14
