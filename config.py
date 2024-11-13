@@ -5,7 +5,8 @@ import sys
 import platform
 
 CURRENT_OS: str = platform.system()
-API_BASE_URL: str = 'http://localhost:5000'
+API_BASE_URL: str = 'https://technetium.nimh.nih.gov/compmem'
+VERIFY: bool = False
 RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
 # WORKER_ID_PLACEHOLDER_VALUE is the placeholder value assigned to the WorkerID field
 # in the executables when we build them. It should be replaced by actual ID when

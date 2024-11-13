@@ -4,7 +4,7 @@ import zipfile
 import requests
 import logging
 import time
-from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS
+from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY
 from hashlib import blake2b
 from io import BytesIO
 from pathlib import Path
@@ -31,7 +31,7 @@ def get_blocks_to_run(worker_id: str) -> list[str] | dict[str, str]:
     params = {'worker_id': worker_id}
 
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, verify=VERIFY)
         response.raise_for_status()  # Raise an error for non-2xx status codes
         tasks = response.json().get('blocks_to_run', [])
         logging.info(f'Tasks to run: {tasks}')
@@ -123,7 +123,7 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
         data = {'block_name': block_name, 'checksum': checksum}
         files = {'file': (zip_file_name_with_timestamp, zip_buffer, 'application/zip')}
 
-        response = requests.post(url, params=params, data=data, files=files)
+        response = requests.post(url, params=params, data=data, files=files, verify=VERIFY)
         logging.info(f"Response Status Code: {response.status_code}")
 
         if response.status_code == 200:
