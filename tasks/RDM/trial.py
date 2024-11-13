@@ -48,65 +48,74 @@ def Trial(self,
           num_dots=100,
           right_coherence=0.0,
           left_coherence=0.0,
-          pulse_server=None
+          pulse_server=None,
           ):
 
 
     self.eeg_pulse_time = None
-    with Serial():
-        # present the dots
-        with Parallel():
-            cross.update(color=(.35, .35, .35, 1.0))
-            md = MovingDots(color=color, scale=s(config.SCALE),
-                            num_dots=num_dots, radius=s(config.RADIUS),
-                            motion_props=[{"coherence": right_coherence,
-                                           "direction": 0,
-                                           "direction_variance": 0},
-                                          {"coherence": left_coherence,
-                                           "direction": 180,
-                                           "direction_variance": 0}],
-                            lifespan=config.LIFESPAN,
-                            lifespan_variance=config.LIFESPAN_VAR,
-                            speed=s(config.SPEED))
-        with UntilDone():
-            # Collect key response
-            Wait(until=md.appear_time)
-            if config.EEG:
-                pulse_fn = LSLPush(server=pulse_server,
-                                   val=Ref.getitem(config.EEG_CODES,
-                                                    "code"))
-                Log(name="RDM_PULSES",
-                    start_time=pulse_fn.push_time)
-                self.eeg_pulse_time = pulse_fn.push_time
+    
+    with Parallel():
+        background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
+        border = Ellipse(color = (1,1,1,0))
+        telescope = Ellipse(color = (1,1,1,0))
+    with UntilDone():
 
-            gr = GetResponse(correct_resp=correct_resp,
-                        base_time=md.appear_time['time'],
-                        duration=config.RESPONSE_DURATION,
-                        keys=config.RESP_KEYS)
-        self.pressed = gr.pressed
-        self.press_time = gr.press_time
-        self.rt = gr.rt
-        self.correct = gr.correct
-        # give feedback
-        with If(self.pressed == correct_resp):
-            # They got it right
-            Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
-                  font_size=s(config.FEEDBACK_FONT_SIZE),
-                  font_name='DejaVuSans.ttf')
-        with Elif(self.pressed == incorrect_resp):
-            # they got it wrong
-            Label(text=u"\u2717", color='red',
-                  font_size=s(config.FEEDBACK_FONT_SIZE),
-                  duration=config.FEEDBACK_TIME, font_name='DejaVuSans.ttf')
-        with Else():
-            # too slow
-            Label(text="Too Slow!", font_size=s(config.FEEDBACK_FONT_SIZE),
-                  duration=config.FEEDBACK_TIME*2.)
+        with Serial():
+            # present the dots
+            with Parallel():
+                cross.update(color=(.35, .35, .35, 1.0))
+                md = MovingDots(color=color, scale=s(config.SCALE),
+                                num_dots=num_dots, radius=s(config.RADIUS),
+                                motion_props=[{"coherence": right_coherence,
+                                            "direction": 0,
+                                            "direction_variance": 0},
+                                            {"coherence": left_coherence,
+                                            "direction": 180,
+                                            "direction_variance": 0}],
+                                lifespan=config.LIFESPAN,
+                                lifespan_variance=config.LIFESPAN_VAR,
+                                speed=s(config.SPEED))
+                border.update(center = md.center, size = (md.width*1.2, md.height*1.2), color = (.55,.55,.55,1))
+                telescope.update(center = md.center, size = (md.width*1.1, md.height*1.1), color = (.35, .35, .35, 1.0))
+            with UntilDone():
+                # Collect key response
+                Wait(until=md.appear_time)
+                if config.EEG:
+                    pulse_fn = LSLPush(server=pulse_server,
+                                    val=Ref.getitem(config.EEG_CODES,
+                                                        "code"))
+                    Log(name="RDM_PULSES",
+                        start_time=pulse_fn.push_time)
+                    self.eeg_pulse_time = pulse_fn.push_time
 
-    # bring the cross back
-    cross.update(color=config.CROSS_COLOR)
+                gr = GetResponse(correct_resp=correct_resp,
+                            base_time=md.appear_time['time'],
+                            duration=config.RESPONSE_DURATION,
+                            keys=config.RESP_KEYS)
+            self.pressed = gr.pressed
+            self.press_time = gr.press_time
+            self.rt = gr.rt
+            self.correct = gr.correct
+            # give feedback
+            with If(self.pressed == correct_resp):
+                # They got it right
+                Label(text=u"\u2713", color='green', duration=config.FEEDBACK_TIME,
+                    font_size=s(config.FEEDBACK_FONT_SIZE),
+                    font_name='DejaVuSans.ttf')
+            with Elif(self.pressed == incorrect_resp):
+                # they got it wrong
+                Label(text=u"\u2717", color='red',
+                    font_size=s(config.FEEDBACK_FONT_SIZE),
+                    duration=config.FEEDBACK_TIME, font_name='DejaVuSans.ttf')
+            with Else():
+                # too slow
+                Label(text="Too Slow!", font_size=s(config.FEEDBACK_FONT_SIZE),
+                    duration=config.FEEDBACK_TIME*2.)
 
-    # save vars
-    self.appear_time = md.appear_time
-    self.disappear_time = md.disappear_time
-    self.refresh_rate = md.widget.refresh_rate
+        # bring the cross back
+        cross.update(color=config.CROSS_COLOR)
+
+        # save vars
+        self.appear_time = md.appear_time
+        self.disappear_time = md.disappear_time
+        self.refresh_rate = md.widget.refresh_rate

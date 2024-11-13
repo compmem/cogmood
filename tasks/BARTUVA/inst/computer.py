@@ -20,7 +20,7 @@ attention to the colors."""
 text_2 = """Here is an example of what the task looks like. In the center of
 the screen is a pump and a balloon. To the side is the bank. The amount of
 money you could earn by successfully pumping the balloon will be shown
-within the box under it. The amount of money that could be added to the bank by
+on the pump itself. The amount of money that could be added to the bank by
 collecting will be displayed within the balloon itself.
 
 You could PUMP the balloon by pressing the %s key with one hand, or you

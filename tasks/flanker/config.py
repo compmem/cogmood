@@ -1,4 +1,14 @@
-#from numpy import linspace
+from pathlib import Path
+
+# Define the base directory as the directory containing the current file
+BASE_DIR = Path(__file__).resolve().parent
+
+# Use BASE_DIR / "stim" / "fish_" to define the STIM_DIRECTORY path
+STIM_DIRECTORY = str(BASE_DIR / "stim" / "fish_")
+
+# Background image path
+BACKGROUND_IMAGE = str(BASE_DIR / "ocean_background.png")
+
 # FLANKER VARIABLES
 NUM_TRIALS = 1 # (len(evidence_conditions)-1) * 4 + 2 * num_trials
 NUM_BLOCKS = 1
@@ -9,87 +19,30 @@ RESP_KEYS = ['1', '4']
 CONT_KEY = ['1', '4']
 
 NUM_FLANKS = 2
+LAYERS = [{"condition": "=", "dir":"right", "layers":["right","left"]},{"condition":"~","dir":"right","layers":["left","right"]},{"condition": "=", "dir":"left", "layers":["left","right"]},{"condition":"~","dir":"left","layers":["right","left"]},{"condition": "+", "dir":"right", "layers":["right","right"]},{"condition":"+","dir":"left","layers":["left","left"]}]
+
+
 CONDITIONS = [
               # Mixed Easy R
-              {"stim": "__<__\n" +
-                       "_<><_\n" +
-                       "<>>><\n" +
-                       "_<><_\n" +
-                       "__<__\n",
-               "condition": "=",
-               "dir": "R"},
+              {"condition": "=",
+               "dir": "right"},
               # Mixed Hard R
-              {"stim": "__>__\n" +
-                       "_><>_\n" +
-                       "><><>\n" +
-                       "_><>_\n" +
-                       "__>__\n",
-               "condition": "~",
-               "dir": "R"},
+              { "condition": "~",
+               "dir": "right"},
               # Mixed Hard L
-              {"stim": "__<__\n" +
-                       "_<><_\n" +
-                       "<><><\n" +
-                       "_<><_\n" +
-                       "__<__\n",
-               "condition": "~",
-               "dir": "L"},
+              {"condition": "~",
+               "dir": "left"},
               # Mixed Easy L
-              {"stim": "__>__\n" +
-                       "_><>_\n" +
-                       "><<<>\n" +
-                       "_><>_\n" +
-                       "__>__\n",
-               "condition": "=",
-               "dir": "L"},
+              {"condition": "=",
+               "dir": "left"},
               # Congruent R
-              {"stim": "__>__\n" +
-                       "_>>>_\n" +
-                       ">>>>>\n" +
-                       "_>>>_\n" +
-                       "__>__\n",
-               "condition": "+",
-               "dir": "R"},
+              {"condition": "+",
+               "dir": "right"},
               # Congruent L
-              {"stim": "__<__\n" +
-                       "_<<<_\n" +
-                       "<<<<<\n" +
-                       "_<<<_\n" +
-                       "__<__\n",
-               "condition": "+",
-               "dir": "L"},
+              {"condition": "+",
+               "dir": "left"},
 
               ]
-# uNCOMMENT THIS LINE FOR EXTRA CONDITIONS
-"""CONDITIONS = CONDITIONS + [{"stim": "__>__\n" +
-                                    "_<><_\n" +
-                                    "<<><<\n" +
-                                    "_<><_\n" +
-                                    "__>__\n",
-                            "condition": "|",
-                            "dir": "R"},
-                           {"stim": "__<__\n" +
-                                    "_<<<_\n" +
-                                    ">>>>>\n" +
-                                    "_<<<_\n" +
-                                    "__<__\n",
-                            "condition": "--",
-                            "dir": "R"},
-                           {"stim": "__<__\n" +
-                                    "_><>_\n" +
-                                    ">><>>\n" +
-                                    "_><>_\n" +
-                                    "__<__\n",
-                            "condition": "|",
-                            "dir": "L"},
-                           {"stim": "__>__\n" +
-                                    "_>>>_\n" +
-                                    "<<<<<\n" +
-                                    "_>>>_\n" +
-                                    "__>__\n",
-                            "condition": "--",
-                            "dir": "L"},
-                           ]"""
 
 #EVIDENCE_CONDITIONS = [0., 45.]
 NUM_LOCS = 8
@@ -101,6 +54,9 @@ NUM_REPS = 1
 RESPONSE_DURATION = 3.
 FROM_CENTER = 300
 FEEDBACK_TIME = 0.5
+
+STIM_SIZE = 50
+PADDING = 5
 
 SKIP_SIZE = [200, 50]
 SKIP_FONT_SIZE = 25
@@ -133,15 +89,6 @@ NUM_LOCS = 8
 
 TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
-HAPPY_FONT_SIZE = 25
-HAPPY_INC_BASE = .02
-HAPPY_INC_START = .2
-HAPPY_MOD = 20.
-HAPPY_RANGE = 10
-NON_PRESS_INT = .1
-PRESS_INT = .016
-SLIDER_WIDTH = 1000
-RESP_HAPPY = ["F", "J"]
 
 TOUCH = False
 

@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
 # load all the states
-from smile.common import Log, Label, Wait, Ref, Rectangle, Func, Debug, Loop, \
-                         UntilDone, If, Else, Parallel, Subroutine, KeyPress, \
-                         UpdateWidget
+from smile.common import *
 from smile.clock import clock
 import smile.ref as ref
 
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-from .happy import HappyQuest
+from ..happy import HappyQuest
 import smile.ref as ref
 from .list_gen import gen_fblocks
 from math import log
 from .trial import Trial, GetResponse
 from .instruct import Instruct
-from . import version
+#from . import version
 
 
 def _get_score(corr_trials, num_trials, rt_trials):
@@ -29,7 +27,7 @@ def _get_score(corr_trials, num_trials, rt_trials):
 
 @Subroutine
 def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
-               happy_mid=True):
+               happy_mid=False):
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + \
@@ -40,11 +38,11 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
     res = Func(gen_fblocks, config)
     self.f_blocks = res.result
 
-    Log(name="flankerinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="flankerinfo")
+        #version=version.__version__,
+        #author=version.__author__,
+        #date_time=version.__date__,
+        #email=version.__email__)
 
     Instruct(config, lang=lang)
     Wait(2.0)
@@ -75,7 +73,11 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
     with Loop(self.f_blocks) as block:
 
         # put up the fixation cross
-        fix = Label(text='+', color=config.CROSS_COLOR,
+        with Parallel():
+            Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0] * 1.1, 
+                                                                    self.exp.screen.size[1] * 1.1),
+                        allow_stretch = True, keep_ratio = False)
+            fix = Label(text='+', color=config.CROSS_COLOR,
               font_size=s(config.CROSS_FONTSIZE))
         with UntilDone():
 
@@ -88,7 +90,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                     with Parallel():
                         Rectangle(blocking=False, color=(.35, .35, .35, 1.0),
                                   size=self.exp.screen.size)
-                        HappyQuest(config, task='FLANKER', block_num=run_num, trial_num=trial.i)
+                        HappyQuest(task='FLANKER', block_num=run_num, trial_num=trial.i)
                     self.start_happy = Func(clock.now).result
                     self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
                                                                    config.TIME_JITTER_HAPPY)
@@ -97,8 +99,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                 Wait(config.ITI, jitter=.25)
 
                 # do the trial
-                ft = Trial(config,
-                           stim=trial.current['stim'],
+                ft = Trial(config, direct = trial.current["dir"],
                            center_x=self.exp.screen.center_x + trial.current['loc_x']*s(config.FROM_CENTER),
                            center_y=self.exp.screen.center_y + trial.current['loc_y']*s(config.FROM_CENTER),
                            correct_resp=trial.current['corr_resp'],
@@ -117,7 +118,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
 
                 # log what we need
                 Log(trial.current,
-                    name='FL',
+                    name='flkr',
                     run_num=run_num,
                     appear_time=ft.appear_time,
                     disappear_time=ft.disappear_time,
@@ -131,7 +132,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                     eeg_pulse_time=ft.eeg_pulse_time)
 
     Wait(.5)
-    HappyQuest(config, task='FLANKER', block_num=run_num, trial_num=trial.i)
+    HappyQuest(task='FLANKER', block_num=run_num, trial_num=trial.i)
 
     if config.FMRI:
         self.keep_tr_checking = True
@@ -198,7 +199,7 @@ if __name__ == "__main__":
     exp = Experiment(name="FLANKERONLY",
                      background_color=((.35, .35, .35, 1.0)),
                      scale_down=True, scale_box=(1200, 900))
-    InputSubject(exp_title="Flanker")
+    # InputSubject(exp_title="Flanker")
     Wait(1.0)
     FlankerExp(config, run_num=0, lang="E",
                pulse_server=pulse_server)

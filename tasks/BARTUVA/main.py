@@ -5,14 +5,12 @@ from smile.scale import scale as s
 from smile.lsl import LSLPush
 from smile.clock import clock
 import smile.ref as ref
-from .happy import HappyQuest
+from ..happy import HappyQuest
 from .list_gen import add_air
 from .instruct import Instruct
 from .trial import BARTSub, GetResponse
 
 import os
-
-from . import version
 
 
 @Subroutine
@@ -24,7 +22,7 @@ def BartuvaExp(self,
                full_instructions=True,
                practice=False,
                pulse_server=None,
-               happy_mid=True):
+               happy_mid=False):
 
     if task_dir is not None:
         config.TASK_DIR = task_dir
@@ -41,11 +39,7 @@ def BartuvaExp(self,
     else:
         cont_key_str = "SPACEBAR"
 
-    Log(name="BARTUVAinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="BARTUVAinfo")
 
     Wait(1.)
 
@@ -116,17 +110,18 @@ def BartuvaExp(self,
         self.block_tic = 0
 
         # HAPPY STUFF
-        self.start_happy = Func(clock.now).result
-        self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
-                                                       config.TIME_JITTER_HAPPY)
+        # self.start_happy = Func(clock.now).result
+        # self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
+        #                                                config.TIME_JITTER_HAPPY)
         # with Loop(bag.current) as balloon:
         with Loop(bags) as balloon:
-            with If(happy_mid):
-                Wait(.3)
-                with Parallel():
-                    Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
-                    HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
+            # with If(happy_mid):
+            #     Wait(.3)
+            #     with Parallel():
+            #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
+            #         HappyQuest(task='BART', block_num=run_num, trial_num=balloon.i)
             Balloon = BARTSub(config,
+                              log_name='bart',
                               balloon=balloon.current,
                               balloon_id=balloon.i,
                               block=self.block_tic,
@@ -143,7 +138,7 @@ def BartuvaExp(self,
 
         self.set_number += 1
     Wait(.5)
-    HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
+    HappyQuest(task='BART', block_num=run_num, trial_num=balloon.i)
     # Press 6 to say we are done recording then show them their score.
     if config.FMRI:
         self.keep_tr_checking = True
@@ -180,7 +175,8 @@ if __name__ == "__main__":
 
     config.FLIP_BART = True
     exp = Experiment(name="BARTUVA_ONLY",
-                     background_color=((.35, .35, .35, 1.0)))
+                     background_color=((.35, .35, .35, 1.0)),
+                     scale_up = True, scale_down = True, scale_box = config.MONITOR_SIZE,)
 
     BartuvaExp(config,
                run_num=0,

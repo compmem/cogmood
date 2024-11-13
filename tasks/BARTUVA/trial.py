@@ -1,7 +1,6 @@
 ﻿from smile.common import *
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-import os
 
 
 # adding button/key press subroutine
@@ -43,6 +42,7 @@ def GetResponse(self,
 @Subroutine
 def BARTSub(self,
             config,
+            log_name,
             balloon=[],
             balloon_id=0,
             block=0,
@@ -53,9 +53,14 @@ def BARTSub(self,
             run_num=0,
             trkp_press_time=None,
             pulse_server=None):
-    BANK_IMG = os.path.join(config.TASK_DIR, "stim", "Bank.png")
-    POP_IMG = os.path.join(config.TASK_DIR, 'stim', 'Pop.png')
-
+    self.balloon_color = balloon["color"]
+    IMG_DIR = config.TASK_DIR + "/stim/"
+    BANK_IMG = IMG_DIR + "piggy_bank.png"
+    POP_IMG = IMG_DIR + 'balloon-pop.png'
+    BALLOON_IMG = IMG_DIR + Ref(str, self.balloon_color) + ".png"
+    CONFETTI_IMG = IMG_DIR + Ref(str, self.balloon_color) + "_confetti.png"
+    BACKGROUND_IMG = IMG_DIR + "landscape.png"
+    AIRPUMP_IMG = IMG_DIR + "single_p.png"
     #sets updating index from main.py
     self.set_number = set_number
 
@@ -79,58 +84,28 @@ def BARTSub(self,
 
     # Generating images,labels, and objects on screen
     with Parallel():
-
-        Nozzle = Triangle(color=balloon['color'],
-                          points=[self.exp.screen.center_x,
-                                  self.exp.screen.center_y + s(config.TRIAN_SIZE),
-                                  self.exp.screen.center_x - s(config.TRIAN_SIZE)/2.,
-                                  self.exp.screen.center_y,
-                                  self.exp.screen.center_x + s(config.TRIAN_SIZE)/2.,
-                                  self.exp.screen.center_y])
-        Balloon = Ellipse(color=balloon['color'],
-                          size=(s(self.curr_balloon_size), s(self.curr_balloon_size)),
-                          bottom=Nozzle.top-s(18))
-        Bank_outline1 = Rectangle(color=(0,0,0,0),
-                         center_x=self.exp.screen.center_x + (s(250)*pos),
-                         center_y=self.exp.screen.center_y - s(75),
-                         width=s(config.BANK_WIDTH) + s(5),
-                         height=s(config.BANK_HEIGHT) + s(5))
-        Bank = Image(source=BANK_IMG,
-                     center=Bank_outline1.center,
-                     allow_stretch=True, keep_ratio=False,
-                     width=s(config.BANK_WIDTH),
-                     height=s(config.BANK_HEIGHT))
+        Landscape = Image(source = BACKGROUND_IMG, bottom = self.exp.screen.bottom, size = (self.exp.screen.width * 1.1, self.exp.screen.height * 1.1), allow_stretch = True)
+        Air_pump = Image(source = AIRPUMP_IMG, bottom = self.exp.screen.bottom + s(75), height = s(config.AIRPUMP_HEIGHT), 
+                        width = s(config.AIRPUMP_WIDTH), center_x = (self.exp.screen.center_x - s(150)), allow_stretch = True)
+        Balloon = Image(source = BALLOON_IMG, size = (s(self.curr_balloon_size), s(self.curr_balloon_size)), allow_stretch = True, bottom = Air_pump.top - s(5), center_x = Air_pump.center_x - s(5))
+        Bank = Image(source= BANK_IMG, size =(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch = True, left = Air_pump.right - s(25), top = Balloon.top - s(50))
         Gtotal = Label(text=Ref('${:0,.2f}'.format, self.grand_total),
                       font_size=s(config.TOTAL_FONT_SIZE),
-                      center=Bank.center)
-        Air_line = Rectangle(color='white',
-                             center_x=self.exp.screen.center_x,
-                             top=Nozzle.bottom + s(25),
-                             width=s(config.NOZZLE_WIDTH),
-                             height=s(config.NOZZLE_HEIGHT))
-        Air_pump_outline = Rectangle(color='white',
-                             center_x=self.exp.screen.center_x,
-                             top=Air_line.bottom,
-                             width=s(config.AIR_PUMP_WIDTH) + s(5),
-                             height=s(config.AIR_PUMP_HEIGHT) + s(5))
-        Air_pump = Rectangle(color='black',
-                             center=Air_pump_outline.center,
-                             width=s(config.AIR_PUMP_WIDTH),
-                             height=s(config.AIR_PUMP_HEIGHT))
+                      center = (Bank.center_x + s(10), Bank.center_y - s(50)))
         Total = Label(text=Ref('${:0,.2f}'.format, self.total),
                       font_size=s(config.TOTAL_FONT_SIZE),
                       color='black',
                       center=Balloon.center)
         LChoice_label = Label(text='%s to pump'%config.KEY_TEXT[0],
                               font_size=s(config.TRIAL_FONT_SIZE),
-                              color='white', halign="center",
-                              top=Air_pump_outline.bottom - s(10),
+                              color='black', halign="center",
+                              bottom =Air_pump.bottom, center_x = Air_pump.center_x
                               )
         RChoice_label = Label(text='%s to collect'%config.KEY_TEXT[1],
                           font_size=s(config.TRIAL_FONT_SIZE),
-                          color='white', halign="center",
-                          center_x=Bank_outline1.center_x,
-                          top=Bank_outline1.bottom - s(1))
+                          color='black', halign="center",
+                          center_x=Bank.center_x,
+                          top=Bank.bottom - s(1))
 
 
     with UntilDone():
@@ -186,23 +161,26 @@ def BARTSub(self,
                             self.total = 0
                             # Wait(0.4, jitter=0.3)
                             with Serial():
-                                Reward_label.slide(duration=config.REWARD_SLIDE_DURATION,
-                                                   center=Balloon.center,
-                                                   color=(0,0,0,0))
+                                Reward_label.update(text = "")
                                 with Parallel():
                                     Total.slide(duration=0.5,
                                                 center_y=Balloon.center_y)
                                     Balloon.slide(duration=0.5,
                                                   size=(s(config.BALLOON_EXPLODE_SIZE[0]),
-                                                        s(config.BALLOON_EXPLODE_SIZE[1])),
-                                                  color=(0,0,0,0))
-                                with Parallel():
-                                    Pop_image = Image(source=POP_IMG,
-                                                      duration=config.POP_ANIMATION_DURATION,
-                                                      size=(s(config.POP_SIZE[0]), s(config.POP_SIZE[1])),
-                                                      center=Balloon.center)
+                                                        s(config.BALLOON_EXPLODE_SIZE[1])))
+                                    Confetti = Image(source = CONFETTI_IMG, center = Balloon.center)
+                                # with Parallel():
+                                #     Pop_image = Image(source=POP_IMG,
+                                #                       duration=config.POP_ANIMATION_DURATION,
+                                #                       size=(s(config.POP_SIZE[0]), s(config.POP_SIZE[1])),
+                                #                       center=Balloon.center)
                                     Total.update(color=(0,0,0,0))
-                                    Nozzle.update(color=(0,0,0,0))
+                                with UntilDone():
+                                    with Serial():
+                                        Balloon.update(source = POP_IMG, duration = config.POP_ANIMATION_DURATION)
+                                        Confetti.slide(height = s(config.CONFETTI_EXPAND_HEIGHT), width = s(config.CONFETTI_EXPAND_WIDTH), 
+                                           duration = config.CONFETTI_EXPAND_DUR, allow_stretch = True)
+                                        Confetti.slide(bottom = self.exp.screen.bottom, duration = config.CONFETTI_FALL_DUR)
 
                                 Gtotal.update(text=Ref('${:0,.2f}'.format, self.grand_total))
                                 self.pop_status='popped'
@@ -222,9 +200,9 @@ def BARTSub(self,
                                                            color=(0,0,0,0))
                                         with Parallel():
                                             Balloon.slide(duration=config.BALLOON_GROWTH_DURATION,
-                                                          size=(s(self.curr_balloon_size),s(self.curr_balloon_size)),
+                                                          size=(s(self.curr_balloon_size),s(self.curr_balloon_size)))
                                                           #center_y=Balloon.center_y + s(config.INC_BALLOON_SIZE))
-                                                          )
+                                                        
                                             Total.slide(duration=config.BALLOON_GROWTH_DURATION,
                                                         center_y=Balloon.center_y
                                                         )
@@ -232,7 +210,7 @@ def BARTSub(self,
                                         Total.update(text=Ref('${:0,.2f}'.format, self.total))
                                         Invisible_box = Rectangle(color=(0,0,0,0),
                                                              center_x=self.exp.screen.center_x,
-                                                             top=Nozzle.bottom,
+                                                             top=Air_pump.center_y,
                                                              width=s(1),
                                                              height=s(1),
                                                              duration=0.1)
@@ -256,13 +234,13 @@ def BARTSub(self,
                             Total.update(text=Ref('${:0,.2f}'.format, self.total))
 
                             with Serial():
-                                Nozzle.update(color=(0,0,0,0))
+                                #Nozzle.update(color=(0,0,0,0))
 
                                 with Parallel():
                                     Total.slide(duration=config.COLLECT_DURATION,
-                                                center=Bank.center)
+                                                center = (Bank.center_x + s(10), Bank.center_y - s(50)))
                                     Balloon.slide(duration=config.COLLECT_DURATION,
-                                                  center=Bank.center)
+                                                  center = (Bank.center_x + s(10), Bank.center_y - s(50)))
 
                                 Balloon.update(color=(0,0,0,0))
                                 Total.update(color=(0,0,0,0))
@@ -273,7 +251,7 @@ def BARTSub(self,
                         self.pressed_key = False
 
                 #Logging trial info
-                Log(name="OBART",
+                Log(name=log_name,
                     subject=self.subject,
                     run_num=run_num,
                     balloon_number_session=balloon_number_session,

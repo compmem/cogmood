@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
+import platform
 
+CURRENT_OS: str = platform.system()
+API_BASE_URL: str = 'http://localhost:5000'
+RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+# WORKER_ID_PLACEHOLDER_VALUE is the placeholder value assigned to the WorkerID field
+# in the executables when we build them. It should be replaced by actual ID when
+# the executable is prepared for distribution.
+WORKER_ID_PLACEHOLDER_VALUE = '"------------------------".---------------------------'
 EXP_NAME = "SUPREMEMOOD"
 
 BACKGROUND_COLOR = (.35, .35, .35, 1.0)
@@ -19,17 +28,12 @@ RECOUTHEIGHT = 800
 DISPLAY_FONT = 45
 BUTTON_WH = 200
 
-TASKS = [[['cab', True], ['flkr', True], ['rdm', True], ['bart', True]],
-         [['cab', False], ['flkr', False], ['rdm', False], ['bart', False]],]
-
-#TASKS = [[['rdmf', False], ['bart', False], ['barta', False],['barts', False], ]]
 NUM_REPS = 1
 FMRI_TASKS = [['cab', 'flkr', 'rdm', 'bart'],
               ['cab', 'flkr', 'rdm'],
               ['cab', 'flkr', 'rdm']]
 FMRI_REPS = 1
 SHUFFLE_TASKS = True
-HAPPY_SPEED = .5
 RESP_KEYS = ['F', 'J']
 CONT_KEY = ['SPACEBAR']
 FMRI_TR = ['T']
@@ -55,16 +59,6 @@ MMIDB = os.path.join("assets", "buttons", "pressed_STW.png")
 
 TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
-HAPPY_FONT_SIZE = 25
-HAPPY_INC_BASE = .02
-HAPPY_INC_START = .2
-HAPPY_MOD = 20.
-HAPPY_RANGE = 10
-NON_PRESS_INT = .1
-PRESS_INT = .016
-SLIDER_WIDTH = 1000
-RESP_HAPPY = ["F", "J"]
-
 
 INST_FONT = 25
 INST_TEXT = "You will perform 4 tasks in this experiment, and some of the tasks more than once. Instructions will be displayed prior to each task. Please read the instructions for each task very carefully.\n\nFor each task, you will make responses by pressing the %s button with one hand, and the %s button with your other hand.\n\nSet aside 40 minutes to an hour. You are able to take short breaks between each task.\n\nOnce the experiment fully begins, you may end the experiment by pressing the escape key. The window will close, and your data up till that point will be sent to us and your payment will be forfeit. Press any key to proceed."

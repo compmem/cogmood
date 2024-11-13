@@ -4,7 +4,7 @@ This script presents stimuli for the associative binding task.
 The task presents pairs of objects to participants, who must decide whether
 each pair is "new" (i.e. not presented previously), or "old."
 
-Each pair is presented 3 times (an initial presention plus 2 repetitions), and
+Each pair is presented 3 times (an initial presentation plus 2 repetitions), and
 recombined with other pairs once.
 
 The order in which these events occur differs by "strength" condition.
@@ -17,14 +17,14 @@ The order in which these events occur differs by "strength" condition.
 
 # import needed libraries
 from smile.common import Log, Label, Wait, Ref, Rectangle, Func, Debug, Loop, \
-                         UntilDone, If, Else, Parallel, Subroutine, KeyPress, \
-                         Image, Meanwhile
+    UntilDone, If, Else, Parallel, Subroutine, KeyPress, \
+    Image, Meanwhile
 from smile.scale import scale as s
 from smile.lsl import LSLPush
 from smile.clock import clock
 import smile.ref as ref
 
-from .happy import HappyQuest
+from ..happy import HappyQuest
 
 from math import log
 import os
@@ -32,65 +32,25 @@ from .list_gen import make_trials
 from .instruct import Instruct
 from .GetResponse import GetResponse
 
-from . import version
-
-
-# make_metric function takes subject's accuracy and RTs and converts them to a
-# metric score ranging from 0 (worst performance) to 100 (best performance)
-def make_metric(config, acc_list, rt_list):
-    # define the minimum and maximum allowed RTs (in s)
-    min_rt = config.MIN_RT
-    max_rt = config.MAX_RT
-
-    # loop through trials, and only include ones with
-    # RT within acceptable range
-    rts = []
-    accs = []
-    for i, rt in enumerate(rt_list):
-        rts.append(rt)
-        if (rt > min_rt):
-            accs.append(acc_list[i])
-        else:
-            accs.append(False)
-    # number of trials taken into account for metric
-    num_trials = len(accs)
-
-    # accuracy metric: distance of average accuracy from chance (50%), such
-    # that perfect accuracy results in avec = 1.
-    avec = ((sum(accs)/float(num_trials))-.5)/.5
-
-    # RT metric: average distance from min and max RT, such that fastest
-    # response on every trial results in rvec = 1.
-    rvec = (sum([(log(max_rt + 1.) - log(r + 1.)) /
-                 ((log(max_rt + 1.) - log(min_rt + 1.)))
-                 for r in rts])/num_trials)
-
-    # combine accuracy and RT metrics into single score
-    score = int(avec * rvec * 100)
-
-    return score
-
 
 @Subroutine
 def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
-               conditions=None, happy_mid=True):
-    TRIAL_REMIND_TEXT_L = "%s <-- %s" %(config.RESP_KY[0], list(config.RESP_KEYS.keys())[list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
-    TRIAL_REMIND_TEXT_R = "%s --> %s" %(list(config.RESP_KEYS.keys())[list(config.RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
+               conditions=None, happy_mid=False):
+    TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
+                                         list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
+    TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(config.RESP_KEYS.keys())[list(
+        config.RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
     if task_dir is not None:
         config.TASK_DIR = task_dir
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + \
-                       str(config.CONT_KEY[-1])
+            str(config.CONT_KEY[-1])
     else:
         cont_key_str = str(config.CONT_KEY[0])
 
-    Log(name="AssBindinfo",
-        version=version.__version__,
-        author=version.__author__,
-        date_time=version.__date__,
-        email=version.__email__)
+    Log(name="AssBindinfo")
 
     # get needed variables from config file
     num_attempts = config.NUM_ATTEMPTS
@@ -143,51 +103,76 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.accs = []
     self.rts = []
     with Parallel():
+        background_rect = Rectangle(color = "white",size=(self.exp.screen.width * 1.1,
+                                 self.exp.screen.height * 1.1))
+        background = Image(source=Ref(os.path.join, config.TASK_DIR, 'card_table.png'),
+                           size=(self.exp.screen.width,
+                                 self.exp.screen.height),
+                           allow_stretch=True,
+                           keep_ratio=False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
-                      font_size=s(config.INST_TITLE_FONT_SIZE),
-                      bottom = self.exp.screen.bottom + s(200),
-                      center_x = self.exp.screen.center_x - s(50))
+                        font_size=s(config.INST_TITLE_FONT_SIZE),
+                        bottom=self.exp.screen.bottom + s(200),
+                        center_x=self.exp.screen.center_x - s(50),
+                        color="black")
         old_rem = Label(text=TRIAL_REMIND_TEXT_R,  # 'H = Old',
-                      font_size=s(config.INST_TITLE_FONT_SIZE),
-                      top=new_rem.bottom,
-                      center_x=self.exp.screen.center_x + s(50))
+                        font_size=s(config.INST_TITLE_FONT_SIZE),
+                        top=new_rem.bottom,
+                        center_x=self.exp.screen.center_x + s(50),
+                        color="black")
     with UntilDone():
         # loop through trials
         with Loop(trials) as trial:
-            with If((Func(clock.now).result >= self.end_happy) & (happy_mid)):
-                Wait(.3)
-                with Parallel():
-                    Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
-                    HappyQuest(config, task='CAB', block_num=block, trial_num=trial.i)
-                self.start_happy = Func(clock.now).result
-                self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
-                                                               config.TIME_JITTER_HAPPY)
+            # with If((Func(clock.now).result >= self.end_happy) & (happy_mid)):
+            #     Wait(.3)
+            #     with Parallel():
+            #         Rectangle(blocking=False, color=(.35, .35, .35, 1.0), size=self.exp.screen.size)
+            #         HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
+            #     self.start_happy = Func(clock.now).result
+            #     self.end_happy = self.start_happy + ref.jitter(config.TIME_BETWEEN_HAPPY,
+            #                                                    config.TIME_JITTER_HAPPY)
             # delay until next trial based on a base time plus a jitter
             Wait(config.ISI_BASE, jitter=config.ISI_JIT)
 
             with Parallel():
+                # adding in a border around the image to make them look like cards (more gamelike)
+                left_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
+                                    width=(s(config.IMG_WIDTH) + s(100)),
+                                    height=(s(config.IMG_HEIGHT) + s(100)),
+                                    blocking=False,
+                                    allow_stretch=True,
+                                    right=self.exp.screen.center_x - s(25),
+                                    keep_ratio=False)
+                right_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
+                                     width=(s(config.IMG_WIDTH) + s(100)),
+                                     height=(s(config.IMG_HEIGHT) + s(100)),
+                                     blocking=False,
+                                     allow_stretch=True,
+                                     left=left_border.right + s(25),
+                                     keep_ratio=False)
                 # initialize a frame around the images
                 # (which is invisible until response)
-                resp_rect = Rectangle(size=(s(2*config.IMG_WIDTH +
-                                              config.RESP_FRAME_SIZE),
-                                            s(config.IMG_HEIGHT +
-                                              config.RESP_FRAME_SIZE)),
+                self.width = right_border.right - left_border.left
+                self.height = right_border.top - right_border.bottom
+                resp_rect = Rectangle(width = self.width, center_x = self.exp.screen.center_x - s(25/2),
+                                      top = left_border.top, height = self.height,
                                       color=(.35, .35, .35, 0.0),
                                       duration=config.STIM_PRES_TIME)
+
                 # present pair of images
-                #left_image = Image(source=trial.current['img_L'],
+                # left_image = Image(source=trial.current['img_L'],
                 Debug(L=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
                       R=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']))
                 left_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
                                    duration=config.STIM_PRES_TIME,
-                                   right=self.exp.screen.center_x,
+                                   center=left_border.center,
                                    width=s(config.IMG_WIDTH),
                                    height=s(config.IMG_HEIGHT),
                                    allow_stretch=True, keep_ratio=False)
-                #right_image = Image(source=trial.current['img_R'],
+                # right_image = Image(source=trial.current['img_R'],
                 right_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']),
                                     duration=config.STIM_PRES_TIME,
-                                    left=left_image.right,
+                                    center=right_border.center,
                                     width=s(config.IMG_WIDTH),
                                     height=s(config.IMG_HEIGHT),
                                     allow_stretch=True, keep_ratio=False)
@@ -197,7 +182,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                 if config.EEG:
                     pulse_fn = LSLPush(server=pulse_server,
                                        val=Ref.getitem(config.EEG_CODES,
-                                                        trial.current['cond_trial']))
+                                                       trial.current['cond_trial']))
                     Log(name="CAB_PULSES",
                         start_time=pulse_fn.push_time)
                     self.eeg_pulse_time = pulse_fn.push_time
@@ -220,10 +205,9 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                     self.accs += [False]
                     self.rts += [config.MAX_RT]
 
-
             # log data
             Log(trial.current,
-                name="cont_ass_bind",
+                name="cab",
                 appearL=left_image.appear_time,
                 appearR=right_image.appear_time,
                 disappearL=left_image.disappear_time,
@@ -237,10 +221,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                 fmri_tr_time=self.trkp_press_time,
                 eeg_pulse_time=self.eeg_pulse_time)
     Wait(.5)
-    HappyQuest(config, task='CAB', block_num=block, trial_num=trial.i)
-
-    # calculate this block's score
-    self.this_score = Func(make_metric, config, self.accs, self.rts)
+    HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
 
     # Press 6 to say we are done recording then show them their score.
     if config.FMRI:
@@ -257,29 +238,6 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
             KeyPress(keys=config.FMRI_TECH_KEYS)
 
         Wait(1.0)
-
-    """# present this block's score to the participant
-    Wait(.5)
-    with Parallel():
-        Rectangle(width=s(config.WIDTH_SCORE_RECT),
-                  height=s(config.HEIGHT_SCORE_RECT),
-                  color=[144./255., 175./255., 197./255.])
-        pbfbC = Label(text=Ref(str, self.this_score.result)+" Points!",
-                      font_size=s(config.FINAL_FONT_SIZE))
-        Label(text="Your score for this block:",
-              font_size=s(config.FINAL_FONT_SIZE), bottom=pbfbC.top + s(10.))
-        if config.TOUCH:
-            Label(text="Press the screen to continue.",
-                  font_size=s(config.FINAL_FONT_SIZE),
-                  top=pbfbC.bottom - s(10.))
-        else:
-            Label(text="Press %s to continue." % cont_key_str,
-                  font_size=s(config.FINAL_FONT_SIZE),
-                  top=pbfbC.bottom - s(10.))
-
-    with UntilDone():
-        Wait(1.5)
-        GetResponse(keys=config.CONT_KEY)"""
 
 
 if __name__ == "__main__":
@@ -309,7 +267,7 @@ if __name__ == "__main__":
     exp = Experiment(background_color=(.35, .35, .35, 1.0),
                      name="CAB", scale_down=True, scale_box=(1200, 900))
 
-    InputSubject(exp_title="Associative Binding")
+    # InputSubject(exp_title="Associative Binding")
     with Loop(3) as lp:
         exp.rem_only = (lp.i != 0)
         AssBindExp(config,

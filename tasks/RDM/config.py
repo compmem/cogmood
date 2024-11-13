@@ -1,4 +1,12 @@
-# config
+
+from pathlib import Path
+
+# Define the base directory as the directory containing the current file
+BASE_DIR = Path(__file__).resolve().parent
+
+# Background image path
+BACKGROUND_IMAGE = str(BASE_DIR / "NIGHT_SKY.png")
+
 NUM_BLOCKS = 1
 NUM_DOTS = 100
 
@@ -58,12 +66,3 @@ INST_SPEED = 200.0
 
 TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
-HAPPY_FONT_SIZE = 25
-HAPPY_INC_BASE = .02
-HAPPY_INC_START = .2
-HAPPY_MOD = 20.
-HAPPY_RANGE = 10
-NON_PRESS_INT = .1
-PRESS_INT = .016
-SLIDER_WIDTH = 1000
-RESP_HAPPY = ["F", "J"]

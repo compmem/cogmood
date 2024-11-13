@@ -1,10 +1,7 @@
 #listgen
-# import numpy as np
 import random
 from decimal import *
-import pickle
-from glob import glob
-import os
+import config
 
 
 def range_shuffle(ranges):
@@ -42,26 +39,12 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
     g_code=[] #g_code: it really is that cool
     bag_ID=0 #counter used to identify what bag a balloon is in
     balloon_counter = 0     #A counter used to mark the balloon's number out of the total number of balloons
-    # colors = ['red','blue','green','purple']   #colors for the different balloon types
-    # colors = [[141,211,199,1.],[255,255,179,1.],[190,186,218,1.],[251,128,114,1.],
-    #           [128,177,211,1.],[253,180,98,1.],[179,222,105,1.],[252,205,229,1.]]
-    colors = [[0.6509803921568628, 0.807843137254902, 0.8901960784313725, 1.0],
-              [0.12156862745098039, 0.47058823529411764, 0.7058823529411765, 1.0],
-              [0.6980392156862745, 0.8745098039215686, 0.5411764705882353, 1.0],
-              [0.2, 0.6274509803921569, 0.17254901960784313, 1.0],
-              [0.984313725490196, 0.6039215686274509, 0.6, 1.0],
-              [0.8901960784313725, 0.10196078431372549, 0.10980392156862745, 1.0],
-              [0.9921568627450981, 0.7490196078431373, 0.43529411764705883, 1.0],
-              [1.0, 0.4980392156862745, 0.0, 1.0],
-              [0.792156862745098, 0.6980392156862745, 0.8392156862745098, 1.0],
-              [0.41568627450980394, 0.23921568627450981, 0.6039215686274509, 1.0],
-              [1.0, 1.0, 0.6, 1.0],
-              [0.6941176470588235, 0.34901960784313724, 0.1568627450980392, 1.0]]
+  
+    colors = ["red", "orange", "yellow", "green", "lime", "mustard", "salmon", "purple", "lavender", "navy", "blue", "maroon"]
     random.shuffle(colors)
     if practice == True:
-        colors = [[0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 1.0],
-                  [0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 1.0],
-                  [0.8509803921568627, 0.8509803921568627, 0.8509803921568627, 1.0]]
+        colors = ["practice"]
+
     for balloon_set in x:
         limits=balloon_set['range']
         number_of_balloons=balloon_set['number_of_balloons']
@@ -107,14 +90,16 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
         random.shuffle(g_code)
     else:
         pass
-    if practice == True:
-        pass
-    else:
-        try:
-            pickles = glob(subject_directory+'/obart_pickles')
-            session_num = str(len(pickles))
-            pickle.dump(g_code,open(subject_directory+'/obart_pickles/bags_session_'+session_num+'.p','wb'))
-        except:
-            os.makedirs(subject_directory+'/obart_pickles')
-            pickle.dump(g_code,open(subject_directory+'/obart_pickles/bags_session_0.p','wb'))
+
     return g_code
+
+# x = add_air(total_number_of_balloons=config.NUM_BALLOONS,
+#                   num_ranges=len(config.BALLOON_SETUP),
+#                   balloon_setup=config.BALLOON_SETUP,
+#                   randomize=config.RANDOMIZE_BALLOON_NUM,
+#                   reward_low=config.REWARD_LOW,
+#                   reward_high=config.REWARD_HIGH,
+#                   subject_directory="1",
+#                   practice=False,
+#                   shuffle_bags=config.SHUFFLE_BAGS)
+# print(x)

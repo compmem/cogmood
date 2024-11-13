@@ -63,7 +63,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                     img2 = Image(source=config.INST2_IMG_PATH,
                                                  bottom=(self.exp.screen.height/2.) + s(50),
                                                  keep_ratio=True, allow_stretch=True,
-                                                 height=s(250))
+                                                 height=s(400))
                                     lbl2 = Label(text=txt%(config.KEY_TEXT[0],
                                                            config.KEY_TEXT[-1]),
                                                  halign='left', top=img2.bottom-s(10),
@@ -125,6 +125,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                         # with Loop(bag.current) as balloon:
                         with Loop(bags) as balloon:
                             Balloon = BARTSub(config,
+                                              log_name='bart_practice',
                                               balloon=balloon.current,
                                               block=self.block_tic,
                                               set_number=self.set_number,
