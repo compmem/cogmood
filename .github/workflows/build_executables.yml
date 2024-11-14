@@ -105,14 +105,14 @@ jobs:
         - name: Build executable with PyInstaller
           run: |
             export PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/bin:$PATH
-            export PYTHONPATH=$PWD/python_packages:$PYTHONPATH
+            export PYTHONPATH=$PWD/python_packages:$PWD/smile:$PYTHONPATH
             cd package
             python3 -m PyInstaller --noconfirm cogmood_mac.spec
             cd ..
             mkdir SUPREME
             cp -r package/dist/SUPREME.app SUPREME/
             create-dmg --volname SUPREME SUPREME.dmg SUPREME
-            
+
         - name: Upload macOS executable
           uses: actions/upload-artifact@v4
           with:
