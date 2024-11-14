@@ -53,9 +53,9 @@ jobs:
                 export KIVY_GL_BACKEND=angle_sdl2
                 python -m PyInstaller cogmood_windows.spec
             - name: save exe
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
-                name: SUPREME
+                name: SUPREME.exe
                 path: package/dist/SUPREME.exe
 
 
@@ -101,8 +101,6 @@ jobs:
             python3 -m pip install --upgrade pip
             python3 -m pip install --target $PWD/python_packages --only-binary=:all: --platform macosx_10_13_universal2 -r requirements.txt
             export PYTHONPATH=$PWD/python_packages:$PYTHONPATH
-            
-            
 
         - name: Build executable with PyInstaller
           run: |
@@ -114,5 +112,5 @@ jobs:
         - name: Upload macOS executable
           uses: actions/upload-artifact@v4
           with:
-            name: SUPREME
-            path: package/dist/SUPREME
+            name: SUPREME.app
+            path: package/dist/SUPREME.app
