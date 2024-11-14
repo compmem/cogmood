@@ -10,7 +10,7 @@ data = [
 
 a = Analysis(
     ['../main.py'],
-    pathex=[''],
+    pathex=['../smile', '../python_packages'],
     binaries=[],
     datas=data,
     hiddenimports=[],
