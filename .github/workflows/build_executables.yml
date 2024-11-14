@@ -55,7 +55,7 @@ jobs:
             - name: save exe
               uses: actions/upload-artifact@v4
               with:
-                name: SUPREME.exe
+                name: SUPREME_win
                 path: package/dist/SUPREME.exe
 
 
@@ -76,7 +76,7 @@ jobs:
         - name: Install Homebrew dependencies
           run: |
             brew update
-            brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf
+            brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf create-dmg
 
         - name: Set up Python
           uses: actions/setup-python@v5
@@ -108,9 +108,13 @@ jobs:
             export PYTHONPATH=$PWD/python_packages:$PYTHONPATH
             cd package
             python3 -m PyInstaller --noconfirm cogmood_mac.spec
+            mkdir SUPREME
+            cp -r package/dist/SUPREME.app SUPREME/
+            create-dmg --volname SUPREME SUPREME.dmg SUPREME
+            
 
         - name: Upload macOS executable
           uses: actions/upload-artifact@v4
           with:
-            name: SUPREME.app
-            path: package/dist/SUPREME.app
+            name: SUPREME_mac
+            path: SUPREME.dmg
