@@ -11,7 +11,7 @@ data = [
 ]
 
 a = Analysis(['..\\main.py'],
-             pathex=[''],
+             pathex=['..\\smile'],
              binaries=[],
              datas=data,
              hiddenimports=[],

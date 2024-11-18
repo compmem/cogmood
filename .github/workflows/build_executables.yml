@@ -49,7 +49,9 @@ jobs:
             - name: package cogmood
               shell: bash -l {0}
               run: |
-                cd package 
+                export PYTHONPATH=$PWD/smile:$PYTHONPATH
+                cd package
+                echo $PATH
                 export KIVY_GL_BACKEND=angle_sdl2
                 python -m PyInstaller cogmood_windows.spec
             - name: save exe
