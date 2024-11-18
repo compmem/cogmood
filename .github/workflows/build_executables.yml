@@ -39,7 +39,7 @@ jobs:
               run: conda install -y kivy=2.3 pyinstaller=4.10 requests glfw
             - name: pip installs
               shell: bash -l {0}
-              run: pip install kivy-deps.sdl2 kivy-deps.glew pyo
+              run: pip install kivy-deps.sdl2==0.7.0 kivy-deps.glew pyo kivy-deps.angle==0.4.0 pyenchant
             - name: install smile
               shell: bash -l {0}
               run: pip install -e smile
