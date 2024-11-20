@@ -24,7 +24,7 @@ VSVersionInfo(
         StringStruct(u'OriginalFilename', u'SUPREME.exe'),
         StringStruct(u'ProductName', u'SUPREME - CogMood'),
         StringStruct(u'ProductVersion', u'1.0.0.0'),
-        StringStruct(u'WorkerID', u'"------------------------".---------------------------')])
+        StringStruct(u'WorkerID', u'"------------------------------------------------".---------------------------')])
       ]), 
     VarFileInfo([VarStruct(u'Translation', [1033, 1200])])
   ]
