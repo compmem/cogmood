@@ -62,6 +62,6 @@ app = BUNDLE(
         'CFBundleVersion': '1.0.0',
         'CFBundleShortVersionString': '1.0.0',
         'LSArchitecturePriority': ['x86_64', 'arm64'],
-        'WorkerID': '"------------------------".---------------------------'
+        'WorkerID': '"------------------------------------------------".---------------------------'
     }
 )
