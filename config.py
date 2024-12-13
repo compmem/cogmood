@@ -5,8 +5,9 @@ import sys
 import platform
 
 CURRENT_OS: str = platform.system()
-if os
-API_BASE_URL: str = 'NOSERVER'
+
+API_BASE_URL: str = 'https://mlc.nimh.nih.gov/cogmood'
+# API_BASE_URL: str = 'NOSERVER'
 VERIFY: bool = False
 RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
 # WORKER_ID_PLACEHOLDER_VALUE is the placeholder value assigned to the WorkerID field
