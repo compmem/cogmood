@@ -6,8 +6,12 @@ import platform
 
 CURRENT_OS: str = platform.system()
 API_BASE_URL: str = 'https://mlc.nimh.nih.gov/cogmood'
+#API_BASE_URL='http://127.0.0.1:5000'
+API_SALT: str = 'SALT'
 VERIFY: bool = False
 RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+# WORKER_ID_SOURCE valid values = ['USER', 'EXECUTABLE']
+WORKER_ID_SOURCE = "USER"
 # WORKER_ID_PLACEHOLDER_VALUE is the placeholder value assigned to the WorkerID field
 # in the executables when we build them. It should be replaced by actual ID when
 # the executable is prepared for distribution.

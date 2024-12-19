@@ -4,9 +4,9 @@ import sys
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, \
     Label, Loop, If, Elif, Else, KeyPress, Ref, \
-    Parallel, Slider, Serial, UpdateWidget, Debug, Meanwhile
-from smile.clock import clock
+    Parallel, Slider, Serial, UpdateWidget, Debug, Meanwhile, While
 from smile.scale import scale as s
+from custom_startup import InputSubject
 # from android.permissions import request_permissions, Permission
 # request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
 from kivy.resources import resource_add_path
@@ -64,22 +64,35 @@ if CogBatt_config.RUNNING_FROM_EXECUTABLE:
     WRK_DIR = sys._MEIPASS
     resource_add_path(WRK_DIR)
 
-retrieved_worker_id = retrieve_worker_id()
-
-tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
-number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
-
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
-                 scale_down=True, scale_box=(1000, 1000), debug=False,
+                 scale_down=True, scale_box=(1000, 1000), debug=True,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
+exp._code = ''
+if CogBatt_config.WORKER_ID_SOURCE == 'EXECUTABLE':
+    retrieved_worker_id = retrieve_worker_id()
+    tasks_from_api = get_blocks_to_run(retrieved_worker_id['content'])
+    number_of_tasks = 0 if tasks_from_api['status'] == 'error' else len(tasks_from_api['content'])
 
-exp.tasks_from_api = tasks_from_api
-exp.worker_id_dict = retrieved_worker_id
+    exp.tasks_from_api = tasks_from_api
+    exp.worker_id_dict = retrieved_worker_id
+elif CogBatt_config.WORKER_ID_SOURCE == 'USER':
+    InputSubject()
+    tasks_from_api = Func(get_blocks_to_run, Ref.object(exp)._subject, Ref.object(exp).get_var('_code')).result
+    with If(tasks_from_api['status'] == 'error'):
+        number_of_tasks = 0
+    with Else():
+        number_of_tasks = tasks_from_api['content'].__len__()
+    exp.tasks_from_api = tasks_from_api
+    exp.worker_id_dict = {"status": "success", "content": Ref.object(exp)._subject}
+else:
+    raise NotImplementedError
+
+
 
 with Parallel():
     with Serial(blocking=False):
@@ -89,8 +102,13 @@ with Parallel():
             author=version.__author__,
             date_time=version.__date__,
             email=version.__email__)
-
         Wait(.5)
+        with If(Ref.object(exp).get_var('code_invalid')):
+            error_screen(error='Invalid task code: ' + Ref(str, exp._code),
+                         message='You entered an incorrect task code, please double check the code '
+                                 'listed on the website and try again. If it still does not work '
+                                 'please contact Dylan Nielson at Dylan.Nielson@nih.gov.'
+                         )
 
         with If(CogBatt_config.RUNNING_FROM_EXECUTABLE):
             # Handles case where retrieval of worker id fails
@@ -196,7 +214,8 @@ with Parallel():
                                                 block_name=exp.task_name + '_' + Ref(str, exp.block_number),
                                                 data_directory=Ref.object(
                                                     exp)._session_dir,
-                                                slog_file_name='log_'+exp.task_name+'_'+'0.slog')
+                                                slog_file_name='log_'+exp.task_name+'_'+'0.slog',
+                                                code=Ref.object(exp).get_var('_code'))
                     Wait(3)
 
             # Error screen for failed upload
