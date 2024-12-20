@@ -4,7 +4,7 @@ import zipfile
 import requests
 import logging
 import time
-from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY
+from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY, WORKER_ID_SOURCE
 from hashlib import blake2b
 from io import BytesIO
 from pathlib import Path
@@ -17,18 +17,22 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def get_blocks_to_run(worker_id: str) -> list[str] | dict[str, str]:
+def get_blocks_to_run(worker_id: str, code: str | None = None) -> list[str] | dict[str, str]:
     """
     Sends a GET request to retrieve the list of blocks that are yet to be run by the worker.
 
     Args:
         worker_id (str): The unique identifier for the worker whose blocks are being fetched.
+        code (str): Optional verifcation code if worker_id_source is user
 
     Returns:
         dict: A dictionary with 'status' as success or error, and 'content' containing either the blocks list or an error message.
     """
     url = f'{API_BASE_URL}/taskcontrol'
-    params = {'worker_id': worker_id}
+    if WORKER_ID_SOURCE == 'EXECUTABLE':
+        params = {'worker_id': worker_id}
+    elif WORKER_ID_SOURCE == 'USER':
+        params = {'worker_id': worker_id, 'code':code}
 
     try:
         response = requests.get(url, params=params, verify=VERIFY)
@@ -78,7 +82,7 @@ def hash_file(file_obj):
     return hash_blake.hexdigest()
 
 
-def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file_name: str) -> dict[str, str]:
+def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file_name: str, code: str | None = None) -> dict[str, str]:
     """
     Sends a POST request to upload a completed block along with its checksum and the associated zipped file.
     Uses the config.API_BASE_URL to build the URL.
@@ -88,6 +92,7 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
         block_name (str): The name of the block being uploaded, typically in the format "taskname_runnumber".
         data_directory (str): The directory where the slog file is located.
         slog_file_name (str): The name of the slog file.
+        code (str): Optional verifcation code if worker_id_source is user.
 
     Behavior:
         - Zips the slog file.
@@ -119,7 +124,10 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
         current_time_ms = int(time.time() * 1000)
         zip_file_name_with_timestamp = f'{block_name}_{current_time_ms}.zip'
 
-        params = {'worker_id': worker_id}
+        if WORKER_ID_SOURCE == 'EXECUTABLE':
+            params = {'worker_id': worker_id}
+        elif WORKER_ID_SOURCE == 'USER':
+            params = {'worker_id': worker_id, 'code': code}
         data = {'block_name': block_name, 'checksum': checksum}
         files = {'file': (zip_file_name_with_timestamp, zip_buffer, 'application/zip')}
 
@@ -241,6 +249,7 @@ def _read_exe_worker_id() -> dict[str, str]:
     except Exception as e:
         logging.error(f"An error occurred while reading the executable version info: {e}")
         return {"status": "error", "content": str(e)}
+
 
 
 if __name__ == "__main__":
