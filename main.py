@@ -68,7 +68,7 @@ if CogBatt_config.RUNNING_FROM_EXECUTABLE:
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
-                 scale_down=True, scale_box=(1000, 1000), debug=True,
+                 scale_down=True, scale_box=(1000, 1000), debug=False,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR)
