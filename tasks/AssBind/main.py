@@ -103,8 +103,8 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     self.accs = []
     self.rts = []
     with Parallel():
-        background_rect = Rectangle(color = "white",size=(self.exp.screen.width * 1.1,
-                                 self.exp.screen.height * 1.1))
+        # background_rect = Rectangle(color = "white",size=(self.exp.screen.width * 1.1,
+        #                          self.exp.screen.height * 1.1))
         background = Image(source=Ref(os.path.join, config.TASK_DIR, 'card_table.png'),
                            size=(self.exp.screen.width,
                                  self.exp.screen.height),
@@ -137,15 +137,15 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
             with Parallel():
                 # adding in a border around the image to make them look like cards (more gamelike)
                 left_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
-                                    width=(s(config.IMG_WIDTH) + s(100)),
-                                    height=(s(config.IMG_HEIGHT) + s(100)),
+                                    width=(s(config.IMG_WIDTH) + s(50)),
+                                    height=(s(config.IMG_HEIGHT) + s(50)),
                                     blocking=False,
                                     allow_stretch=True,
                                     right=self.exp.screen.center_x - s(25),
                                     keep_ratio=False)
                 right_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
-                                     width=(s(config.IMG_WIDTH) + s(100)),
-                                     height=(s(config.IMG_HEIGHT) + s(100)),
+                                     width=(s(config.IMG_WIDTH) + s(50)),
+                                     height=(s(config.IMG_HEIGHT) + s(50)),
                                      blocking=False,
                                      allow_stretch=True,
                                      left=left_border.right + s(25),
