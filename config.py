@@ -5,8 +5,11 @@ import sys
 import platform
 
 CURRENT_OS: str = platform.system()
+
 API_BASE_URL: str = 'https://mlc.nimh.nih.gov/cogmood'
-#API_BASE_URL='http://127.0.0.1:5000'
+# API_BASE_URL='http://127.0.0.1:5000'
+# API_BASE_URL: str = 'NOSERVER'
+
 API_SALT: str = 'SALT'
 VERIFY: bool = False
 RUNNING_FROM_EXECUTABLE: bool = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')

@@ -116,7 +116,8 @@ with Parallel():
                 error_screen(error='Failed to Retrieve Identifier: ' + exp.worker_id_dict['content'],
                             message='Contact Dylan Nielson')
             # Handles case where retrieval of worker id is default placeholder
-            with Elif(exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE):
+            with Elif((exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE)
+                       and (CogBatt_config.API_BASE_URL != 'NOSERVER')):
                 error_screen(error='Non-Unique Identifier',
                             message='Contact Dylan Nielson')
         # Error screen for failed GET request to retrieve blocks

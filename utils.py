@@ -28,6 +28,15 @@ def get_blocks_to_run(worker_id: str, code: str | None = None) -> list[str] | di
     Returns:
         dict: A dictionary with 'status' as success or error, and 'content' containing either the blocks list or an error message.
     """
+    if API_BASE_URL == 'NOSERVER':
+        logging.info('API_BASE_URL set to NOSERVER, faking server responses')
+        tasks = ["rdm", "flkr", "bart", "cab"]
+        reformatted_tasks = []
+        for bn in [0, 1]:
+            for tt in tasks:
+                reformatted_tasks.append({'task_name':tt, 'block_number': bn})
+        logging.info(f'Reformatted task list: {reformatted_tasks}')
+        return {'status': 'success', 'content': reformatted_tasks}
     url = f'{API_BASE_URL}/taskcontrol'
     if WORKER_ID_SOURCE == 'EXECUTABLE':
         params = {'worker_id': worker_id}
@@ -103,6 +112,10 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
      Returns:
         dict: A dictionary with 'status' ('success' or 'error') and 'content' (message or error details).
     """
+    if API_BASE_URL == 'NOSERVER':
+        logging.info('API_BASE_URL set to NOSERVER, skipping upload')
+        return {"status": "success", "content": "Data upload skipped."}
+
     url = f"{API_BASE_URL}/taskcontrol"
     slog_file_path = Path(data_directory) / slog_file_name
     
@@ -169,12 +182,13 @@ def retrieve_worker_id() -> dict[str, str]:
         dict: A dictionary with 'status' and 'content' containing the worker ID or error message.
     """
     if RUNNING_FROM_EXECUTABLE:
+
         # Select appropriate worker ID retrieval function based on OS
         os_worker_id_function = {
             'Windows': _read_exe_worker_id,
             'Darwin': _read_app_worker_id
         }.get(CURRENT_OS, lambda: {'status': 'error', 'content': 'Unsupported OS'})
-        
+
         return os_worker_id_function()
 
     return {'status': 'error', 'content': 'Not running from an executable'}
