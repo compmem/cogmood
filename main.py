@@ -110,7 +110,7 @@ with Parallel():
                                  'please contact Dylan Nielson at Dylan.Nielson@nih.gov.'
                          )
 
-        with If(CogBatt_config.RUNNING_FROM_EXECUTABLE):
+        with If(CogBatt_config.RUNNING_FROM_EXECUTABLE and (CogBatt_config.WORKER_ID_SOURCE != 'USER')):
             # Handles case where retrieval of worker id fails
             with If(exp.worker_id_dict['status'] == 'error'):
                 error_screen(error='Failed to Retrieve Identifier: ' + exp.worker_id_dict['content'],
