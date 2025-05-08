@@ -71,7 +71,7 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  scale_down=True, scale_box=(1000, 1000), debug=False,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
-                 working_dir=WRK_DIR)
+                 working_dir=WRK_DIR, show_splash = False)
 exp._code = ''
 if CogBatt_config.WORKER_ID_SOURCE == 'EXECUTABLE':
     retrieved_worker_id = retrieve_worker_id()
