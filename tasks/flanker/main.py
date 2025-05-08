@@ -131,7 +131,7 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
                     fmri_tr_time=self.trkp_press_time,
                     eeg_pulse_time=ft.eeg_pulse_time)
 
-    Wait(.5)
+    Wait(1)
     HappyQuest(config, task='FLANKER', block_num=run_num, trial_num=trial.i)
 
     if config.FMRI:
