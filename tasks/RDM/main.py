@@ -153,7 +153,7 @@ def RDMExp(self, config, run_num=0, lang="E", pulse_server=None, practice=False,
                     refresh_rate=mdt.refresh_rate,
                     fmri_tr_time=self.trkp_press_time,
                     eeg_pulse_time=mdt.eeg_pulse_time)
-    Wait(.5)
+    Wait(1)
     HappyQuest(config, task='RDM', block_num=run_num, trial_num=trial.i)
     # Press 6 to say we are done recording then show them their score.
     if config.FMRI:
