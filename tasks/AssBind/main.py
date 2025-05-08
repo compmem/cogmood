@@ -220,7 +220,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                 trial_id=trial.i,
                 fmri_tr_time=self.trkp_press_time,
                 eeg_pulse_time=self.eeg_pulse_time)
-    Wait(.5)
+    Wait(1)
     # HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
 
     # Press 6 to say we are done recording then show them their score.
