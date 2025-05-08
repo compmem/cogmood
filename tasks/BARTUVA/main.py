@@ -136,7 +136,7 @@ def BartuvaExp(self,
         self.block_tic += 1
 
         self.set_number += 1
-    Wait(.5)
+    Wait(1)
     HappyQuest(config, task='BART', block_num=run_num, trial_num=balloon.i)
     # Press 6 to say we are done recording then show them their score.
     if config.FMRI:
