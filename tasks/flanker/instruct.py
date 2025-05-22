@@ -85,7 +85,7 @@ def Instruct(self, config, lang="E"):
 
                 # upper left
                 Flanker(config, center_x=self.exp.screen.center_x - s(400),
-                        center_y=toplbl.top + s(125),
+                        center_y=toplbl.top + s(150),
                         direction = "left",
                         condition = "+",
                         layers = config.LAYERS,
@@ -94,7 +94,7 @@ def Instruct(self, config, lang="E"):
                         #stim="__<__\n_<<<_\n<<<<<\n_<<<_\n__<__\n")
                 # upper middle
                 Flanker(config, center_x=self.exp.screen.center_x,
-                        center_y=toplbl.top + s(125),
+                        center_y=toplbl.top + s(150),
                         direction = "left",
                         condition = "=",
                         layers = config.LAYERS,
@@ -103,7 +103,7 @@ def Instruct(self, config, lang="E"):
                         #stim="__>__\n_><>_\n><<<>\n_><>_\n__>__\n")
                 # upper right
                 Flanker(config, center_x=self.exp.screen.center_x + s(400),
-                        center_y=toplbl.top + s(125),
+                        center_y=toplbl.top + s(150),
                         direction = "left",
                         condition = "~",
                         layers = config.LAYERS,
@@ -114,7 +114,7 @@ def Instruct(self, config, lang="E"):
 
                 # lower left
                 Flanker(config, center_x=self.exp.screen.center_x - s(400),
-                        center_y=toplbl.bottom - s(125),
+                        center_y=toplbl.bottom - s(150),
                         direction = "right",
                         condition = "+",
                         layers = config.LAYERS,
@@ -123,7 +123,7 @@ def Instruct(self, config, lang="E"):
                 # WONDERING IF THIS IS AN ERROR BECAUSE IT SHOWS THE SAME ONE TWICE, I DIDN'T WRITE THIS PART
                 # lower middle
                 Flanker(config, center_x=self.exp.screen.center_x,
-                        center_y=toplbl.bottom - s(125),
+                        center_y=toplbl.bottom - s(150),
                         direction = "right",
                         condition = "=",
                         layers = config.LAYERS,
@@ -131,7 +131,7 @@ def Instruct(self, config, lang="E"):
                         # stim="__>__\n_><>_\n><><>\n_><>_\n__>__\n")
                 # lower right
                 Flanker(config, center_x=self.exp.screen.center_x + s(400),
-                        center_y=toplbl.bottom - s(125),
+                        center_y=toplbl.bottom - s(150),
                         direction = "right",
                         condition = "~",
                         layers = config.LAYERS,
