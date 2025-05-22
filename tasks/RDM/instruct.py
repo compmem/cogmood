@@ -104,6 +104,7 @@ def Instruct(self, config, lang="E", practice=False):
 
     # handle the reverse mapping
     with Parallel():
+        Background = Image(source = config.BACKGROUND_IMAGE, size = (self.exp.screen.size[0]*1.1, self.exp.screen.size[1]*1.1), allow_stretch = True, keep_ratio = False, blocking=False)
         Label(text=self.top_text,
               markup=True, halign='center', text_size=(s(config.TEST_WIDTH), None),
               bottom=self.exp.screen.center_y + s(config.INST_RADIUS) + s(60),
