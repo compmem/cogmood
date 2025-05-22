@@ -137,12 +137,12 @@ def Instruct(self, config, lang="E", practice=False):
         if config.TOUCH:
             Label(text=self.tap_text_M,
                   font_size=s(config.INST_FONT_SIZE),
-                  top=lt.bottom - s(10),
+                  top=lt.bottom - s(30),
                   markup=True, halign='center')
         else:
             Label(text=self.tap_text_C,
                   font_size=s(config.INST_FONT_SIZE),
-                  top=lt.bottom - s(10),
+                  top=lt.bottom - s(30),
                   markup=True, halign='center')
 
     with UntilDone():
