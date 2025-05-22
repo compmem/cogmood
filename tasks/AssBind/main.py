@@ -120,6 +120,21 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                         top=new_rem.bottom,
                         center_x=self.exp.screen.center_x + s(50),
                         color="black")
+        # adding in a border around the image to make them look like cards (more gamelike)
+        left_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
+                                    width=(s(config.IMG_WIDTH) + s(50)),
+                                    height=(s(config.IMG_HEIGHT) + s(50)),
+                                    blocking=False,
+                                    allow_stretch=True,
+                                    right=self.exp.screen.center_x - s(5),
+                                    keep_ratio=False)
+        right_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
+                                     width=(s(config.IMG_WIDTH) + s(50)),
+                                     height=(s(config.IMG_HEIGHT) + s(50)),
+                                     blocking=False,
+                                     allow_stretch=True,
+                                     left=left_border.right + s(10),
+                                     keep_ratio=False)
     with UntilDone():
         # allows people time to orient
         Wait(1)
@@ -138,25 +153,25 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
 
             with Parallel():
                 # adding in a border around the image to make them look like cards (more gamelike)
-                left_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
-                                    width=(s(config.IMG_WIDTH) + s(50)),
-                                    height=(s(config.IMG_HEIGHT) + s(50)),
-                                    blocking=False,
-                                    allow_stretch=True,
-                                    right=self.exp.screen.center_x - s(5),
-                                    keep_ratio=False)
-                right_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
-                                     width=(s(config.IMG_WIDTH) + s(50)),
-                                     height=(s(config.IMG_HEIGHT) + s(50)),
-                                     blocking=False,
-                                     allow_stretch=True,
-                                     left=left_border.right + s(10),
-                                     keep_ratio=False)
+                # left_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
+                #                    width=(s(config.IMG_WIDTH) + s(50)),
+                #                   height=(s(config.IMG_HEIGHT) + s(50)),
+                #                    blocking=False,
+                #                    allow_stretch=True,
+                #                    right=self.exp.screen.center_x - s(5),
+                #                    keep_ratio=False)
+                # right_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
+                #                     width=(s(config.IMG_WIDTH) + s(50)),
+                #                     height=(s(config.IMG_HEIGHT) + s(50)),
+                #                     blocking=False,
+                #                     allow_stretch=True,
+                #                     left=left_border.right + s(10),
+                #                     keep_ratio=False)
                 # initialize a frame around the images
                 # (which is invisible until response)
                 self.width = right_border.right - left_border.left
                 self.height = right_border.top - right_border.bottom
-                resp_rect = Rectangle(width = self.width, center_x = self.exp.screen.center_x - s(25/2),
+                resp_rect = Rectangle(width = self.width, center_x = self.exp.screen.center_x,
                                       top = left_border.top, height = self.height,
                                       color=(.35, .35, .35, 0.0),
                                       duration=config.STIM_PRES_TIME)
