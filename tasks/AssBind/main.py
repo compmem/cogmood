@@ -121,6 +121,8 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                         center_x=self.exp.screen.center_x + s(50),
                         color="black")
     with UntilDone():
+        # allows people time to orient
+        Wait(1)
         # loop through trials
         with Loop(trials) as trial:
             # with If((Func(clock.now).result >= self.end_happy) & (happy_mid)):
