@@ -141,14 +141,14 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                                     height=(s(config.IMG_HEIGHT) + s(50)),
                                     blocking=False,
                                     allow_stretch=True,
-                                    right=self.exp.screen.center_x - s(25),
+                                    right=self.exp.screen.center_x - s(5),
                                     keep_ratio=False)
                 right_border = Image(source=Ref(os.path.join, config.TASK_DIR, "playing_card.png"),
                                      width=(s(config.IMG_WIDTH) + s(50)),
                                      height=(s(config.IMG_HEIGHT) + s(50)),
                                      blocking=False,
                                      allow_stretch=True,
-                                     left=left_border.right + s(25),
+                                     left=left_border.right + s(10),
                                      keep_ratio=False)
                 # initialize a frame around the images
                 # (which is invisible until response)
