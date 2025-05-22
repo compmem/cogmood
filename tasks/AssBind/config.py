@@ -60,8 +60,8 @@ INST_FONT_SIZE = 30
 INST_TITLE_FONT_SIZE = 35
 
 # width and height of images used in instructions, in pixels; IMG_WIDTH * 1.5
-INST_IMG_WIDTH = 512
-INST_IMG_HEIGHT = 256
+INST_IMG_WIDTH = 500 * 1.6
+INST_IMG_HEIGHT = 500
 
 # percentage of the pixels on the screen, used to adjust image/label spacing in instructions
 PIXEL_PERCENT = .08
