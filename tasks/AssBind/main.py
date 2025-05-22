@@ -112,7 +112,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                            keep_ratio=False)
         new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
                         font_size=s(config.INST_TITLE_FONT_SIZE),
-                        bottom=self.exp.screen.bottom + s(200),
+                        bottom=self.exp.screen.bottom + s(300),
                         center_x=self.exp.screen.center_x - s(50),
                         color="black")
         old_rem = Label(text=TRIAL_REMIND_TEXT_R,  # 'H = Old',
