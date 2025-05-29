@@ -92,8 +92,6 @@ elif CogBatt_config.WORKER_ID_SOURCE == 'USER':
 else:
     raise NotImplementedError
 
-
-
 with Parallel():
     with Serial(blocking=False):
         # Log all of the info about the subject and the CogBatt version
