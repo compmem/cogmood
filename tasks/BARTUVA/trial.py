@@ -112,7 +112,7 @@ def BARTSub(self,
         with Loop(Ref(len,balloon['pop'])) as trial:
             with If(self.pressed_key==True):
                 with If(trial.i==0):
-                    Wait(0.5, jitter=.3)
+                    #Wait(0.5, jitter=.3)
                     Fixation_cross = Label(text='+',
                                            font_size=s(config.CROSS_FONT_SIZE),
                                            color=config.CROSS_COLOR,
