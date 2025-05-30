@@ -23,7 +23,6 @@ def _validate_code(exp):
     worker_id = exp._subject
     code = exp.get_var('_code')
     expected_code = blake2b(worker_id.encode(), digest_size=4, salt=CogBatt_config.API_SALT.encode()).hexdigest()[:4]
-    Debug(code=code, expected_code=expected_code, invalid=code!=expected_code)
     exp.set_var('code_invalid', code != expected_code)
 
 @Subroutine
