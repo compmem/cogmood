@@ -105,19 +105,19 @@ with Parallel():
             error_screen(error='Invalid task code: ' + Ref(str, exp._code),
                          message='You entered an incorrect task code, please double check the code '
                                  'listed on the website and try again. If it still does not work '
-                                 'please contact Dylan Nielson at Dylan.Nielson@nih.gov.'
+                                 'please contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov.'
                          )
 
         with If(CogBatt_config.RUNNING_FROM_EXECUTABLE and (CogBatt_config.WORKER_ID_SOURCE != 'USER')):
             # Handles case where retrieval of worker id fails
             with If(exp.worker_id_dict['status'] == 'error'):
                 error_screen(error='Failed to Retrieve Identifier: ' + exp.worker_id_dict['content'],
-                            message='Contact Dylan Nielson')
+                            message='Contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov')
             # Handles case where retrieval of worker id is default placeholder
             with Elif((exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE)
                        and (CogBatt_config.API_BASE_URL != 'NOSERVER')):
                 error_screen(error='Non-Unique Identifier',
-                            message='Contact Dylan Nielson')
+                            message='Contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov')
         # Error screen for failed GET request to retrieve blocks
         with If(exp.tasks_from_api['status'] == 'error'):
             error_screen(error='Failed to retrieve tasks.',
@@ -125,7 +125,9 @@ with Parallel():
         # Handles case where there are no more blocks to run
         with Elif(number_of_tasks == 0):
             error_screen(error='No tasks to run.',
-                            message='Press next in the browser or return to the website via the link from prolific if that window is no longer open.')
+                            message='Press the "I have completed the tasks" button in the browser'
+                                    ' or return to the website via the link from Prolific '
+                                    'if that window is no longer open.')
 
         # Present initial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
