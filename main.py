@@ -200,7 +200,7 @@ with Parallel():
                 BartuvaExp(Bartuva_config,
                            run_num=exp.block_number,
                            sub_dir=Ref.object(exp)._session_dir,
-                           practice=False,
+                           practice=True,
                            task_dir=task2dir,
                            happy_mid=False)
             

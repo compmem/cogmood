@@ -8,9 +8,9 @@ RANDOMIZE_BALLOON_NUM = False
 BALLOON_SETUP = [{'range': [0, 8], 'number_of_balloons':8},
                  {'range': [0, 16], 'number_of_balloons':8},
                  {'range': [8, 16], 'number_of_balloons':8}]
-PRACTICE_SETUP = [{'range': [10,10], 'number_of_balloons':0},
-                 {'range': [3,3], 'number_of_balloons':0},
-                 {'range': [6,6], 'number_of_balloons':0}]
+PRACTICE_SETUP = [{'range': [10,10], 'number_of_balloons':2},
+                 {'range': [3,3], 'number_of_balloons':2},
+                 {'range': [6,6], 'number_of_balloons':2}]
 NUM_BALLOONS = 18
 NUM_BAGS = len(BALLOON_SETUP)
 BALLOONS_PER_BAG = NUM_BALLOONS/NUM_BAGS
