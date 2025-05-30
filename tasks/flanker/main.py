@@ -44,7 +44,15 @@ def FlankerExp(self, config, run_num=0, lang="E", pulse_server=None,
         #date_time=version.__date__,
         #email=version.__email__)
 
-    Instruct(config, lang=lang)
+    Instruct(config, run_num, lang=lang)
+    Label(text='You will now begin the fish task.' +
+               '\nOnce you press %s, the task will begin. Get ready!' % (cont_key_str) +
+               '\nPress %s to start the task.' % (cont_key_str),
+          halign='center',
+          font_size=s(config.FINAL_FONT_SIZE))
+    with UntilDone():
+        Wait(.5)
+        GetResponse(keys=config.CONT_KEY)
     Wait(2.0)
 
     self.trials_corr = 0.
