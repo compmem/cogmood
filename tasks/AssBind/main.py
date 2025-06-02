@@ -71,9 +71,9 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
     text_names = ['main', 'ex1', 'ex2', 'ex3', 'ex4', 'remind']
     rem_names = ['remind']
     with If(reminder_only):
-        Instruct(config=config, text_names=rem_names)
+        Instruct(config=config, text_names=rem_names, run_num=block)
     with Else():
-        Instruct(config=config, text_names=text_names)
+        Instruct(config=config, text_names=text_names, run_num=block)
 
     Wait(1.0)
 

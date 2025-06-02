@@ -56,7 +56,8 @@ def BartuvaExp(self,
     num_balloons = config.NUM_BALLOONS
 
     Label(text='You will now begin the balloon task.' +
-               '\nPress %s to continue.' % (cont_key_str),
+               '\nOnce you press %s, the task will begin. Get ready!' % (cont_key_str) +
+               '\nPress %s to start the task.' % (cont_key_str),
           halign='center',
           font_size=s(config.LABEL_FONT_SIZE))
     with UntilDone():

@@ -38,7 +38,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='SUPREME',
+    name='NIMHCogMood',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -51,14 +51,14 @@ exe = EXE(
 
 app = BUNDLE(
     exe,
-    name='SUPREME.app',
+    name='NIMHCogMood.app',
     icon=None,
-    bundle_identifier='uva.compmem.supreme',
+    bundle_identifier='nimh.mlc.nimhcogmood',
     info_plist={
         'NSHighResolutionCapable': 'True',
-        'CFBundleDisplayName': 'SUPREME',
-        'CFBundleName': 'SUPREME',
-        'CFBundleIdentifier': 'uva.compmem.supreme',
+        'CFBundleDisplayName': 'NIMHCogMood',
+        'CFBundleName': 'NIMHCogMood',
+        'CFBundleIdentifier': 'nimh.mlc.nimhcogmood',
         'CFBundleVersion': '1.0.0',
         'CFBundleShortVersionString': '1.0.0',
         'LSArchitecturePriority': ['x86_64', 'arm64'],

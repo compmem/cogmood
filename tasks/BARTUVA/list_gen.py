@@ -43,7 +43,7 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
     colors = ["red", "orange", "yellow", "green", "lime", "mustard", "salmon", "purple", "lavender", "navy", "blue", "maroon"]
     random.shuffle(colors)
     if practice == True:
-        colors = ["practice"]
+        colors = ["practice", "pink", "teal"]
 
     for balloon_set in x:
         limits=balloon_set['range']

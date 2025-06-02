@@ -3,58 +3,115 @@ import os
 from smile.scale import scale as s
 from .GetResponse import GetResponse
 
+
+def get_is_first(run_num):
+    return run_num == 0
 # present instructions
 @Subroutine
-def Instruct(self, config, text_names):#, resp_keys, touch, font_size):
+def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
+
+    is_first = Func(get_is_first, run_num).result
 
     texts = get_text(config)
-    with Parallel():
-        if not config.TOUCH:
-            MouseCursor(blocking=False)
-        with Serial(blocking=False):
-            for doc in text_names:
-                with Parallel():
-                    title = Label(text='Memory Task Instructions',
-                                  font_size=s(config.INST_TITLE_FONT_SIZE),
+    with If(is_first):
+        with Parallel():
+            if not config.TOUCH:
+                MouseCursor(blocking=False)
+            with Serial(blocking=True):
+                for doc in text_names:
+                    with Parallel():
+                        title = Label(text='Memory Task Instructions',
+                                      font_size=s(config.INST_TITLE_FONT_SIZE),
+                                      text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                                      top=self.exp.screen.center_y + s(415))
+
+                        # image != None for 4 example slides
+                        with If(texts[doc]['image'] != None):
+                            image = Image(source=texts[doc]['image'],
+                                          top=(title.bottom - s(10)),
+                                          width=s(config.INST_IMG_WIDTH),
+                                          height=s(config.INST_IMG_HEIGHT),
+                                          allow_stretch=True, keep_ratio=False)
+                        with If(texts[doc]['image'] != None):
+                            Label(text=texts[doc]['text'],
+                                  font_size=s(config.INST_FONT_SIZE),
                                   text_size=(s(config.TEXT_SIZE_WIDTH), None),
-                                  top=self.exp.screen.center_y + s(415))
+                                  top=(image.bottom - s(10)))
 
-                # image != None for 4 example slides
-                    with If(texts[doc]['image'] != None):
-                        image = Image(source=texts[doc]['image'],
-                                      top=(title.bottom - s(10)),
-                                      width=s(config.INST_IMG_WIDTH),
-                                      height=s(config.INST_IMG_HEIGHT),
-                                      allow_stretch=True, keep_ratio=False)
-                    with If(texts[doc]['image'] != None):
-                       Label(text=texts[doc]['text'],
-                             font_size=s(config.INST_FONT_SIZE),
-                             text_size=(s(config.TEXT_SIZE_WIDTH), None),
-                             top=(image.bottom - s(10)))
+                        # image == None for first and last slides (instructions and reminder)
+                        with If(texts[doc]['image'] == None):
+                            Label(text=texts[doc]['text'],
+                                  text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                                  font_size=s(config.INST_FONT_SIZE),
+                                  top=(title.bottom - s(10)))
 
-                 # image == None for first and last slides (instructions and reminder)
-                    with If(texts[doc]['image'] == None):
-                        Label(text=texts[doc]['text'],
-                              text_size=(s(config.TEXT_SIZE_WIDTH), None),
-                              font_size=s(config.INST_FONT_SIZE),
-                              top=(title.bottom - s(10)))
+                    with UntilDone():
+                        Wait(1.0)
+                        GetResponse(keys=texts[doc]['keys'])
 
-                with UntilDone():
-                    Wait(1.0)
-                    GetResponse(keys=texts[doc]['keys'])
+    with Else():
+        with Parallel():
+            if not config.TOUCH:
+                MouseCursor(blocking=False)
+            with Serial(blocking=False):
+                for doc in text_names:
+                    with Parallel():
+                        title = Label(text='Memory Task Instructions',
+                                      font_size=s(config.INST_TITLE_FONT_SIZE),
+                                      text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                                      top=self.exp.screen.center_y + s(415))
 
-                #RstDocument(text=texts[doc]['text'],
-                            #width=self.exp.screen.height,
-                            #height=self.exp.screen.height,
-                            #base_font_size=s(config.RST_FONT_SIZE))
+                    # image != None for 4 example slides
+                        with If(texts[doc]['image'] != None):
+                            image = Image(source=texts[doc]['image'],
+                                          top=(title.bottom - s(10)),
+                                          width=s(config.INST_IMG_WIDTH),
+                                          height=s(config.INST_IMG_HEIGHT),
+                                          allow_stretch=True, keep_ratio=False)
+                        with If(texts[doc]['image'] != None):
+                           Label(text=texts[doc]['text'],
+                                 font_size=s(config.INST_FONT_SIZE),
+                                 text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                                 top=(image.bottom - s(10)))
 
+                     # image == None for first and last slides (instructions and reminder)
+                        with If(texts[doc]['image'] == None):
+                            Label(text=texts[doc]['text'] + '\n\nYou may press the button in the'
+                                                            ' lower right corner to skip the practice',
+                                  text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                                  font_size=s(config.INST_FONT_SIZE),
+                                  top=(title.bottom - s(10)))
 
-        with Serial(blocking=False):
-            with ButtonPress():
-                Button(text="Skip Practice", right=self.exp.screen.width,
-                       bottom=0, width=s(config.SKIP_SIZE[0]),
-                       height=s(config.SKIP_SIZE[1]), blocking=False,
-                       font_size=s(config.SKIP_FONT_SIZE))
+                    with UntilDone():
+                        Wait(1.0)
+                        GetResponse(keys=texts[doc]['keys'])
+
+                    #RstDocument(text=texts[doc]['text'],
+                                #width=self.exp.screen.height,
+                                #height=self.exp.screen.height,
+                                #base_font_size=s(config.RST_FONT_SIZE))
+
+            with Serial(blocking=False):
+                with ButtonPress():
+                    Button(text="Skip Practice", right=self.exp.screen.width,
+                           bottom=0, width=s(config.SKIP_SIZE[0]),
+                           height=s(config.SKIP_SIZE[1]), blocking=False,
+                           font_size=s(config.SKIP_FONT_SIZE))
+        with Parallel():
+            doc = 'remind'
+            title = Label(text='Memory Task Instructions',
+                          font_size=s(config.INST_TITLE_FONT_SIZE),
+                          text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                          top=self.exp.screen.center_y + s(415))
+            Label(text=texts[doc]['text'],
+                  text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                  font_size=s(config.INST_FONT_SIZE),
+                  top=(title.bottom - s(10)))
+
+        with UntilDone():
+            Wait(1.0)
+            GetResponse(keys=texts[doc]['keys'])
+
     Wait(2.0)
 
 
