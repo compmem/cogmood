@@ -97,6 +97,20 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
                            bottom=0, width=s(config.SKIP_SIZE[0]),
                            height=s(config.SKIP_SIZE[1]), blocking=False,
                            font_size=s(config.SKIP_FONT_SIZE))
+        with Parallel():
+            doc = 'remind'
+            title = Label(text='Memory Task Instructions',
+                          font_size=s(config.INST_TITLE_FONT_SIZE),
+                          text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                          top=self.exp.screen.center_y + s(415))
+            Label(text=texts[doc]['text'],
+                  text_size=(s(config.TEXT_SIZE_WIDTH), None),
+                  font_size=s(config.INST_FONT_SIZE),
+                  top=(title.bottom - s(10)))
+
+        with UntilDone():
+            Wait(1.0)
+            GetResponse(keys=texts[doc]['keys'])
 
     Wait(2.0)
 
