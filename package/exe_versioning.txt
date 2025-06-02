@@ -22,7 +22,7 @@ VSVersionInfo(
         StringStruct(u'InternalName', u'NIMH - CogMood'),
         StringStruct(u'LegalCopyright', u''),
         StringStruct(u'OriginalFilename', u'NIMHCogMood.exe'),
-        StringStruct(u'ProductName', u'SNIMH - CogMood'),
+        StringStruct(u'ProductName', u'NIMH - CogMood'),
         StringStruct(u'ProductVersion', u'1.0.0.0'),
         StringStruct(u'WorkerID', u'"------------------------------------------------".---------------------------')])
       ]), 
