@@ -57,8 +57,8 @@ jobs:
             - name: save exe
               uses: actions/upload-artifact@v4
               with:
-                name: SUPREME_win
-                path: package/dist/SUPREME.exe
+                name: NIMHCogMood_win
+                path: package/dist/NIMHCogMood.exe
 
 
     build-macos:
@@ -111,12 +111,12 @@ jobs:
             cd package
             python3 -m PyInstaller --noconfirm cogmood_mac.spec
             cd ..
-            mkdir SUPREME
-            cp -r package/dist/SUPREME.app SUPREME/
-            create-dmg --volname SUPREME SUPREME.dmg SUPREME
+            mkdir NIMHCogMood
+            cp -r package/dist/NIMHCogMood.app NIMHCogMood/
+            create-dmg --volname NIMHCogMood NIMHCogMood.dmg NIMHCogMood
 
         - name: Upload macOS executable
           uses: actions/upload-artifact@v4
           with:
-            name: SUPREME_mac
-            path: SUPREME.dmg
+            name: NIMHCogMood_mac
+            path: NIMHCogMood.dmg
