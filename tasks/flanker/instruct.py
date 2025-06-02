@@ -25,8 +25,8 @@ def get_instructions(config, run_num):
                        'You will be asked to indicate the direction that the \n' + \
                        '[b]middle symbol is pointing[/b], while ignoring any other symbols. \n\n'
     if run_num > 0:
-        inst['top_text'] += "\n You may press the button in the lower right " \
-                         "corner to skip the practice."
+        inst['top_text'] += "You may press the button in the lower right " \
+                         "corner to skip the practice \n\n."
     inst['inst_1'] = '[b]Practice 1:[/b] \n \n' + \
                      'Respond to the arrow in the red circle while ignoring the other symbols. \n'
 
@@ -550,12 +550,11 @@ def Instruct(self, config, run_num, lang="E"):
                     Label(text="+", font_size=s(config.ORIENT_FONT_SIZE))
 
             with Serial(blocking=False):
-                with If(run_num > 0):
-                    with ButtonPress():
-                        Button(text=inst['skip_text'], right=self.exp.screen.width,
-                               bottom=0, width=s(config.SKIP_SIZE[0]),
-                               height=s(config.SKIP_SIZE[1]), blocking=False,
-                               font_size=s(config.SKIP_FONT_SIZE))
+                with ButtonPress():
+                    Button(text=inst['skip_text'], right=self.exp.screen.width,
+                           bottom=0, width=s(config.SKIP_SIZE[0]),
+                           height=s(config.SKIP_SIZE[1]), blocking=False,
+                           font_size=s(config.SKIP_FONT_SIZE))
 
 
     Wait(1.0)
