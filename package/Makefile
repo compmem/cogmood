@@ -1,7 +1,7 @@
 # Define the spec files for each OS
 MAC_SPEC_FILE=cogmood_mac.spec
 WIN_SPEC_FILE=cogmood_windows.spec
-EXECUTABLE_NAME=SUPREME
+EXECUTABLE_NAME=NIMHCogMood
 
 # Define UPX executable path
 WIN_UPX=upx/windows_upx.exe
