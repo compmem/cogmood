@@ -224,6 +224,15 @@ with Parallel():
                 error_screen(error='Error During Upload',
                              message=exp.task_data_upload.result['content'])
 
+        Label(text='Thank you for completing the tasks! Please return to the website'
+                   'and click the "I have completed the tasks" button.'
+                   '\n\n If you know longer have the page open, click on the task link'
+                   ' from prolific again to return to the webpage.'
+                   '\n\n You wil be redirected to Prolific with your completion code.',
+              text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+        with UntilDone():
+            KeyPress()
+
     KeyPress(['ESCAPE'], blocking=False)
 Wait(.25)
 exp.run()
