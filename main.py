@@ -13,7 +13,7 @@ from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
 from utils import retrieve_worker_id, \
-    get_blocks_to_run, upload_block
+    get_blocks_to_run, upload_block, sid_evenness
 import version
 
 # Various task imports
@@ -91,6 +91,9 @@ elif CogBatt_config.WORKER_ID_SOURCE == 'USER':
     exp.worker_id_dict = {"status": "success", "content": Ref.object(exp)._subject}
 else:
     raise NotImplementedError
+
+# get subject id odd or even to counterbalance CAB
+flip_CAB = Func(sid_evenness, Ref.object(exp)._subject).result
 
 with Parallel():
     with Serial(blocking=False):
@@ -182,7 +185,8 @@ with Parallel():
                            task_dir=taskdir,
                            sub_dir=Ref.object(exp)._subject_dir,
                            block=exp.block_number,
-                           happy_mid=False)
+                           happy_mid=False,
+                           flip_resp=flip_CAB)
             with Elif(exp.task_name == "rdm"):
                 Wait(.5)
                 RDMExp(RDM_config,

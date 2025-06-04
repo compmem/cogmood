@@ -36,11 +36,18 @@ from .GetResponse import GetResponse
 @Subroutine
 def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
-               conditions=None, happy_mid=False):
-    TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
-                                         list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
-    TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(config.RESP_KEYS.keys())[list(
-        config.RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
+               conditions=None, happy_mid=False, flip_resp=False):
+    if flip_resp:
+        resp_keys = {
+            'old': config.RESP_KEYS['new'],
+            'new': config.RESP_KEYS['old'],
+        }
+    else:
+        resp_keys = config.RESP_KEYS
+    TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(resp_keys.keys())[
+                                         list(resp_keys.values()).index(config.RESP_KY[0])])
+    TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(resp_keys.keys())[list(
+        resp_keys.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
     if task_dir is not None:
         config.TASK_DIR = task_dir
 
@@ -207,7 +214,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                 Wait(0.2)
                 response = GetResponse(keys=config.RESP_KY,
                                        base_time=left_image.appear_time['time'],
-                                       correct_resp=Ref.getitem(config.RESP_KEYS,
+                                       correct_resp=Ref.getitem(resp_keys,
                                                                 trial.current['resp_correct']))
 
                 # present frame around images to indicate response
@@ -236,7 +243,9 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
                 block=block,
                 trial_id=trial.i,
                 fmri_tr_time=self.trkp_press_time,
-                eeg_pulse_time=self.eeg_pulse_time)
+                eeg_pulse_time=self.eeg_pulse_time,
+                old_key=resp_keys['old'],
+                new_key=resp_keys['new'])
     Wait(.5)
     HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
 

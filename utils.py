@@ -265,6 +265,33 @@ def _read_exe_worker_id() -> dict[str, str]:
         return {"status": "error", "content": str(e)}
 
 
+def sid_evenness(sid):
+    # make sure the input is a string
+    sid = str(sid)
+    # initialize val so we can later catch if it never got set
+    val = None
+    # loop through the SID backwards looking for something that
+    # ord will return a value on
+    # I'm using a naked except because I don't care how ord fails
+    for char in sid[::-1]:
+        try:
+            val = ord(char)
+            break
+        except:
+            continue
+    # if for some reason ord works on nothing in sid
+    # then just use the length
+    # if all SIDs are the same length, this'll be a problem
+    # but I really don't expect to get this far
+    # and we'll keep an eye on use of this in the data
+    if val is None:
+        val = len(sid)
+
+    if val % 2 == 0:
+        return True
+    else:
+        return False
+
 
 if __name__ == "__main__":
     upload_block(worker_id='123456',
