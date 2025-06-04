@@ -43,15 +43,8 @@ def gen_moving_dot_trials(config):
             temp_real.append(trial)
     # make sure that exactly half of the equal coherence trials have the left response
     # as the correct response and half have the right response as the correct response
-    random.shuffle(temp_eq_coh_right)
-    eq_coh_trials = []
-    for i in range(len(config.COHERENCES)):
-        eq_coh_trials.append(temp_eq_coh_right.pop())
-    for trial in eq_coh_trials:
-        temp_eq_coh_left = [i for i in temp_eq_coh_left if i['left_coherence'] != trial['left_coherence']]
-    eq_coh_trials.extend(temp_eq_coh_left)
     # combine all trials together
-    trials = temp_extra + temp_real + eq_coh_trials
+    trials = temp_extra + temp_real + temp_eq_coh_left + temp_eq_coh_right
     blocks = []
     # randomize each block and create list of blocks
     # based on NUM_BLOCKS attribute
