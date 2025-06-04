@@ -8,11 +8,11 @@ def get_is_first(run_num):
     return run_num == 0
 # present instructions
 @Subroutine
-def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
+def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, touch, font_size):
 
     is_first = Func(get_is_first, run_num).result
 
-    texts = get_text(config)
+    texts = get_text(config, flip_resp=flip_resp)
     with If(is_first):
         with Parallel():
             if not config.TOUCH:
@@ -116,7 +116,14 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
 
 # this function reads in the text for each instruction slide and dynamically changes it based on response keys
-def get_text(config):#resp_keys, touch):
+def get_text(config, flip_resp=False):#resp_keys, touch):
+    if flip_resp:
+        resp_keys = {
+            'old': config.RESP_KEYS['new'],
+            'new': config.RESP_KEYS['old'],
+        }
+    else:
+        resp_keys = config.RESP_KEYS
 
     # dictionary containing the text for each instruction slide
     inst = {}
@@ -155,24 +162,48 @@ def get_text(config):#resp_keys, touch):
                     '%s to begin. '
 
     # dictionary containing image path, response keys, and text for each slide
-    texts = {'main': {'image': None,
-                      'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']],
-                      'text': inst['main']},
-            'ex1': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
-                    'keys': [config.RESP_KEYS['new']],
-                    'text': inst['ex1']},
-            'ex2': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "canoejoystick.jpg"))),
-                    'keys': [config.RESP_KEYS['new']],
-                    'text': inst['ex2']},
-            'ex3': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
-                    'keys': [config.RESP_KEYS['old']],
-                    'text': inst['ex3']},
-            'ex4': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beejoystick.jpg"))),
-                    'keys': [config.RESP_KEYS['new']],
-                    'text': inst['ex4']},
-            'remind': {'image': None,
-                       'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']],
-                       'text': inst['remind']}}
+    if flip_resp:
+        texts = {'main': {'image': None,
+                          'keys': [resp_keys['new'], resp_keys['old']],
+                          'text': inst['main']},
+                 'ex1': {'image': str(
+                     config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beehouse.jpg"))),
+                         'keys': [resp_keys['new']],
+                         'text': inst['ex1']},
+                 'ex2': {'image': str(
+                     config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_canoejoystick.jpg"))),
+                         'keys': [resp_keys['new']],
+                         'text': inst['ex2']},
+                 'ex3': {'image': str(
+                     config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beehouse.jpg"))),
+                         'keys': [resp_keys['old']],
+                         'text': inst['ex3']},
+                 'ex4': {'image': str(
+                     config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beejoystick.jpg"))),
+                         'keys': [resp_keys['new']],
+                         'text': inst['ex4']},
+                 'remind': {'image': None,
+                            'keys': [resp_keys['new'], resp_keys['old']],
+                            'text': inst['remind']}}
+    else:
+        texts = {'main': {'image': None,
+                          'keys': [resp_keys['new'], resp_keys['old']],
+                          'text': inst['main']},
+                'ex1': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
+                        'keys': [resp_keys['new']],
+                        'text': inst['ex1']},
+                'ex2': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "canoejoystick.jpg"))),
+                        'keys': [resp_keys['new']],
+                        'text': inst['ex2']},
+                'ex3': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
+                        'keys': [resp_keys['old']],
+                        'text': inst['ex3']},
+                'ex4': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beejoystick.jpg"))),
+                        'keys': [resp_keys['new']],
+                        'text': inst['ex4']},
+                'remind': {'image': None,
+                           'keys': [resp_keys['new'], resp_keys['old']],
+                           'text': inst['remind']}}
 
     #texts = {'main': {'file': 'inst.rst', 'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']]},
             #'ex1': {'file': 'ex1.rst', 'keys': [config.RESP_KEYS['new']]},
@@ -198,20 +229,20 @@ def get_text(config):#resp_keys, touch):
                                            "Touch the screen")
 
     else:
-        texts['main']['replacements'] = ("press the %s key" %config.RESP_KEYS['old'], "press %s key" %config.RESP_KEYS['new'],
-                                            "Press the %s or %s key" %(config.RESP_KEYS['old'], config.RESP_KEYS['new']))
-        texts['ex1']['replacements'] = ("press %s," %config.RESP_KEYS['new'],
-                                        "Press the %s key" %config.RESP_KEYS['new'])
-        texts['ex2']['replacements'] = ("press %s," %config.RESP_KEYS['new'],
-                                        "Press the %s key" %config.RESP_KEYS['new'])
-        texts['ex3']['replacements'] = ("press %s," %config.RESP_KEYS['old'],
-                                        "Press the %s key" %config.RESP_KEYS['old'])
-        texts['ex4']['replacements'] = ("press %s," %config.RESP_KEYS['new'],
-                                        "Press the %s key" %config.RESP_KEYS['new'])
-        texts['remind']['replacements'] = ("press %s key" %config.RESP_KEYS['old'],
-                                           "press %s key" %config.RESP_KEYS['new'],
-                                            "Press the %s or %s key" %(config.RESP_KEYS['old'],
-                                                                        config.RESP_KEYS['new']))
+        texts['main']['replacements'] = ("press the %s key" %resp_keys['old'], "press %s key" %resp_keys['new'],
+                                            "Press the %s or %s key" %(resp_keys['old'], resp_keys['new']))
+        texts['ex1']['replacements'] = ("press %s," %resp_keys['new'],
+                                        "Press the %s key" %resp_keys['new'])
+        texts['ex2']['replacements'] = ("press %s," %resp_keys['new'],
+                                        "Press the %s key" %resp_keys['new'])
+        texts['ex3']['replacements'] = ("press %s," %resp_keys['old'],
+                                        "Press the %s key" %resp_keys['old'])
+        texts['ex4']['replacements'] = ("press %s," %resp_keys['new'],
+                                        "Press the %s key" %resp_keys['new'])
+        texts['remind']['replacements'] = ("press %s key" %resp_keys['old'],
+                                           "press %s key" %resp_keys['new'],
+                                            "Press the %s or %s key" %(resp_keys['old'],
+                                                                        resp_keys['new']))
 
 
     for doc in texts:
