@@ -90,6 +90,80 @@ def hash_file(file_obj):
         hash_blake.update(chunk)
     return hash_blake.hexdigest()
 
+def upload_happy(worker_id: str, block_name: str, data_directory: str, code: str | None = None) -> dict[str, str]:
+    """
+    Function to upload all of the non-empty happy blocks found
+
+    Args:
+        worker_id (str): The unique identifier for the worker who is uploading the block.
+        block_name (str): The name of the block being uploaded, typically in the format "taskname_runnumber".
+        data_directory (str): The directory where the slog file is located.
+        code (str): Optional verifcation code if worker_id_source is user.
+
+    Behavior:
+        - Finds all of the slog files
+        - Zips them up
+        - Sends the `worker_id`, `block_name`, and `checksum` in the form data.
+        - Uploads the zipped file associated with the block in the `files` parameter.
+
+     Returns:
+        dict: A dictionary with 'status' ('success' or 'error') and 'content' (message or error details).
+    """
+    if API_BASE_URL == 'NOSERVER':
+        logging.info('API_BASE_URL set to NOSERVER, skipping upload')
+        return {"status": "success", "content": "Data upload skipped."}
+    url = f"{API_BASE_URL}/taskcontrol"
+
+    slog_files = sorted(Path(data_directory).glob('log_happy*.slog'))
+    zip_buffer = BytesIO()
+    try:
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for slog_file_path in slog_files:
+                zip_file.write(slog_file_path, slog_file_path.parts[-1])
+
+        zip_buffer.seek(0)
+        checksum = hash_file(zip_buffer)
+        zip_buffer.seek(0)
+
+        current_time_ms = int(time.time() * 1000)
+        zip_file_name_with_timestamp = f'{block_name}_{current_time_ms}.zip'
+
+        if WORKER_ID_SOURCE == 'EXECUTABLE':
+            params = {'worker_id': worker_id}
+        elif WORKER_ID_SOURCE == 'USER':
+            params = {'worker_id': worker_id, 'code': code}
+        data = {'block_name': block_name, 'checksum': checksum}
+        files = {'file': (zip_file_name_with_timestamp, zip_buffer, 'application/zip')}
+
+        response = requests.post(url, params=params, data=data, files=files, verify=VERIFY)
+        logging.info(f"Response Status Code: {response.status_code}")
+
+        if response.status_code == 200:
+            logging.info("Upload successful!")
+            return {"status": "success", "content": "Data upload successful."}
+        elif response.status_code == 400:
+            error_message = response.json().get("error", "Unknown error")
+            logging.warning(f"Bad Request: {error_message}")
+            return {"status": "error", "content": error_message}
+        elif response.status_code == 409:
+            logging.warning("Checksum mismatch: checksums don't match")
+            return {"status": "error", "content": "Checksum mismatch"}
+        else:
+            logging.error(f"Unexpected response: {response.status_code} - {response.text}")
+            return {"status": "error", "content": f"Unexpected response: {response.status_code}"}
+
+    except requests.exceptions.ConnectionError as connection_error:
+        logging.error(f"Error Connecting: {connection_error}")
+        return {"status": "error", "content": "Connection error"}
+    except requests.exceptions.Timeout as timeout_error:
+        logging.error(f"Timeout Error: {timeout_error}")
+        return {"status": "error", "content": "Timeout error"}
+    except requests.exceptions.RequestException as error:
+        logging.error(f"An error occurred: {error}")
+        return {"status": "error", "content": "Request error"}
+    finally:
+        zip_buffer.close()
+
 
 def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file_name: str, code: str | None = None) -> dict[str, str]:
     """

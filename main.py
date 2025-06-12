@@ -13,7 +13,7 @@ from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
 from utils import retrieve_worker_id, \
-    get_blocks_to_run, upload_block, sid_evenness
+    get_blocks_to_run, upload_block, sid_evenness, upload_happy
 import version
 
 # Various task imports
@@ -220,6 +220,12 @@ with Parallel():
                                                 data_directory=Ref.object(
                                                     exp)._session_dir,
                                                 slog_file_name='log_'+exp.task_name+'_'+'0.slog',
+                                                code=Ref.object(exp).get_var('_code'))
+                    exp.happy_data_upload = Func(upload_happy,
+                                                worker_id=exp.worker_id_dict['content'],
+                                                block_name=exp.task_name + 'happy_' + Ref(str, exp.block_number),
+                                                data_directory=Ref.object(
+                                                    exp)._session_dir,
                                                 code=Ref.object(exp).get_var('_code'))
                     Wait(3)
 
