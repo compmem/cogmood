@@ -339,6 +339,8 @@ UPLOAD_EXTRA_FILES = {
     ],
     'bart':[
         ('log_sysinfo_0.slog', False, 'log_sysinfo_0.slog'),
+        ('log_bart_practice_0.slog', False, 'log_bart_practice_0.slog'),
+        ('log_bart_practice_1.slog', False, 'log_bart_practice_1.slog'),
         ('obart_pickles', True, 'obart_pickles')
     ]
 }
