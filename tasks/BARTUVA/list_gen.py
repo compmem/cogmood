@@ -105,6 +105,7 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
                 continue
             else:
                 pickle_path.write_bytes(pickle.dumps(g_code))
+                break
     return g_code
 
 # x = add_air(total_number_of_balloons=config.NUM_BALLOONS,
