@@ -1,5 +1,9 @@
 #listgen
 import random
+import os
+import pickle
+import glob
+
 from decimal import *
 import config
 
@@ -90,6 +94,17 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
         random.shuffle(g_code)
     else:
         pass
+    if practice == True:
+        pass
+    else:
+        try:
+            pickles = glob(subject_directory+'/obart_pickles')
+            session_num = str(len(pickles))
+            pickle.dump(g_code,open(subject_directory+'/obart_pickles/bags_session_'+session_num+'.p','wb'))
+        except:
+            os.makedirs(subject_directory+'/obart_pickles')
+            pickle.dump(g_code,open(subject_directory+'/obart_pickles/bags_session_0.p','wb'))
+    return g_code
 
     return g_code
 

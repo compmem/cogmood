@@ -322,3 +322,14 @@ CESD = [{'type':'TITLE',
                 'Most or all of the time\n(5-7 days)'],
          'group_id':"22"}
          ]
+
+# for adding extrafiles to zip
+# format is (file path below subject directory,
+# if the path is a directory,
+# desired name of the file in the archive)
+UPLOAD_EXTRA_FILES = {
+    'flkr':[],
+    'rdm':[],
+    'cab':[],
+    'bart':[('obart_pickles', True, 'obart_pickles')]
+}

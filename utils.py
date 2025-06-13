@@ -4,7 +4,7 @@ import zipfile
 import requests
 import logging
 import time
-from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY, WORKER_ID_SOURCE
+from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY, WORKER_ID_SOURCE, UPLOAD_EXTRA_FILES
 from hashlib import blake2b
 from io import BytesIO
 from pathlib import Path
@@ -198,16 +198,33 @@ def upload_block(worker_id: str, block_name: str, data_directory: str, slog_file
         return {"status": "error", "content": "Log file not found"}
     
     logging.info(f"SLOG File Found: File '{slog_file_name}' exists at '{slog_file_path}'.")
-
+    task_name = block_name.split('_')[0]
+    extra_files = UPLOAD_EXTRA_FILES[task_name]
     zip_buffer = BytesIO()
     try:
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             zip_file.write(slog_file_path, slog_file_name)
+            for extra_file, ef_isdir, extra_file_name in extra_files:
+                if ef_isdir:
+                    efd = Path(data_directory) / extra_file
+                    if not efd.exists():
+                        return {"status": "error", "content": f"{extra_file} not found"}
+                    for efp in efd.glob('*'):
+                        logging.info(f"Extra File Found: File '{efp.parts[-1]}' exists at '{efp}'.")
+                        zip_file.write(efp, Path(extra_file_name)/efp.parts[-1])
+                else:
+                    efp = Path(data_directory) / extra_file
+                    if not efp.exists():
+                        return {"status": "error", "content": f"{extra_file} not found"}
+                    logging.info(f"Extra File Found: File '{efp.parts[-1]}' exists at '{efp}'.")
+                    zip_file.write(efp, extra_file_name)
 
         zip_buffer.seek(0)
         checksum = hash_file(zip_buffer)
         zip_buffer.seek(0)
-
+        namelist = zipfile.ZipFile(zip_buffer).namelist()
+        zip_buffer.seek(0)
+        logging.info(f"Created zipfile has the following contents: {namelist}")
         current_time_ms = int(time.time() * 1000)
         zip_file_name_with_timestamp = f'{block_name}_{current_time_ms}.zip'
 
