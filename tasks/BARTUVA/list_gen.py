@@ -3,7 +3,7 @@ import random
 import os
 import pickle
 import glob
-
+from pathlib import Path
 from decimal import *
 import config
 
@@ -97,15 +97,14 @@ def add_air(total_number_of_balloons,num_ranges,balloon_setup,randomize,reward_l
     if practice == True:
         pass
     else:
-        try:
-            pickles = glob(subject_directory+'/obart_pickles')
-            session_num = str(len(pickles))
-            pickle.dump(g_code,open(subject_directory+'/obart_pickles/bags_session_'+session_num+'.p','wb'))
-        except:
-            os.makedirs(subject_directory+'/obart_pickles')
-            pickle.dump(g_code,open(subject_directory+'/obart_pickles/bags_session_0.p','wb'))
-    return g_code
-
+        pickle_dir = Path(subject_directory) / 'obart_pickles'
+        pickle_dir.mkdir(exist_ok=True)
+        for pickle_n in range(100):
+            pickle_path = pickle_dir / f'bags_session_{pickle_n}.p'
+            if pickle_path.exists():
+                continue
+            else:
+                pickle_path.write_bytes(pickle.dumps(g_code))
     return g_code
 
 # x = add_air(total_number_of_balloons=config.NUM_BALLOONS,
