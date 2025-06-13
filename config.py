@@ -328,8 +328,17 @@ CESD = [{'type':'TITLE',
 # if the path is a directory,
 # desired name of the file in the archive)
 UPLOAD_EXTRA_FILES = {
-    'flkr':[],
-    'rdm':[],
-    'cab':[],
-    'bart':[('obart_pickles', True, 'obart_pickles')]
+    'flkr':[
+        ('log_sysinfo_0.slog', False, 'log_sysinfo_0.slog')
+    ],
+    'rdm':[
+        ('log_sysinfo_0.slog', False, 'log_sysinfo_0.slog')
+    ],
+    'cab':[
+        ('log_sysinfo_0.slog', False, 'log_sysinfo_0.slog')
+    ],
+    'bart':[
+        ('log_sysinfo_0.slog', False, 'log_sysinfo_0.slog'),
+        ('obart_pickles', True, 'obart_pickles')
+    ]
 }
