@@ -356,9 +356,11 @@ def _read_exe_worker_id() -> dict[str, str]:
         return {"status": "error", "content": str(e)}
 
 
-def sid_evenness(sid):
+def sid_evenness(sid, hash_input=False):
     # make sure the input is a string
     sid = str(sid)
+    if hash_input:
+        sid = blake2b(sid.encode(), digest_size=4).hexdigest()
     # initialize val so we can later catch if it never got set
     val = None
     # loop through the SID backwards looking for something that

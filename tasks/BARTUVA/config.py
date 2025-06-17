@@ -19,6 +19,7 @@ TOUCH_TEXT = ["Touch left side\n","Touch right side\n"]
 TOUCH_INST = ['left side of the screen', 'right side of the screen']
 TASK_DIR = "."
 INST2_IMG_PATH = os.path.join("inst", "EXAMPLE.png")
+FLIPPED_INST2_IMG_PATH = os.path.join("inst", "flipped_EXAMPLE.png")
 
 RESP_KEYS = ['F', 'J']
 CONT_KEY = ['SPACEBAR']

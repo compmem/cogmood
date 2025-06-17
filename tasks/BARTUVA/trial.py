@@ -52,7 +52,8 @@ def BARTSub(self,
             subject="test000",
             run_num=0,
             trkp_press_time=None,
-            pulse_server=None):
+            pulse_server=None,
+            flip_resp=False):
     self.balloon_color = balloon["color"]
     IMG_DIR = config.TASK_DIR + "/stim/"
     BANK_IMG = IMG_DIR + "piggy_bank.png"
@@ -77,18 +78,27 @@ def BARTSub(self,
     ###################################################################
     #Conditional that breaks loop when false.
     self.pressed_key = True
-    if (config.FLIP_BART):
+    if flip_resp:
         pos = -1
+        resp_keys = [config.RESP_KEYS[1], config.RESP_KEYS[0]]
+        key_text = resp_keys
     else:
         pos = 1
+        key_text = config.KEY_TEXT
+        resp_keys = config.RESP_KEYS
 
     # Generating images,labels, and objects on screen
     with Parallel():
         Landscape = Image(source = BACKGROUND_IMG, bottom = self.exp.screen.bottom, size = (self.exp.screen.width * 1.1, self.exp.screen.height * 1.1), allow_stretch = True)
         Air_pump = Image(source = AIRPUMP_IMG, bottom = self.exp.screen.bottom + s(75), height = s(config.AIRPUMP_HEIGHT), 
-                        width = s(config.AIRPUMP_WIDTH), center_x = (self.exp.screen.center_x - s(150)), allow_stretch = True)
-        Balloon = Image(source = BALLOON_IMG, size = (s(self.curr_balloon_size), s(self.curr_balloon_size)), allow_stretch = True, bottom = Air_pump.top - s(5), center_x = Air_pump.center_x - s(5))
-        Bank = Image(source= BANK_IMG, size =(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch = True, left = Air_pump.right - s(25), top = Balloon.top - s(50))
+                        width = s(config.AIRPUMP_WIDTH), center_x = (self.exp.screen.center_x - (s(150) * pos)), allow_stretch = True)
+        Balloon = Image(source = BALLOON_IMG, size = (s(self.curr_balloon_size), s(self.curr_balloon_size)),
+                        allow_stretch = True, bottom = Air_pump.top - s(5), center_x = Air_pump.center_x - s(5))
+        if flip_resp:
+            Bank = Image(source=BANK_IMG, size=(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch=True,
+                         right=Air_pump.left + s(25), top=Balloon.top - s(50))
+        else:
+            Bank = Image(source= BANK_IMG, size =(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch = True, left = Air_pump.right - s(25), top = Balloon.top - s(50))
         Gtotal = Label(text=Ref('${:0,.2f}'.format, self.grand_total),
                       font_size=s(config.TOTAL_FONT_SIZE),
                       center = (Bank.center_x + s(10), Bank.center_y - s(50)))
@@ -96,16 +106,28 @@ def BARTSub(self,
                       font_size=s(config.TOTAL_FONT_SIZE),
                       color='black',
                       center=Balloon.center)
-        LChoice_label = Label(text='%s to pump'%config.KEY_TEXT[0],
+        if flip_resp:
+            LChoice_label = Label(text='%s to pump' % key_text[0],
+                                  font_size=s(config.TRIAL_FONT_SIZE),
+                                  color='black', halign="center",
+                                  bottom=Air_pump.bottom, center_x=Air_pump.center_x
+                                  )
+            RChoice_label = Label(text='%s to collect' % key_text[1],
+                                  font_size=s(config.TRIAL_FONT_SIZE),
+                                  color='black', halign="center",
+                                  center_x=Bank.center_x,
+                                  top=Bank.bottom - s(1))
+        else:
+            LChoice_label = Label(text='%s to pump'%key_text[0],
+                                  font_size=s(config.TRIAL_FONT_SIZE),
+                                  color='black', halign="center",
+                                  bottom =Air_pump.bottom, center_x = Air_pump.center_x
+                                  )
+            RChoice_label = Label(text='%s to collect'%key_text[1],
                               font_size=s(config.TRIAL_FONT_SIZE),
                               color='black', halign="center",
-                              bottom =Air_pump.bottom, center_x = Air_pump.center_x
-                              )
-        RChoice_label = Label(text='%s to collect'%config.KEY_TEXT[1],
-                          font_size=s(config.TRIAL_FONT_SIZE),
-                          color='black', halign="center",
-                          center_x=Bank.center_x,
-                          top=Bank.bottom - s(1))
+                              center_x=Bank.center_x,
+                              top=Bank.bottom - s(1))
 
 
     with UntilDone():
@@ -147,7 +169,7 @@ def BARTSub(self,
                             Gtotal.update(color='white')
                     # get response using subroutine
                     with UntilDone():
-                        gr = GetResponse(keys=config.RESP_KEYS,
+                        gr = GetResponse(keys=resp_keys,
                                          base_time=self.rt_start)
                         self.grand_total += 0.01
                         Gtotal.update(text=Ref('${:0,.2f}'.format, self.grand_total),
@@ -156,7 +178,7 @@ def BARTSub(self,
                         self.press_time = gr.press_time
                         self.rt = gr.rt
 
-                    with If(self.pressed == config.RESP_KEYS[0]):
+                    with If(self.pressed == resp_keys[0]):
                         with If(balloon['pop'][trial.i] == 0):
                             self.total = 0
                             # Wait(0.4, jitter=0.3)
@@ -228,7 +250,7 @@ def BARTSub(self,
                                     Gtotal.update(text=Ref('${:0,.2f}'.format, self.grand_total))
                                     self.pop_status = 'buy-in'
 
-                    with Elif(self.pressed == config.RESP_KEYS[-1]):
+                    with Elif(self.pressed == resp_keys[-1]):
 
                         with Parallel():
                             Total.update(text=Ref('${:0,.2f}'.format, self.total))
@@ -276,7 +298,9 @@ def BARTSub(self,
                     rewards=balloon['rewards'][trial.i],
                     balloon_size=self.curr_balloon_size,
                     trkp_press_time=trkp_press_time,
-                    eeg_pulse_time=self.eeg_pulse_time)
+                    eeg_pulse_time=self.eeg_pulse_time,
+                    pump_button=resp_keys[0],
+                    collect_button=resp_keys[1])
                     # reward_dist_type=self.reward_dist_type[trial.i],
 
                 self.rt_start = self.invbox_appear_time['time']

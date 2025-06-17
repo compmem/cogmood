@@ -27,13 +27,24 @@ def get_practice_inst(config, run_num):
     return practice_inst
 @Subroutine
 def Instruct(self, config, run_num, sub_dir, task_dir=None,
-             full_instructions=True, practice=True, lang="E",):
+             full_instructions=True, practice=True, lang="E", flip_resp=False):
     is_first = Func(get_is_first, run_num).result
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + str(config.CONT_KEY[-1])
     else:
         cont_key_str = str(config.CONT_KEY[0])
+
+    if flip_resp:
+        pos = -1
+        resp_keys = [config.RESP_KEYS[1], config.RESP_KEYS[0]]
+        key_text = resp_keys
+        inst_img_path = config.FLIPPED_INST2_IMG_PATH
+    else:
+        pos = 1
+        key_text = config.KEY_TEXT
+        resp_keys = config.RESP_KEYS
+        inst_img_path = config.INST2_IMG_PATH
 
     practice_inst = Func(get_practice_inst, config, run_num).result
     if config.TOUCH:
@@ -77,12 +88,12 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                             with Parallel():
                                 with If((instruction.i==2)):
                                     with Parallel():
-                                        img2 = Image(source=config.INST2_IMG_PATH,
+                                        img2 = Image(source=inst_img_path,
                                                      bottom=(self.exp.screen.height/2.) + s(50),
                                                      keep_ratio=True, allow_stretch=True,
                                                      height=s(400))
-                                        lbl2 = Label(text=txt%(config.KEY_TEXT[0],
-                                                               config.KEY_TEXT[-1]),
+                                        lbl2 = Label(text=txt%(key_text[0],
+                                                               key_text[-1]),
                                                      halign='left', top=img2.bottom-s(10),
                                                      font_size=s(config.LABEL_FONT_SIZE))
                                         Label(text='Press %s to continue'%(config.CONT_KEY_STR),
@@ -147,7 +158,8 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                                   balloon_number_session=self.balloon_number_session,
                                                   subject=self._exp.subject,
                                                   run_num=run_num,
-                                                  trkp_press_time=self.trkp_press_time)
+                                                  trkp_press_time=self.trkp_press_time,
+                                                  flip_resp=flip_resp)
                                 self.balloon_number_session += 1
                                 self.grand_total = Balloon.grand_total
                             self.block_tic += 1
@@ -173,12 +185,12 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                             with Parallel():
                                 with If((instruction.i == 2)):
                                     with Parallel():
-                                        img2 = Image(source=config.INST2_IMG_PATH,
+                                        img2 = Image(source=inst_img_path,
                                                      bottom=(self.exp.screen.height / 2.) + s(50),
                                                      keep_ratio=True, allow_stretch=True,
                                                      height=s(400))
-                                        lbl2 = Label(text=txt % (config.KEY_TEXT[0],
-                                                                 config.KEY_TEXT[-1]),
+                                        lbl2 = Label(text=txt % (key_text[0],
+                                                                 key_text[-1]),
                                                      halign='left', top=img2.bottom - s(10),
                                                      font_size=s(config.LABEL_FONT_SIZE))
                                         Label(text='Press %s to continue' % (config.CONT_KEY_STR),
@@ -242,7 +254,8 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                                   balloon_number_session=self.balloon_number_session,
                                                   subject=self._exp.subject,
                                                   run_num=run_num,
-                                                  trkp_press_time=self.trkp_press_time)
+                                                  trkp_press_time=self.trkp_press_time,
+                                                  flip_resp=flip_resp)
                                 self.balloon_number_session += 1
                                 self.grand_total = Balloon.grand_total
                             self.block_tic += 1

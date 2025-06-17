@@ -22,12 +22,15 @@ def BartuvaExp(self,
                full_instructions=True,
                practice=False,
                pulse_server=None,
-               happy_mid=False):
+               happy_mid=False,
+               flip_resp=False):
 
     if task_dir is not None:
         config.TASK_DIR = task_dir
     config.INST2_IMG_PATH = os.path.join(config.TASK_DIR,
                                          config.INST2_IMG_PATH)
+    config.FLIPPED_INST2_IMG_PATH = os.path.join(config.TASK_DIR,
+                                         config.FLIPPED_INST2_IMG_PATH)
 
     if config.TOUCH:
         config.KEY_TEXT = config.TOUCH_TEXT
@@ -50,7 +53,8 @@ def BartuvaExp(self,
                  sub_dir=sub_dir,
                  task_dir=task_dir,
                  full_instructions=full_instructions,
-                 practice=practice)
+                 practice=practice,
+                 flip_resp=flip_resp)
 
     balloon_setup = config.BALLOON_SETUP
     num_balloons = config.NUM_BALLOONS
@@ -132,7 +136,8 @@ def BartuvaExp(self,
                               subject=self._exp.subject,
                               run_num=run_num,
                               trkp_press_time=self.trkp_press_time,
-                              pulse_server=pulse_server)
+                              pulse_server=pulse_server,
+                              flip_resp=flip_resp)
             self.balloon_number_session += 1
             self.grand_total = Balloon.grand_total
         self.block_tic += 1

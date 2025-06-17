@@ -1,11 +1,15 @@
 # General imports
 import os
 import sys
+from pathlib import Path
+from hashlib import blake2b
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, \
     Label, Loop, If, Elif, Else, KeyPress, Ref, \
     Parallel, Slider, Serial, UpdateWidget, Debug, Meanwhile, While
 from smile.scale import scale as s
+
+import config
 from custom_startup import InputSubject
 # from android.permissions import request_permissions, Permission
 # request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE])
@@ -94,6 +98,8 @@ else:
 
 # get subject id odd or even to counterbalance CAB
 flip_CAB = Func(sid_evenness, Ref.object(exp)._subject).result
+# take next digit to counterbalance BART
+flip_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
 
 with Parallel():
     with Serial(blocking=False):
@@ -206,7 +212,8 @@ with Parallel():
                            sub_dir=Ref.object(exp)._session_dir,
                            practice=True,
                            task_dir=task2dir,
-                           happy_mid=False)
+                           happy_mid=False,
+                           flip_resp=flip_BART)
             
             Wait(.5)
 
