@@ -11,7 +11,7 @@ import zipfile
 # and creates a single block of AssBind trials
 # def get_stim(images_per_trial,number_of_learn_trials,image_path, subj_dir):
 def get_stim(config, subj_dir):
-    stim_dir = Path(config.TASK_DIR) / "stim"
+    stim_dir = Path(config.UNZIP_DIR) / "stim"
     stim_zip = Path(config.TASK_DIR) / "stim.zip"
 
     # Open the zip file without extracting

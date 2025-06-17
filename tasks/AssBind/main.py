@@ -34,7 +34,7 @@ from .GetResponse import GetResponse
 
 
 @Subroutine
-def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
+def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
                conditions=None, happy_mid=False, flip_resp=False):
     if flip_resp:
@@ -50,6 +50,9 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
         resp_keys.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
     if task_dir is not None:
         config.TASK_DIR = task_dir
+    if unzip_dir is not None:
+        os.makedirs(unzip_dir, exist_ok=True)
+        config.UNZIP_DIR = unzip_dir
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + \
@@ -185,16 +188,16 @@ def AssBindExp(self, config, sub_dir, task_dir=None, block=0,
 
                 # present pair of images
                 # left_image = Image(source=trial.current['img_L'],
-                Debug(L=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
-                      R=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']))
-                left_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_L']),
+                Debug(L=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_L']),
+                      R=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_R']))
+                left_image = Image(source=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_L']),
                                    duration=config.STIM_PRES_TIME,
                                    center=left_border.center,
                                    width=s(config.IMG_WIDTH),
                                    height=s(config.IMG_HEIGHT),
                                    allow_stretch=True, keep_ratio=False)
                 # right_image = Image(source=trial.current['img_R'],
-                right_image = Image(source=Ref(os.path.join, config.TASK_DIR, 'stim', trial.current['img_R']),
+                right_image = Image(source=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_R']),
                                     duration=config.STIM_PRES_TIME,
                                     center=right_border.center,
                                     width=s(config.IMG_WIDTH),

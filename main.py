@@ -63,11 +63,11 @@ Bartuva_config.CONT_KEY = CogBatt_config.CONT_KEY
 WRK_DIR = '.'
 
 # Check if running from an executable
-if CogBatt_config.RUNNING_FROM_EXECUTABLE:
-    # Update WRK_DIR to the location of the executable
-    WRK_DIR = sys._MEIPASS
-    resource_add_path(WRK_DIR)
-
+# if CogBatt_config.RUNNING_FROM_EXECUTABLE:
+#     # Update WRK_DIR to the location of the executable
+#     WRK_DIR = sys._MEIPASS
+#     resource_add_path(WRK_DIR)
+resource_add_path(WRK_DIR)
 
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
@@ -185,10 +185,14 @@ with Parallel():
                 if CogBatt_config.RUNNING_FROM_EXECUTABLE:
                     taskdir = os.path.join(os.path.join(
                         sys._MEIPASS), "tasks", "AssBind")
+                    unzipdir = os.path.join(WRK_DIR, "tasks", "AssBind")
                 else:
                     taskdir = os.path.join("tasks", "AssBind")
+                    unzipdir=taskdir
+                Debug(taskdir=taskdir, td_exist=os.path.exists(taskdir))
                 AssBindExp(AssBind_config,
                            task_dir=taskdir,
+                           unzip_dir=unzipdir,
                            sub_dir=Ref.object(exp)._subject_dir,
                            block=exp.block_number,
                            happy_mid=False,
