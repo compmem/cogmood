@@ -4,7 +4,8 @@ import zipfile
 import requests
 import logging
 import time
-from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY, WORKER_ID_SOURCE, UPLOAD_EXTRA_FILES
+from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY, WORKER_ID_SOURCE,\
+    UPLOAD_EXTRA_FILES, EXPECTED_NUMBER_OF_BLOCKS
 from hashlib import blake2b
 from io import BytesIO
 from pathlib import Path
@@ -384,6 +385,19 @@ def sid_evenness(sid, hash_input=False):
         return True
     else:
         return False
+
+
+def make_n_block_message(blocklist):
+    n = len(blocklist)
+    if n == EXPECTED_NUMBER_OF_BLOCKS:
+        message = "No blocks have been completed and uploaded. You will start from the first of " \
+                  f" {EXPECTED_NUMBER_OF_BLOCKS} total blocks."\
+                  f" Press any key to continue."
+    else:
+        message = f"You have completed and successfully uploaded {EXPECTED_NUMBER_OF_BLOCKS - n} out of " \
+                  f"{EXPECTED_NUMBER_OF_BLOCKS} total blocks. You will start from " \
+                  f"block {EXPECTED_NUMBER_OF_BLOCKS - n + 1}.\n\n Press any key to continue."
+    return message
 
 
 if __name__ == "__main__":

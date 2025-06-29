@@ -40,6 +40,7 @@ NUM_REPS = 1
 FMRI_TASKS = [['cab', 'flkr', 'rdm', 'bart'],
               ['cab', 'flkr', 'rdm'],
               ['cab', 'flkr', 'rdm']]
+EXPECTED_NUMBER_OF_BLOCKS = 9
 FMRI_REPS = 1
 SHUFFLE_TASKS = True
 RESP_KEYS = ['F', 'J']
@@ -69,7 +70,7 @@ TIME_BETWEEN_HAPPY = 15
 TIME_JITTER_HAPPY = 10
 
 INST_FONT = 25
-INST_TEXT = "You will perform 4 tasks in this experiment, completing each task two to three times. Instructions will be displayed prior to each task. Please read the instructions for each task very carefully.\n\nFor each task, you will make responses by pressing the %s button with one hand, and the %s button with your other hand.\n\nSet aside 30-40 minutes. You are able to take short breaks between each task.\n\nOnce the experiment fully begins, you may end the experiment by pressing the escape key. The window will close, and your data up till that point will be sent to us and your payment will be forfeit. Press any key to proceed."
+INST_TEXT = f"You will perform 4 tasks in this experiment, in {EXPECTED_NUMBER_OF_BLOCKS} blocks. Each block takes a few minutes. Instructions will be displayed prior to each block. Please read the instructions very carefully.\n\nFor each task, you will make responses by pressing the %s button with one hand, and the %s button with your other hand.\n\nMost people take 30 minutes to complete the experiment. You are able to take short breaks between each block.\n\nYour results will be uploaded at the end of each block. Your completion of the block is only recorded once your results are successfully uploaded. If you exit a block early or you are unable to upload the results from a block you will have to complete that block again when you run NIMHCogMood again. All blocks must be uploaded for you to complete the experiment.\n\n You may exit the experiment at any time by pressing the escape key.  \n\n Press any key to proceed."
 HAPPY_TEXT = "Periodically during this experiment, you will be asked about your mood. You will use the same keys as mentioned before. Please rate how you feel about your life these days.\n\nMove the slider with these keys and press SPACE BAR button to lock in your response.\n\nPlease respond as quickly and as accurately as possible.\n\nPress any key to continue."
 
 CONSENT_FONT = 25

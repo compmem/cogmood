@@ -17,7 +17,7 @@ from kivy.resources import resource_add_path
 # CogBatt general imports for running and organizing the experiment.
 import config as CogBatt_config
 from utils import retrieve_worker_id, \
-    get_blocks_to_run, upload_block, sid_evenness, upload_happy
+    get_blocks_to_run, upload_block, sid_evenness, upload_happy, make_n_block_message
 import version
 
 # Various task imports
@@ -145,6 +145,13 @@ with Parallel():
         with UntilDone():
             KeyPress()
 
+        with If(number_of_tasks < CogBatt_config.EXPECTED_NUMBER_OF_BLOCKS):
+            Label(text= Func(make_n_block_message, exp.tasks_from_api['content']).result,
+                  font_size=s(CogBatt_config.INST_FONT),
+                  text_size=(s(700), None))
+            with UntilDone():
+                KeyPress()
+
         Label(text=CogBatt_config.HAPPY_TEXT,
               text_size=(s(700), None),
               font_size=s(CogBatt_config.INST_FONT))
@@ -163,7 +170,7 @@ with Parallel():
         Log(name="BLOCK_ORDER",
             order=exp.tasks_from_api['content'])
 
-        Label(text="You will now start the experiments. Press any key to continue.",
+        Label(text="You will now begin the blocks. Press any key to continue.",
               text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
         with UntilDone():
             KeyPress()
@@ -239,9 +246,60 @@ with Parallel():
                                                 code=Ref.object(exp).get_var('_code'))
                     Wait(3)
 
+            with If(exp.task_data_upload.result['status'] == 'error'):
+                Label(text='We were unable to upload the results to the server. '
+                           'Please make sure your computer is still connected to the internet. \n\n'
+                           'Press space bar to try uploading results again.',
+                      text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+                with UntilDone():
+                    KeyPress()
+                with Parallel():
+                    exp.task_data_upload = Func(upload_block,
+                                                worker_id=exp.worker_id_dict['content'],
+                                                block_name=exp.task_name + '_' + Ref(str, exp.block_number),
+                                                data_directory=Ref.object(
+                                                    exp)._session_dir,
+                                                slog_file_name='log_'+exp.task_name+'_'+'0.slog',
+                                                code=Ref.object(exp).get_var('_code'))
+                    exp.happy_data_upload = Func(upload_happy,
+                                                worker_id=exp.worker_id_dict['content'],
+                                                block_name=exp.task_name + 'happy_' + Ref(str, exp.block_number),
+                                                data_directory=Ref.object(
+                                                    exp)._session_dir,
+                                                code=Ref.object(exp).get_var('_code'))
+                    Wait(3)
+            with If(exp.task_data_upload.result['status'] == 'error'):
+                Label(text='We were still unable to upload the results to the server. '
+                           'Please make sure your computer is still connected to the internet. '
+                           'If you are unable to upload your results after this attempt, you will '
+                           'need to repeat the block you just completed, but all prior blocks have'
+                           ' been saved.\n\n'
+                           'Press space bar to try uploading one last time. ',
+
+                      text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
+                with UntilDone():
+                    KeyPress()
+                with Parallel():
+                    exp.task_data_upload = Func(upload_block,
+                                                worker_id=exp.worker_id_dict['content'],
+                                                block_name=exp.task_name + '_' + Ref(str, exp.block_number),
+                                                data_directory=Ref.object(
+                                                    exp)._session_dir,
+                                                slog_file_name='log_'+exp.task_name+'_'+'0.slog',
+                                                code=Ref.object(exp).get_var('_code'))
+                    exp.happy_data_upload = Func(upload_happy,
+                                                worker_id=exp.worker_id_dict['content'],
+                                                block_name=exp.task_name + 'happy_' + Ref(str, exp.block_number),
+                                                data_directory=Ref.object(
+                                                    exp)._session_dir,
+                                                code=Ref.object(exp).get_var('_code'))
+                    Wait(3)
             # Error screen for failed upload
             with If(exp.task_data_upload.result['status'] == 'error'):
-                error_screen(error='Error During Upload',
+                error_screen(error='This block failed to upload. You can try to complete the experimentgit  '
+                                   'again once you have a better internet connection.'
+                                   ' You will only need to repeat the block you just completed.'
+                                   'All of your prior blocks have been saved.',
                              message=exp.task_data_upload.result['content'])
 
         Label(text='Thank you for completing the tasks! Please return to the website'
