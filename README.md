@@ -20,7 +20,7 @@ export PYTHONPATH=$PWD/python_packages:$PWD/smile:$PYTHONPATH
 
 Build app:  
 ```bash
-python3 -m PyInstaller --noconfirm cogmood_mac.spec
+python3 -m PyInstaller --noconfirm NIMHCogMood.spec
 ```
 
 ## Dylan's working approach to building on Windows
