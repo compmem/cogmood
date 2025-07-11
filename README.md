@@ -1,4 +1,5 @@
 # SUPREMEMOOD
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15859971.svg)](https://doi.org/10.5281/zenodo.15859971)
 
 ## Dylan's working approach to building on Mac
 Make sure you pulled submodules so you've got smlie  
