@@ -19,17 +19,15 @@ def make_trials(config):
 
 @Subroutine
 def HappyQuest(self, task, block_num, trial_num, config=default_happy_config):
-    # gen = Func(
-    #     make_trials,
-    #     config
-    # )
-    # trials = gen.result
-
-    trials = make_trials(config)
+    gen = Func(
+        make_trials,
+        config
+    )
+    self.trials = gen.result
 
     with UntilDone():
 
-        with Loop(trials) as trial:
+        with Loop(self.trials) as trial:
             Wait(0.3)
             with Parallel():
                 Label(text=trial.current['inst'],
