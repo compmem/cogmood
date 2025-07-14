@@ -6,3 +6,8 @@ NON_PRESS_INT = .1
 HAPPY_MOD = 20.
 RESP_HAPPY = ["F", "J"]
 HAPPY_RANGE = 10
+MOODS = [
+    {'mood': 'happy', 'notmood': 'unhappy'},
+    {'mood': 'bored', 'notmood': 'not bored'},
+    {'mood': 'frustrated', 'notmood': 'not frustrated'}
+]
