@@ -111,9 +111,16 @@ with Parallel():
             email=version.__email__)
         Wait(.5)
         with If(Ref.object(exp).get_var('code_invalid')):
-            error_screen(error='Invalid task code: ' + Ref(str, exp._code),
-                         message='You entered an incorrect task code, please double check the code '
-                                 'listed on the website and try again. If it still does not work '
+            error_screen(error='Invalid combination of worker ID and task code.',
+                         message='You entered an incorrect combination of worker ID and task code,'
+                                 ' please double check the worker ID and code '
+                                 'listed on the website and try again.'
+                                 ' Most participants who receive this message have incorrectly entered their worker ID.'
+                                 'In particular, zeros and the letter o are commonly confused.'
+                                 '\n\n You entered: '
+                                 '\n\n Worker ID: ' + Ref.object(exp)._subject +
+                                 '\n Code: ' + Ref.object(exp)._vars['_code'] +
+                                 '\n\n If it still does not work '
                                  'please contact Dylan Nielson through Prolific.'
                          )
 
