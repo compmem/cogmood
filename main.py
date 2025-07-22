@@ -114,7 +114,7 @@ with Parallel():
             error_screen(error='Invalid task code: ' + Ref(str, exp._code),
                          message='You entered an incorrect task code, please double check the code '
                                  'listed on the website and try again. If it still does not work '
-                                 'please contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov.'
+                                 'please contact Dylan Nielson through Prolific.'
                          )
 
         with If(CogBatt_config.RUNNING_FROM_EXECUTABLE and (CogBatt_config.WORKER_ID_SOURCE != 'USER')):
@@ -126,7 +126,7 @@ with Parallel():
             with Elif((exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE)
                        and (CogBatt_config.API_BASE_URL != 'NOSERVER')):
                 error_screen(error='Non-Unique Identifier',
-                            message='Contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov')
+                            message='Contact Dylan Nielson through Prolific')
         # Error screen for failed GET request to retrieve blocks
         with If(exp.tasks_from_api['status'] == 'error'):
             error_screen(error='Failed to retrieve tasks.',
@@ -306,7 +306,8 @@ with Parallel():
                    ' and click the "I have completed the tasks" button.'
                    '\n\n If you no longer have the page open, click on the task link'
                    ' from Prolific again to return to the webpage.'
-                   '\n\n You wil be redirected to Prolific with your completion code.',
+                   '\n\n You wil be redirected to Prolific with your completion code.'
+                   '\n\n Press escape to close this window.',
               text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
         with UntilDone():
             KeyPress()
