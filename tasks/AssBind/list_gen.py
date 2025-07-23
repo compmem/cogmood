@@ -36,8 +36,8 @@ def get_stim(config, subj_dir):
         pickle_dir.mkdir(parents=True, exist_ok=True)
 
     # Filter out previously used images and prepare a list of possible images
-    possible_images = [img for img in all_images if Path(
-        img).name not in old_images]
+    possible_images = [img for img in all_images if (Path(
+        img).name not in old_images) and ('._' not in Path(img).name)]
 
     # Select the required number of images
     new_pool = []
