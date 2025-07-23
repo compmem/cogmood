@@ -37,12 +37,12 @@ from .GetResponse import GetResponse
 def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
                conditions=None, happy_mid=False, flip_resp=False):
-    if flip_resp:
+    with If(flip_resp):
         resp_keys = {
             'old': config.RESP_KEYS['new'],
             'new': config.RESP_KEYS['old'],
         }
-    else:
+    with Else():
         resp_keys = config.RESP_KEYS
     TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(resp_keys.keys())[
                                          list(resp_keys.values()).index(config.RESP_KY[0])])

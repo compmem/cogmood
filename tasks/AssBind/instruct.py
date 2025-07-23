@@ -117,12 +117,12 @@ def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, t
 
 # this function reads in the text for each instruction slide and dynamically changes it based on response keys
 def get_text(config, flip_resp=False):#resp_keys, touch):
-    if flip_resp:
+    with If(flip_resp):
         resp_keys = {
             'old': config.RESP_KEYS['new'],
             'new': config.RESP_KEYS['old'],
         }
-    else:
+    with Else():
         resp_keys = config.RESP_KEYS
 
     # dictionary containing the text for each instruction slide
@@ -162,7 +162,7 @@ def get_text(config, flip_resp=False):#resp_keys, touch):
                     '%s to begin. '
 
     # dictionary containing image path, response keys, and text for each slide
-    if flip_resp:
+    with If(flip_resp):
         texts = {'main': {'image': None,
                           'keys': [resp_keys['new'], resp_keys['old']],
                           'text': inst['main']},
@@ -185,7 +185,7 @@ def get_text(config, flip_resp=False):#resp_keys, touch):
                  'remind': {'image': None,
                             'keys': [resp_keys['new'], resp_keys['old']],
                             'text': inst['remind']}}
-    else:
+    with Else():
         texts = {'main': {'image': None,
                           'keys': [resp_keys['new'], resp_keys['old']],
                           'text': inst['main']},
