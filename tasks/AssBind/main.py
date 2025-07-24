@@ -33,21 +33,33 @@ from .instruct import Instruct
 from .GetResponse import GetResponse
 
 
+def get_trial_remind_text(side, flip_resp, config):
+    if flip_resp:
+        if side == 'L':
+            return "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
+                                         list(config.RESP_KEYS.values()).index(config.RESP_KY[1])])
+        if side == 'R':
+            return "%s --> %s" % (config.RESP_KY[1], list(config.RESP_KEYS.keys())[
+                                         list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
+    else:
+        if side == 'L':
+            return "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
+                list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
+        if side == 'R':
+            return "%s --> %s" % (config.RESP_KY[1], list(config.RESP_KEYS.keys())[
+                list(config.RESP_KEYS.values()).index(config.RESP_KY[1])])
+
 @Subroutine
 def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
-               conditions=None, happy_mid=False, flip_resp=False):
-    with If(flip_resp):
-        resp_keys = {
-            'old': config.RESP_KEYS['new'],
-            'new': config.RESP_KEYS['old'],
-        }
-    with Else():
-        resp_keys = config.RESP_KEYS
-    TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(resp_keys.keys())[
-                                         list(resp_keys.values()).index(config.RESP_KY[0])])
-    TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(resp_keys.keys())[list(
-        resp_keys.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
+               conditions=None, happy_mid=False):
+    TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
+        list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
+    TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(config.RESP_KEYS.keys())[list(
+        config.RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
+    Label(text='resp_keys_old ' + config.RESP_KEYS['old'])
+    with UntilDone():
+        KeyPress()
     if task_dir is not None:
         config.TASK_DIR = task_dir
     if unzip_dir is not None:
@@ -81,9 +93,9 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
     text_names = ['main', 'ex1', 'ex2', 'ex3', 'ex4', 'remind']
     rem_names = ['remind']
     with If(reminder_only):
-        Instruct(config=config, text_names=rem_names, run_num=block, flip_resp=flip_resp)
+        Instruct(config=config, text_names=rem_names, run_num=block)
     with Else():
-        Instruct(config=config, text_names=text_names, run_num=block, flip_resp=flip_resp)
+        Instruct(config=config, text_names=text_names, run_num=block)
 
     Wait(1.0)
 
@@ -217,7 +229,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                 Wait(0.2)
                 response = GetResponse(keys=config.RESP_KY,
                                        base_time=left_image.appear_time['time'],
-                                       correct_resp=Ref.getitem(resp_keys,
+                                       correct_resp=Ref.getitem(config.RESP_KEYS,
                                                                 trial.current['resp_correct']))
 
                 # present frame around images to indicate response
@@ -247,8 +259,8 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                 trial_id=trial.i,
                 fmri_tr_time=self.trkp_press_time,
                 eeg_pulse_time=self.eeg_pulse_time,
-                old_key=resp_keys['old'],
-                new_key=resp_keys['new'])
+                old_key=Ref.getitem(config.RESP_KEYS, 'old'),
+                new_key=Ref.getitem(config.RESP_KEYS, 'new'))
     Wait(.5)
     HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
 

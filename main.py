@@ -19,6 +19,7 @@ import config as CogBatt_config
 from utils import retrieve_worker_id, \
     get_blocks_to_run, upload_block, sid_evenness, upload_happy, make_n_block_message
 import version
+from time import sleep
 
 # Various task imports
 from tasks import FlankerExp, Flanker_config
@@ -72,7 +73,7 @@ if CogBatt_config.RUNNING_FROM_EXECUTABLE:
 # Initialize the SMILE experiment.
 exp = Experiment(name=CogBatt_config.EXP_NAME,
                  background_color=CogBatt_config.BACKGROUND_COLOR,
-                 scale_down=True, scale_box=(1000, 1000), debug=False,
+                 scale_down=True, scale_box=(1000, 1000), debug=True,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
                  working_dir=WRK_DIR, show_splash = False)
@@ -86,7 +87,11 @@ if CogBatt_config.WORKER_ID_SOURCE == 'EXECUTABLE':
     exp.worker_id_dict = retrieved_worker_id
 elif CogBatt_config.WORKER_ID_SOURCE == 'USER':
     InputSubject()
-    tasks_from_api = Func(get_blocks_to_run, Ref.object(exp)._subject, Ref.object(exp).get_var('_code')).result
+    for try_n in range(CogBatt_config.TASKGET_TRIES):
+        tasks_from_api = Func(get_blocks_to_run, Ref.object(exp)._subject, Ref.object(exp).get_var('_code')).result
+        with If(not (tasks_from_api['content'] in ['Error Connecting', 'Timeout Error'])):
+            break
+        sleep(0.25)
     with If(tasks_from_api['status'] == 'error'):
         number_of_tasks = 0
     with Else():
@@ -98,6 +103,10 @@ else:
 
 # get subject id odd or even to counterbalance CAB
 flip_CAB = Func(sid_evenness, Ref.object(exp)._subject).result
+with If(flip_CAB):
+    AssBind_config.RESP_KEYS = {'old': AssBind_config.RESP_KEYS['new'], "new": AssBind_config.RESP_KEYS['old']}
+    AssBind_config.FLIP_RESP = True
+
 # take next digit to counterbalance BART
 flip_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
 
@@ -111,14 +120,12 @@ with Parallel():
             email=version.__email__)
         Wait(.5)
         with If(Ref.object(exp).get_var('code_invalid')):
-            error_screen(error='Invalid combination of worker ID and task code.',
-                         message='You entered an incorrect combination of worker ID and task code,'
-                                 ' please double check the worker ID and code '
-                                 'listed on the website and try again.'
-                                 ' Most participants who receive this message have incorrectly entered their worker ID.'
-                                 'In particular, zeros and the letter o are commonly confused.'
-                                 '\n\n You entered: '
-                                 '\n\n Worker ID: ' + Ref.object(exp)._subject +
+            error_screen(error='Invalid combination of Worker ID and Code.',
+                         message='Please double check the Worker ID and Code '
+                                 'and try again.'
+                                 ' Be careful of errors in the Worker ID.'
+                                 '\nYou entered: '
+                                 '\nWorker ID: ' + Ref.object(exp)._subject +
                                  '\n Code: ' + Ref.object(exp)._vars['_code'] +
                                  '\n\n If it still does not work '
                                  'please contact Dylan Nielson through Prolific.'
@@ -128,7 +135,7 @@ with Parallel():
             # Handles case where retrieval of worker id fails
             with If(exp.worker_id_dict['status'] == 'error'):
                 error_screen(error='Failed to Retrieve Identifier: ' + exp.worker_id_dict['content'],
-                            message='Contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov')
+                            message='Contact Dylan Nielson through Prolific.')
             # Handles case where retrieval of worker id is default placeholder
             with Elif((exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE)
                        and (CogBatt_config.API_BASE_URL != 'NOSERVER')):
@@ -144,7 +151,13 @@ with Parallel():
                             message='Press the "I have completed the tasks" button in the browser'
                                     ' or return to the website via the link from Prolific '
                                     'if that window is no longer open.')
-
+        Debug(flip_CAB=flip_CAB, flip_BART=flip_BART)
+        Label(text=Func(str, flip_CAB).result)
+        with UntilDone():
+            KeyPress()
+        Label(text=Func(str, flip_BART).result)
+        with UntilDone():
+            KeyPress()
         # Present initial CogBatt instructions.
         Label(text=CogBatt_config.INST_TEXT,
               font_size=s(CogBatt_config.INST_FONT),
@@ -208,8 +221,7 @@ with Parallel():
                            unzip_dir=unzipdir,
                            sub_dir=Ref.object(exp)._subject_dir,
                            block=exp.block_number,
-                           happy_mid=False,
-                           flip_resp=flip_CAB)
+                           happy_mid=False)
             with Elif(exp.task_name == "rdm"):
                 Wait(.5)
                 RDMExp(RDM_config,
