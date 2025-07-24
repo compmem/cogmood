@@ -10,10 +10,10 @@ def get_is_first(run_num):
 @Subroutine
 def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
-    is_first = Func(get_is_first, run_num).result
-    Debug(filp_resp=config.FLIP_RESP, resp_keys=config.RESP_KEYS)
+    self.is_first = Func(get_is_first, run_num).result
+    Debug(filp_resp=self.exp.FLIP_CAB, resp_keys=self.exp.CAB_RESP_KEYS)
     self.texts = Func(get_text, config).result
-    with If(is_first):
+    with If(self.is_first):
         with Parallel():
             if not config.TOUCH:
                 MouseCursor(blocking=False)
@@ -54,7 +54,7 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
                         self.press_time = None
                         with Parallel():
                             kp = KeyPress(base_time=None,
-                                          keys=self.texts[doc]['keys'],
+                                          keys=Ref(str, self.texts[doc]['keys']),
                                           correct_resp=None,
                                           duration=None,
                                           blocking=False)
@@ -117,7 +117,7 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
                         self.press_time = None
                         with Parallel():
                             kp = KeyPress(base_time=None,
-                                          keys=self.texts[doc]['keys'],
+                                          keys=Ref(str, self.texts[doc]['keys']),
                                           correct_resp=None,
                                           duration=None,
                                           blocking=False)
@@ -169,7 +169,7 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
             self.press_time = None
             with Parallel():
                 kp = KeyPress(base_time=None,
-                              keys=self.texts[doc]['keys'],
+                              keys=Ref(str, self.texts[doc]['keys']),
                               correct_resp=None,
                               duration=None,
                               blocking=False)

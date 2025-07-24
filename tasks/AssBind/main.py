@@ -53,13 +53,17 @@ def get_trial_remind_text(side, flip_resp, config):
 def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                reminder_only=False, pulse_server=None, shuffle=False,
                conditions=None, happy_mid=False):
-    TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
-        list(config.RESP_KEYS.values()).index(config.RESP_KY[0])])
-    TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(config.RESP_KEYS.keys())[list(
-        config.RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
-    Label(text='resp_keys_old ' + config.RESP_KEYS['old'])
-    with UntilDone():
-        KeyPress()
+    # TRIAL_REMIND_TEXT_L = "%s <-- %s" % (config.RESP_KY[0], list(Ref.object(self.exp).CAB_RESP_KEYS.keys())[
+    #     list(Ref.object(self.exp).CAB_RESP_KEYS.values()).index(config.RESP_KY[0])])
+    # TRIAL_REMIND_TEXT_R = "%s --> %s" % (list(Ref.object(self.exp).CAB_RESP_KEYS.keys())[list(
+    #     Ref.object(self.exp).CAB_RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
+    self.TRIAL_REMIND_TEXT_L = Func(get_trial_remind_text, 'L', self.exp.FLIP_CAB, config).result
+    self.TRIAL_REMIND_TEXT_R = Func(get_trial_remind_text, 'R', self.exp.FLIP_CAB, config).result
+    #Label(text='resp_keys_old ' + self.exp.CAB_RESP_KEYS['old'])
+    # with UntilDone():
+    #     KeyPress()
+    Debug(FLIP_CAB=self.exp.FLIP_CAB, CAB_RESP_KEYS=self.exp.CAB_RESP_KEYS, TRIAL_REMIND_TEXT_L=self.TRIAL_REMIND_TEXT_L, TRIAL_REMIND_TEXT_R=self.TRIAL_REMIND_TEXT_R)
+
     if task_dir is not None:
         config.TASK_DIR = task_dir
     if unzip_dir is not None:
@@ -132,12 +136,12 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                                  self.exp.screen.height),
                            allow_stretch=True,
                            keep_ratio=False)
-        new_rem = Label(text=TRIAL_REMIND_TEXT_L,  # 'F = New',
+        new_rem = Label(text=self.TRIAL_REMIND_TEXT_L,  # 'F = New',
                         font_size=s(config.INST_TITLE_FONT_SIZE),
                         bottom=self.exp.screen.bottom + s(300),
                         center_x=self.exp.screen.center_x - s(50),
                         color="black")
-        old_rem = Label(text=TRIAL_REMIND_TEXT_R,  # 'H = Old',
+        old_rem = Label(text=self.TRIAL_REMIND_TEXT_R,  # 'H = Old',
                         font_size=s(config.INST_TITLE_FONT_SIZE),
                         top=new_rem.bottom,
                         center_x=self.exp.screen.center_x + s(50),
