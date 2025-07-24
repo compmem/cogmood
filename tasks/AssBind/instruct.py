@@ -12,7 +12,8 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
     self.is_first = Func(get_is_first, run_num).result
     Debug(filp_resp=self.exp.FLIP_CAB, resp_keys=self.exp.CAB_RESP_KEYS)
-    self.texts = Func(get_text, config).result
+    self.texts = Func(get_text, config, flip_resp=self.exp.FLIP_CAB).result
+    Debug(texts=self.texts)
     with If(self.is_first):
         with Parallel():
             if not config.TOUCH:
@@ -47,34 +48,7 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
                     with UntilDone():
                         Wait(1.0)
-
-                        self.pressed = None
-                        self.rt = None
-                        self.correct = None
-                        self.press_time = None
-                        with Parallel():
-                            kp = KeyPress(base_time=None,
-                                          keys=Ref(str, self.texts[doc]['keys']),
-                                          correct_resp=None,
-                                          duration=None,
-                                          blocking=False)
-                            with Serial(blocking=False):
-                                with ButtonPress(correct_resp=None,
-                                                 base_time=None,
-                                                 duration=None,
-                                                 ) as bp:
-                                    Button(width=self.exp.screen.width * .45,
-                                           height=self.exp.screen.height,
-                                           name=Ref(str, self.texts[doc]['keys'][0]), text="",
-                                           left=0, bottom=0, background_color=(0, 0, 0, 0))
-                                    Button(width=self.exp.screen.width * .45, height=self.exp.screen.height,
-                                           name=Ref(str,self.texts[doc]['keys'][-1]), text="", right=self.exp.screen.width,
-                                           bottom=0, background_color=(0, 0, 0, 0))
-
-                        self.pressed = Ref.cond((bp.pressed == ''), kp.pressed, bp.pressed)
-                        self.rt = Ref.cond((bp.pressed == ''), kp.rt, bp.rt)
-                        self.correct = Ref.cond((bp.pressed == ''), kp.correct, bp.correct)
-                        self.press_time = Ref.cond((bp.pressed == ''), kp.press_time, bp.press_time)
+                        KeyPress(keys=self.texts[doc]['keys'])
 
     with Else():
         with Parallel():
@@ -111,33 +85,8 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
                     with UntilDone():
                         Wait(1.0)
-                        self.pressed = None
-                        self.rt = None
-                        self.correct = None
-                        self.press_time = None
-                        with Parallel():
-                            kp = KeyPress(base_time=None,
-                                          keys=Ref(str, self.texts[doc]['keys']),
-                                          correct_resp=None,
-                                          duration=None,
-                                          blocking=False)
-                            with Serial(blocking=False):
-                                with ButtonPress(correct_resp=None,
-                                                 base_time=None,
-                                                 duration=None,
-                                                 ) as bp:
-                                    Button(width=self.exp.screen.width * .45,
-                                           height=self.exp.screen.height,
-                                           name=Ref(str, self.texts[doc]['keys'][0]), text="",
-                                           left=0, bottom=0, background_color=(0, 0, 0, 0))
-                                    Button(width=self.exp.screen.width * .45, height=self.exp.screen.height,
-                                           name=Ref(str,self.texts[doc]['keys'][-1]), text="", right=self.exp.screen.width,
-                                           bottom=0, background_color=(0, 0, 0, 0))
+                        KeyPress(keys=self.texts[doc]['keys'])
 
-                        self.pressed = Ref.cond((bp.pressed == ''), kp.pressed, bp.pressed)
-                        self.rt = Ref.cond((bp.pressed == ''), kp.rt, bp.rt)
-                        self.correct = Ref.cond((bp.pressed == ''), kp.correct, bp.correct)
-                        self.press_time = Ref.cond((bp.pressed == ''), kp.press_time, bp.press_time)
 
                     #RstDocument(text=texts[doc]['text'],
                                 #width=self.exp.screen.height,
@@ -163,39 +112,13 @@ def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
         with UntilDone():
             Wait(1.0)
-            self.pressed = None
-            self.rt = None
-            self.correct = None
-            self.press_time = None
-            with Parallel():
-                kp = KeyPress(base_time=None,
-                              keys=Ref(str, self.texts[doc]['keys']),
-                              correct_resp=None,
-                              duration=None,
-                              blocking=False)
-                with Serial(blocking=False):
-                    with ButtonPress(correct_resp=None,
-                                     base_time=None,
-                                     duration=None,
-                                     ) as bp:
-                        Button(width=self.exp.screen.width * .45,
-                               height=self.exp.screen.height,
-                               name=Ref(str, self.texts[doc]['keys'][0]), text="",
-                               left=0, bottom=0, background_color=(0, 0, 0, 0))
-                        Button(width=self.exp.screen.width * .45, height=self.exp.screen.height,
-                               name=Ref(str, self.texts[doc]['keys'][-1]), text="", right=self.exp.screen.width,
-                               bottom=0, background_color=(0, 0, 0, 0))
-
-            self.pressed = Ref.cond((bp.pressed == ''), kp.pressed, bp.pressed)
-            self.rt = Ref.cond((bp.pressed == ''), kp.rt, bp.rt)
-            self.correct = Ref.cond((bp.pressed == ''), kp.correct, bp.correct)
-            self.press_time = Ref.cond((bp.pressed == ''), kp.press_time, bp.press_time)
+            KeyPress(keys = self.texts[doc]['keys'])
 
     Wait(2.0)
 
 
 # this function reads in the text for each instruction slide and dynamically changes it based on response keys
-def get_text(config):
+def get_text(config, flip_resp):
 
     # dictionary containing the text for each instruction slide
     inst = {}
@@ -234,7 +157,7 @@ def get_text(config):
                     '%s to begin. '
 
     # dictionary containing image path, response keys, and text for each slide
-    if config.FLIP_RESP:
+    if flip_resp:
         texts = {'main': {'image': None,
                           'keys': ['F', 'J'],
                           'text': inst['main'],
@@ -288,12 +211,12 @@ def get_text(config):
                 'ex3': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
                         'keys': ['F'],
                         'text': inst['ex3'],
-                         'replacements': ("press F,", "Press the F key")
+                        'replacements': ("press F,", "Press the F key")
                         },
                 'ex4': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beejoystick.jpg"))),
                         'keys': ['J'],
                         'text': inst['ex4'],
-                         'replacements': ("press F,", "Press the F key")
+                        'replacements': ("press J,", "Press the J key")
                         },
                 'remind': {'image': None,
                            'keys': ['J', 'F'],
