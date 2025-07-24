@@ -20,6 +20,7 @@ WORKER_ID_SOURCE = "USER"
 # the executable is prepared for distribution.
 WORKER_ID_PLACEHOLDER_VALUE = '"------------------------------------------------".---------------------------'
 EXP_NAME = "SUPREMEMOOD"
+TASKGET_TRIES=3
 
 BACKGROUND_COLOR = (.35, .35, .35, 1.0)
 
