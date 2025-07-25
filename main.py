@@ -111,7 +111,9 @@ Debug(subject=exp.subject, ref_subject=Ref.object(exp)._subject, flip_cab=exp.FL
 
 
 # take next digit to counterbalance BART
-exp.flip_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
+exp.FLIP_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
+
+Debug(subject=exp.subject, ref_subject=Ref.object(exp)._subject, flip_bart=exp.FLIP_BART)
 
 with Parallel():
     with Serial(blocking=False):
@@ -154,11 +156,10 @@ with Parallel():
                             message='Press the "I have completed the tasks" button in the browser'
                                     ' or return to the website via the link from Prolific '
                                     'if that window is no longer open.')
-        Debug(flip_CAB=exp.FLIP_CAB, flip_BART=exp.flip_BART, cab_resp_keys=exp.CAB_RESP_KEYS)
         Label(text=Func(str, exp.FLIP_CAB).result)
         with UntilDone():
             KeyPress()
-        Label(text=Func(str, exp.flip_BART).result)
+        Label(text=Func(str, exp.FLIP_BART).result)
         with UntilDone():
             KeyPress()
         # Present initial CogBatt instructions.
@@ -244,8 +245,7 @@ with Parallel():
                            sub_dir=Ref.object(exp)._session_dir,
                            practice=True,
                            task_dir=task2dir,
-                           happy_mid=False,
-                           flip_resp=exp.flip_BART)
+                           happy_mid=False)
             
             Wait(.5)
 
