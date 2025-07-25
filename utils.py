@@ -380,7 +380,6 @@ def sid_evenness(sid, hash_input=False):
     # and we'll keep an eye on use of this in the data
     if val is None:
         val = len(sid)
-
     if val % 2 == 0:
         return True
     else:
