@@ -59,8 +59,8 @@ app = BUNDLE(
         'CFBundleDisplayName': 'NIMHCogMood',
         'CFBundleName': 'NIMHCogMood',
         'CFBundleIdentifier': 'gov.nih.nimh.mlc.nimhcogmood',
-        'CFBundleVersion': '1.0.1',
-        'CFBundleShortVersionString': '1.0.1',
+        'CFBundleVersion': '1.0.2',
+        'CFBundleShortVersionString': '1.0.2',
         'LSArchitecturePriority': ['x86_64', 'arm64'],
         'WorkerID': '"------------------------------------------------".---------------------------'
     }
