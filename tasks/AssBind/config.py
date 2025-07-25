@@ -49,7 +49,6 @@ NUM_ATTEMPTS = 10000
 
 # response key mappings
 RESP_KEYS = {'old':'F', 'new':'J'}
-FLIP_RESP = False
 RESP_KY = ["F", "J"]
 CONT_KEY = ['SPACEBAR']
 

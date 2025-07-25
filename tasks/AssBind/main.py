@@ -59,10 +59,6 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
     #     Ref.object(self.exp).CAB_RESP_KEYS.values()).index(config.RESP_KY[1])], config.RESP_KY[1])
     self.TRIAL_REMIND_TEXT_L = Func(get_trial_remind_text, 'L', self.exp.FLIP_CAB, config).result
     self.TRIAL_REMIND_TEXT_R = Func(get_trial_remind_text, 'R', self.exp.FLIP_CAB, config).result
-    #Label(text='resp_keys_old ' + self.exp.CAB_RESP_KEYS['old'])
-    # with UntilDone():
-    #     KeyPress()
-    Debug(FLIP_CAB=self.exp.FLIP_CAB, CAB_RESP_KEYS=self.exp.CAB_RESP_KEYS, TRIAL_REMIND_TEXT_L=self.TRIAL_REMIND_TEXT_L, TRIAL_REMIND_TEXT_R=self.TRIAL_REMIND_TEXT_R)
 
     if task_dir is not None:
         config.TASK_DIR = task_dir

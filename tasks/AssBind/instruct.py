@@ -11,9 +11,8 @@ def get_is_first(run_num):
 def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
     self.is_first = Func(get_is_first, run_num).result
-    Debug(filp_resp=self.exp.FLIP_CAB, resp_keys=self.exp.CAB_RESP_KEYS)
     self.texts = Func(get_text, config, flip_resp=self.exp.FLIP_CAB).result
-    Debug(texts=self.texts)
+
     with If(self.is_first):
         with Parallel():
             if not config.TOUCH:
@@ -183,7 +182,7 @@ def get_text(config, flip_resp):
                  },
                  'ex4': {'image': str(
                      config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beejoystick.jpg"))),
-                         'keys': ['F"'],
+                         'keys': ['F'],
                          'text': inst['ex4'],
                          'replacements': ("press F,", "Press the F key")
                  },
@@ -221,7 +220,7 @@ def get_text(config, flip_resp):
                 'remind': {'image': None,
                            'keys': ['J', 'F'],
                            'text': inst['remind'],
-                           'replacements': ("press the J key", "press F key", "Press the J or F key")
+                           'replacements': ("press the F key", "press J key", "Press the J or F key")
                            }}
     #
     # texts = {'main': {'file': 'inst.rst', 'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']]},
