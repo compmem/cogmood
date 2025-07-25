@@ -1,7 +1,6 @@
 ﻿from smile.common import *
 from smile.scale import scale as s
 from smile.lsl import LSLPush
-from pathlib import Path
 
 # adding button/key press subroutine
 @Subroutine

@@ -100,13 +100,9 @@ with If(exp.FLIP_CAB):
     exp.CAB_RESP_KEYS = {'old': AssBind_config.RESP_KEYS['new'], "new": AssBind_config.RESP_KEYS['old']}
 with Else():
     exp.CAB_RESP_KEYS = {'old': AssBind_config.RESP_KEYS['old'], "new": AssBind_config.RESP_KEYS['new']}
-Debug(subject=exp.subject, ref_subject=Ref.object(exp)._subject, flip_cab=exp.FLIP_CAB, cab_resp_keys=exp.CAB_RESP_KEYS)
-
 
 # take next digit to counterbalance BART
 exp.FLIP_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
-
-Debug(subject=exp.subject, ref_subject=Ref.object(exp)._subject, flip_bart=exp.FLIP_BART)
 
 with Parallel():
     with Serial(blocking=False):
