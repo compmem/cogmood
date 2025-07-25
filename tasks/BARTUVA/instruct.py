@@ -81,7 +81,6 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                 with Serial(blocking=True):
                     with If(full_instructions):
                         with Loop(self.inst_list) as instruction:
-                            Debug(int_current = instruction.current)
                             with Parallel():
                                 with If((instruction.i==2)):
                                     with Parallel():
@@ -145,7 +144,6 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
 
                             # with Loop(bag.current) as balloon:
                             with Loop(bags) as balloon:
-                                Debug(baloon=balloon.current)
                                 Balloon = BARTSub(config,
                                                   log_name='bart_practice',
                                                   balloon=balloon.current,

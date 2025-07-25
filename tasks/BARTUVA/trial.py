@@ -57,7 +57,6 @@ def BARTSub(self,
     self.balloon_color = balloon["color"]
     IMG_DIR = config.TASK_DIR + "/stim/"
     BANK_IMG = IMG_DIR + "piggy_bank.png"
-    Debug(flip_BART=self.exp.FLIP_BART)
     POP_IMG = IMG_DIR + 'balloon-pop.png'
     BALLOON_IMG = IMG_DIR + Ref(str, self.balloon_color) + ".png"
     CONFETTI_IMG = IMG_DIR + Ref(str, self.balloon_color) + "_confetti.png"
@@ -94,13 +93,9 @@ def BARTSub(self,
                         width = s(config.AIRPUMP_WIDTH), center_x = (self.exp.screen.center_x - (s(150) * self.pos)), allow_stretch = True)
         Balloon = Image(source = BALLOON_IMG, size = (s(self.curr_balloon_size), s(self.curr_balloon_size)),
                         allow_stretch = True, bottom = Air_pump.top - s(5), center_x = Air_pump.center_x - s(5))
-        # with If(self.exp.FLIP_BART):
-        #     self.exp.bank_center = Air_pump.right + s(25) + s(config.BANK_SIZE[0]) / 2
-        # with Else():
-        #     self.exp.bank_center = Air_pump.left - s(25) - s(config.BANK_SIZE[0]) / 2
 
         Bank = Image(source=BANK_IMG, size=(s(config.BANK_SIZE[0]), s(config.BANK_SIZE[1])), allow_stretch=True,
-                     center_x=(self.exp.screen.center_x + (s(200) * self.pos)), top=Balloon.top - s(50))
+                     center_x=(self.exp.screen.center_x + (s(225) * self.pos)), top=Balloon.top - s(50))
         Gtotal = Label(text=Ref('${:0,.2f}'.format, self.grand_total),
                        font_size=s(config.TOTAL_FONT_SIZE),
                        center=(Bank.center_x + s(10), Bank.center_y - s(50)))
