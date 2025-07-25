@@ -1,8 +1,6 @@
 # General imports
 import os
 import sys
-from pathlib import Path
-from hashlib import blake2b
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, \
     Label, Loop, If, Elif, Else, KeyPress, Ref, \
@@ -19,7 +17,6 @@ import config as CogBatt_config
 from utils import retrieve_worker_id, \
     get_blocks_to_run, upload_block, sid_evenness, upload_happy, make_n_block_message
 import version
-from time import sleep
 
 # Various task imports
 from tasks import FlankerExp, Flanker_config
