@@ -34,6 +34,8 @@ from .GetResponse import GetResponse
 
 
 def get_trial_remind_text(side, flip_resp, config):
+    # note that this works because in the flip resp case
+    # I flip the indices on the second get from config.RESP_KY
     if flip_resp:
         if side == 'L':
             return "%s <-- %s" % (config.RESP_KY[0], list(config.RESP_KEYS.keys())[
@@ -200,8 +202,6 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
 
                 # present pair of images
                 # left_image = Image(source=trial.current['img_L'],
-                Debug(L=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_L']),
-                      R=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_R']))
                 left_image = Image(source=Ref(os.path.join, config.UNZIP_DIR, 'stim', trial.current['img_L']),
                                    duration=config.STIM_PRES_TIME,
                                    center=left_border.center,
@@ -229,7 +229,7 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                 Wait(0.2)
                 response = GetResponse(keys=config.RESP_KY,
                                        base_time=left_image.appear_time['time'],
-                                       correct_resp=Ref.getitem(config.RESP_KEYS,
+                                       correct_resp=Ref.getitem(self.exp.CAB_RESP_KEYS,
                                                                 trial.current['resp_correct']))
 
                 # present frame around images to indicate response
@@ -259,8 +259,8 @@ def AssBindExp(self, config, sub_dir, task_dir=None, unzip_dir=None, block=0,
                 trial_id=trial.i,
                 fmri_tr_time=self.trkp_press_time,
                 eeg_pulse_time=self.eeg_pulse_time,
-                old_key=Ref.getitem(config.RESP_KEYS, 'old'),
-                new_key=Ref.getitem(config.RESP_KEYS, 'new'))
+                old_key=Ref.getitem(self.exp.CAB_RESP_KEYS, 'old'),
+                new_key=Ref.getitem(self.exp.CAB_RESP_KEYS, 'new'))
     Wait(.5)
     HappyQuest(task='CAB', block_num=block, trial_num=trial.i)
 
