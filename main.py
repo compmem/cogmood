@@ -87,11 +87,7 @@ if CogBatt_config.WORKER_ID_SOURCE == 'EXECUTABLE':
     exp.worker_id_dict = retrieved_worker_id
 elif CogBatt_config.WORKER_ID_SOURCE == 'USER':
     InputSubject()
-    for try_n in range(CogBatt_config.TASKGET_TRIES):
-        tasks_from_api = Func(get_blocks_to_run, Ref.object(exp)._subject, Ref.object(exp).get_var('_code')).result
-        with If(not (tasks_from_api['content'] in ['Error Connecting', 'Timeout Error'])):
-            break
-        sleep(0.25)
+    tasks_from_api = Func(get_blocks_to_run, Ref.object(exp)._subject, Ref.object(exp).get_var('_code')).result
     with If(tasks_from_api['status'] == 'error'):
         number_of_tasks = 0
     with Else():
