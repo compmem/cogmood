@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO,
 
 RETRY_STRATEGY = Retry(
     total=TASKGET_TRIES,  # Maximum number of retries
-    status=0,
+    status_forcelist=[429, 500, 502, 503, 504],
     redirect=False,
     backoff_factor=0.2,  # Factor for exponential backoff between retries
     allowed_methods=["GET"] # Methods for which to retry
