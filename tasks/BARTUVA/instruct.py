@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from smile.common import *
 from smile.scale import scale as s
-from .inst.computer import computer_list
+from .inst.computer import computer_list, computer_list_flipped
 from .inst.mobile import mobile_list
 
 from .list_gen import add_air
@@ -25,28 +25,25 @@ def get_practice_inst(config, run_num):
                          f"corner to skip the practice."
 
     return practice_inst
+
 @Subroutine
 def Instruct(self, config, run_num, sub_dir, task_dir=None,
-             full_instructions=True, practice=True, lang="E", flip_resp=False):
-    is_first = Func(get_is_first, run_num).result
+             full_instructions=True, practice=True, lang="E"):
+    self.is_first = Func(get_is_first, run_num).result
 
     if len(config.CONT_KEY) > 1:
         cont_key_str = str(config.CONT_KEY[0]) + " or " + str(config.CONT_KEY[-1])
     else:
         cont_key_str = str(config.CONT_KEY[0])
 
-    if flip_resp:
-        pos = -1
-        resp_keys = [config.RESP_KEYS[1], config.RESP_KEYS[0]]
-        key_text = resp_keys
-        inst_img_path = config.FLIPPED_INST2_IMG_PATH
-    else:
-        pos = 1
-        key_text = config.KEY_TEXT
-        resp_keys = config.RESP_KEYS
-        inst_img_path = config.INST2_IMG_PATH
+    with If(self.exp.FLIP_BART):
+        self.inst_img_path = config.FLIPPED_INST2_IMG_PATH
+        self.inst_list = computer_list_flipped
+    with Else():
+        self.inst_img_path = config.INST2_IMG_PATH
+        self.inst_list = computer_list
 
-    practice_inst = Func(get_practice_inst, config, run_num).result
+    self.practice_inst = Func(get_practice_inst, config, run_num).result
     if config.TOUCH:
         with Loop(computer_list) as instruction:
             txt = instruction.current
@@ -78,22 +75,21 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                 GetResponse(keys=config.CONT_KEY)
 
     else:
-        with If(is_first):
+        with If(self.is_first):
             with Parallel():
                 MouseCursor(blocking=False)
                 with Serial(blocking=True):
                     with If(full_instructions):
-                        with Loop(computer_list) as instruction:
-                            txt = instruction.current
+                        with Loop(self.inst_list) as instruction:
+                            Debug(int_current = instruction.current)
                             with Parallel():
                                 with If((instruction.i==2)):
                                     with Parallel():
-                                        img2 = Image(source=inst_img_path,
+                                        img2 = Image(source=self.inst_img_path,
                                                      bottom=(self.exp.screen.height/2.) + s(50),
                                                      keep_ratio=True, allow_stretch=True,
                                                      height=s(400))
-                                        lbl2 = Label(text=txt%(key_text[0],
-                                                               key_text[-1]),
+                                        lbl2 = Label(text=instruction.current,
                                                      halign='left', top=img2.bottom-s(10),
                                                      font_size=s(config.LABEL_FONT_SIZE))
                                         Label(text='Press %s to continue'%(config.CONT_KEY_STR),
@@ -102,7 +98,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                               font_size=s(config.LABEL_FONT_SIZE))
                                 with Else():
                                     with Parallel():
-                                        lbl1 = Label(text=txt,
+                                        lbl1 = Label(text=instruction.current,
                                                      halign='left',
                                                      font_size=s(config.LABEL_FONT_SIZE))
                                         Label(text='Press %s to continue'%(config.CONT_KEY_STR),
@@ -115,7 +111,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
 
                     with If(practice):
 
-                        Label(text=practice_inst,
+                        Label(text=self.practice_inst,
                               halign='center',
                               font_size=s(config.LABEL_FONT_SIZE))
                         with UntilDone():
@@ -149,6 +145,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
 
                             # with Loop(bag.current) as balloon:
                             with Loop(bags) as balloon:
+                                Debug(baloon=balloon.current)
                                 Balloon = BARTSub(config,
                                                   log_name='bart_practice',
                                                   balloon=balloon.current,
@@ -159,7 +156,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                                   subject=self._exp.subject,
                                                   run_num=run_num,
                                                   trkp_press_time=self.trkp_press_time,
-                                                  flip_resp=flip_resp)
+                                                  )
                                 self.balloon_number_session += 1
                                 self.grand_total = Balloon.grand_total
                             self.block_tic += 1
@@ -180,26 +177,24 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                 MouseCursor(blocking=False)
                 with Serial(blocking=False):
                     with If(full_instructions):
-                        with Loop(computer_list) as instruction:
-                            txt = instruction.current
+                        with Loop(self.inst_list) as instruction:
                             with Parallel():
                                 with If((instruction.i == 2)):
                                     with Parallel():
-                                        img2 = Image(source=inst_img_path,
-                                                     bottom=(self.exp.screen.height / 2.) + s(50),
+                                        img2 = Image(source=self.inst_img_path,
+                                                     bottom=(self.exp.screen.height/2.) + s(50),
                                                      keep_ratio=True, allow_stretch=True,
                                                      height=s(400))
-                                        lbl2 = Label(text=txt % (key_text[0],
-                                                                 key_text[-1]),
-                                                     halign='left', top=img2.bottom - s(10),
+                                        lbl2 = Label(text=instruction.current,
+                                                     halign='left', top=img2.bottom-s(10),
                                                      font_size=s(config.LABEL_FONT_SIZE))
-                                        Label(text='Press %s to continue' % (config.CONT_KEY_STR),
+                                        Label(text='Press %s to continue'%(config.CONT_KEY_STR),
                                               halign='left',
                                               top=lbl2.bottom,
                                               font_size=s(config.LABEL_FONT_SIZE))
                                 with Else():
                                     with Parallel():
-                                        lbl1 = Label(text=txt,
+                                        lbl1 = Label(text=instruction.current,
                                                      halign='left',
                                                      font_size=s(config.LABEL_FONT_SIZE))
                                         Label(text='Press %s to continue' % (config.CONT_KEY_STR),
@@ -211,7 +206,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                 GetResponse(keys=config.CONT_KEY)
 
                     with If(practice):
-                        Label(text=practice_inst,
+                        Label(text=self.practice_inst,
                               halign='center',
                               font_size=s(config.LABEL_FONT_SIZE))
                         with UntilDone():
@@ -254,8 +249,7 @@ def Instruct(self, config, run_num, sub_dir, task_dir=None,
                                                   balloon_number_session=self.balloon_number_session,
                                                   subject=self._exp.subject,
                                                   run_num=run_num,
-                                                  trkp_press_time=self.trkp_press_time,
-                                                  flip_resp=flip_resp)
+                                                  trkp_press_time=self.trkp_press_time)
                                 self.balloon_number_session += 1
                                 self.grand_total = Balloon.grand_total
                             self.block_tic += 1
