@@ -78,6 +78,9 @@ def InputSubject(self):
                             background_normal="",
                             background_color=INFO_OUTLINE_COLOR,
                             disabled=True)
+                esc_lbl = Label(text="Press 'Shift' + 'Esc' if you need to exit this screen.", center_x=recin.center_x,
+                            top=recin.bottom - s(10),
+                            font_size=s(INFO_FONT_SIZE))
             with Serial():
                 with While(
                         (Ref.object(codeIn.text).__len__() < 4)

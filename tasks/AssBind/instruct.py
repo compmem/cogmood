@@ -8,12 +8,12 @@ def get_is_first(run_num):
     return run_num == 0
 # present instructions
 @Subroutine
-def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, touch, font_size):
+def Instruct(self, config, text_names, run_num):#, resp_keys, touch, font_size):
 
-    is_first = Func(get_is_first, run_num).result
+    self.is_first = Func(get_is_first, run_num).result
+    self.texts = Func(get_text, config, flip_resp=self.exp.FLIP_CAB).result
 
-    texts = get_text(config, flip_resp=flip_resp)
-    with If(is_first):
+    with If(self.is_first):
         with Parallel():
             if not config.TOUCH:
                 MouseCursor(blocking=False)
@@ -26,28 +26,28 @@ def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, t
                                       top=self.exp.screen.center_y + s(415))
 
                         # image != None for 4 example slides
-                        with If(texts[doc]['image'] != None):
-                            image = Image(source=texts[doc]['image'],
+                        with If(self.texts[doc]['image'] != None):
+                            image = Image(source=self.texts[doc]['image'],
                                           top=(title.bottom - s(10)),
                                           width=s(config.INST_IMG_WIDTH),
                                           height=s(config.INST_IMG_HEIGHT),
                                           allow_stretch=True, keep_ratio=False)
-                        with If(texts[doc]['image'] != None):
-                            Label(text=texts[doc]['text'],
+                        with If(self.texts[doc]['image'] != None):
+                            Label(text=self.texts[doc]['text'],
                                   font_size=s(config.INST_FONT_SIZE),
                                   text_size=(s(config.TEXT_SIZE_WIDTH), None),
                                   top=(image.bottom - s(10)))
 
                         # image == None for first and last slides (instructions and reminder)
-                        with If(texts[doc]['image'] == None):
-                            Label(text=texts[doc]['text'],
+                        with If(self.texts[doc]['image'] == None):
+                            Label(text=self.texts[doc]['text'],
                                   text_size=(s(config.TEXT_SIZE_WIDTH), None),
                                   font_size=s(config.INST_FONT_SIZE),
                                   top=(title.bottom - s(10)))
 
                     with UntilDone():
                         Wait(1.0)
-                        GetResponse(keys=texts[doc]['keys'])
+                        KeyPress(keys=self.texts[doc]['keys'])
 
     with Else():
         with Parallel():
@@ -62,21 +62,21 @@ def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, t
                                       top=self.exp.screen.center_y + s(415))
 
                     # image != None for 4 example slides
-                        with If(texts[doc]['image'] != None):
-                            image = Image(source=texts[doc]['image'],
+                        with If(self.texts[doc]['image'] != None):
+                            image = Image(source=self.texts[doc]['image'],
                                           top=(title.bottom - s(10)),
                                           width=s(config.INST_IMG_WIDTH),
                                           height=s(config.INST_IMG_HEIGHT),
                                           allow_stretch=True, keep_ratio=False)
-                        with If(texts[doc]['image'] != None):
-                           Label(text=texts[doc]['text'],
+                        with If(self.texts[doc]['image'] != None):
+                           Label(text=self.texts[doc]['text'],
                                  font_size=s(config.INST_FONT_SIZE),
                                  text_size=(s(config.TEXT_SIZE_WIDTH), None),
                                  top=(image.bottom - s(10)))
 
                      # image == None for first and last slides (instructions and reminder)
-                        with If(texts[doc]['image'] == None):
-                            Label(text=texts[doc]['text'] + '\n\nYou may press the button in the'
+                        with If(self.texts[doc]['image'] == None):
+                            Label(text=self.texts[doc]['text'] + '\n\nYou may press the button in the'
                                                             ' lower right corner to skip the practice',
                                   text_size=(s(config.TEXT_SIZE_WIDTH), None),
                                   font_size=s(config.INST_FONT_SIZE),
@@ -84,7 +84,8 @@ def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, t
 
                     with UntilDone():
                         Wait(1.0)
-                        GetResponse(keys=texts[doc]['keys'])
+                        KeyPress(keys=self.texts[doc]['keys'])
+
 
                     #RstDocument(text=texts[doc]['text'],
                                 #width=self.exp.screen.height,
@@ -103,27 +104,20 @@ def Instruct(self, config, text_names, run_num, flip_resp=False):#, resp_keys, t
                           font_size=s(config.INST_TITLE_FONT_SIZE),
                           text_size=(s(config.TEXT_SIZE_WIDTH), None),
                           top=self.exp.screen.center_y + s(415))
-            Label(text=texts[doc]['text'],
+            Label(text=self.texts[doc]['text'],
                   text_size=(s(config.TEXT_SIZE_WIDTH), None),
                   font_size=s(config.INST_FONT_SIZE),
                   top=(title.bottom - s(10)))
 
         with UntilDone():
             Wait(1.0)
-            GetResponse(keys=texts[doc]['keys'])
+            KeyPress(keys = self.texts[doc]['keys'])
 
     Wait(2.0)
 
 
 # this function reads in the text for each instruction slide and dynamically changes it based on response keys
-def get_text(config, flip_resp=False):#resp_keys, touch):
-    if flip_resp:
-        resp_keys = {
-            'old': config.RESP_KEYS['new'],
-            'new': config.RESP_KEYS['old'],
-        }
-    else:
-        resp_keys = config.RESP_KEYS
+def get_text(config, flip_resp):
 
     # dictionary containing the text for each instruction slide
     inst = {}
@@ -164,53 +158,77 @@ def get_text(config, flip_resp=False):#resp_keys, touch):
     # dictionary containing image path, response keys, and text for each slide
     if flip_resp:
         texts = {'main': {'image': None,
-                          'keys': [resp_keys['new'], resp_keys['old']],
-                          'text': inst['main']},
+                          'keys': ['F', 'J'],
+                          'text': inst['main'],
+                          'replacements': ("press the J key", "press F key", "Press the J or F key")
+                          },
                  'ex1': {'image': str(
                      config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beehouse.jpg"))),
-                         'keys': [resp_keys['new']],
-                         'text': inst['ex1']},
+                         'keys': ['F'],
+                         'text': inst['ex1'],
+                         'replacements': ("press F,", "Press the F key")
+                      },
                  'ex2': {'image': str(
                      config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_canoejoystick.jpg"))),
-                         'keys': [resp_keys['new']],
-                         'text': inst['ex2']},
+                         'keys': ['F'],
+                         'text': inst['ex2'],
+                         'replacements': ("press F,", "Press the F key")
+                 },
                  'ex3': {'image': str(
                      config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beehouse.jpg"))),
-                         'keys': [resp_keys['old']],
-                         'text': inst['ex3']},
+                         'keys': ['J'],
+                         'text': inst['ex3'],
+                         'replacements': ("press J,", "Press the J key")
+                 },
                  'ex4': {'image': str(
                      config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "flip_beejoystick.jpg"))),
-                         'keys': [resp_keys['new']],
-                         'text': inst['ex4']},
+                         'keys': ['F'],
+                         'text': inst['ex4'],
+                         'replacements': ("press F,", "Press the F key")
+                 },
                  'remind': {'image': None,
-                            'keys': [resp_keys['new'], resp_keys['old']],
-                            'text': inst['remind']}}
+                            'keys': ['F', 'J'],
+                            'text': inst['remind'],
+                            'replacements': ("press the J key", "press F key", "Press the J or F key")
+                            }}
     else:
         texts = {'main': {'image': None,
-                          'keys': [resp_keys['new'], resp_keys['old']],
-                          'text': inst['main']},
+                          'keys': ['J', 'F'],
+                          'text': inst['main'],
+                          'replacements': ("press the F key", "press J key", "Press the F or J key")
+                          },
                 'ex1': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
-                        'keys': [resp_keys['new']],
-                        'text': inst['ex1']},
+                        'keys': ['J'],
+                        'text': inst['ex1'],
+                        'replacements': ("press J,", "Press the J key")
+                        },
                 'ex2': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "canoejoystick.jpg"))),
-                        'keys': [resp_keys['new']],
-                        'text': inst['ex2']},
+                        'keys': ['J'],
+                        'text': inst['ex2'],
+                        'replacements': ("press J,", "Press the J key")
+                        },
                 'ex3': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beehouse.jpg"))),
-                        'keys': [resp_keys['old']],
-                        'text': inst['ex3']},
+                        'keys': ['F'],
+                        'text': inst['ex3'],
+                        'replacements': ("press F,", "Press the F key")
+                        },
                 'ex4': {'image': str(config.resource_path(os.path.join(config.TASK_DIR, "inst", "examples", "beejoystick.jpg"))),
-                        'keys': [resp_keys['new']],
-                        'text': inst['ex4']},
+                        'keys': ['J'],
+                        'text': inst['ex4'],
+                        'replacements': ("press J,", "Press the J key")
+                        },
                 'remind': {'image': None,
-                           'keys': [resp_keys['new'], resp_keys['old']],
-                           'text': inst['remind']}}
-
-    #texts = {'main': {'file': 'inst.rst', 'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']]},
-            #'ex1': {'file': 'ex1.rst', 'keys': [config.RESP_KEYS['new']]},
-            #'ex2': {'file': 'ex2.rst', 'keys': [config.RESP_KEYS['new']]},
-            #'ex3': {'file': 'ex3.rst', 'keys': [config.RESP_KEYS['old']]},
-            #'ex4': {'file': 'ex4.rst', 'keys': [config.RESP_KEYS['new']]},
-            #'remind': {'file': 'remind.rst', 'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']]}}
+                           'keys': ['J', 'F'],
+                           'text': inst['remind'],
+                           'replacements': ("press the F key", "press J key", "Press the J or F key")
+                           }}
+    #
+    # texts = {'main': {'file': 'inst.rst', 'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']]},
+    #         'ex1': {'file': 'ex1.rst', 'keys': [config.RESP_KEYS['new']]},
+    #         'ex2': {'file': 'ex2.rst', 'keys': [config.RESP_KEYS['new']]},
+    #         'ex3': {'file': 'ex3.rst', 'keys': [config.RESP_KEYS['old']]},
+    #         'ex4': {'file': 'ex4.rst', 'keys': [config.RESP_KEYS['new']]},
+    #         'remind': {'file': 'remind.rst', 'keys': [config.RESP_KEYS['new'], config.RESP_KEYS['old']]}}
 
     if config.TOUCH:
         texts['main']['replacements'] = ("touch the LEFT side of the screen",
@@ -228,24 +246,8 @@ def get_text(config, flip_resp=False):#resp_keys, touch):
                                            "touch the RIGHT side of the screen",
                                            "Touch the screen")
 
-    else:
-        texts['main']['replacements'] = ("press the %s key" %resp_keys['old'], "press %s key" %resp_keys['new'],
-                                            "Press the %s or %s key" %(resp_keys['old'], resp_keys['new']))
-        texts['ex1']['replacements'] = ("press %s," %resp_keys['new'],
-                                        "Press the %s key" %resp_keys['new'])
-        texts['ex2']['replacements'] = ("press %s," %resp_keys['new'],
-                                        "Press the %s key" %resp_keys['new'])
-        texts['ex3']['replacements'] = ("press %s," %resp_keys['old'],
-                                        "Press the %s key" %resp_keys['old'])
-        texts['ex4']['replacements'] = ("press %s," %resp_keys['new'],
-                                        "Press the %s key" %resp_keys['new'])
-        texts['remind']['replacements'] = ("press %s key" %resp_keys['old'],
-                                           "press %s key" %resp_keys['new'],
-                                            "Press the %s or %s key" %(resp_keys['old'],
-                                                                        resp_keys['new']))
-
 
     for doc in texts:
         texts[doc]['text'] = texts[doc]['text'] %texts[doc]['replacements']
-        #texts[doc]['text'] = open(config.resource_path(os.path.join(config.TASK_DIR, "inst", texts[doc]['file']))).read() %texts[doc]['replacements']
+    #     texts[doc]['text'] = open(config.resource_path(os.path.join(config.TASK_DIR, "inst", texts[doc]['file']))).read() %texts[doc]['replacements']
     return texts

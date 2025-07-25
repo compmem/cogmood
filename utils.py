@@ -2,10 +2,12 @@ import sys
 import plistlib
 import zipfile
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import logging
 import time
 from config import API_BASE_URL, RUNNING_FROM_EXECUTABLE, CURRENT_OS, VERIFY, WORKER_ID_SOURCE,\
-    UPLOAD_EXTRA_FILES, EXPECTED_NUMBER_OF_BLOCKS
+    UPLOAD_EXTRA_FILES, EXPECTED_NUMBER_OF_BLOCKS, TASKGET_TRIES
 from hashlib import blake2b
 from io import BytesIO
 from pathlib import Path
@@ -17,7 +19,13 @@ from pefile import PE, DIRECTORY_ENTRY
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-
+RETRY_STRATEGY = Retry(
+    total=TASKGET_TRIES,  # Maximum number of retries
+    status_forcelist=[429, 500, 502, 503, 504],
+    redirect=False,
+    backoff_factor=0.2,  # Factor for exponential backoff between retries
+    allowed_methods=["GET"] # Methods for which to retry
+)
 def get_blocks_to_run(worker_id: str, code: str | None = None) -> list[str] | dict[str, str]:
     """
     Sends a GET request to retrieve the list of blocks that are yet to be run by the worker.
@@ -45,7 +53,11 @@ def get_blocks_to_run(worker_id: str, code: str | None = None) -> list[str] | di
         params = {'worker_id': worker_id, 'code':code}
 
     try:
-        response = requests.get(url, params=params, verify=VERIFY)
+        adapter = HTTPAdapter(max_retries=RETRY_STRATEGY)
+        session = requests.Session()
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        response = session.get(url, params=params, verify=VERIFY)
         response.raise_for_status()  # Raise an error for non-2xx status codes
         tasks = response.json().get('blocks_to_run', [])
         logging.info(f'Tasks to run: {tasks}')
@@ -380,7 +392,6 @@ def sid_evenness(sid, hash_input=False):
     # and we'll keep an eye on use of this in the data
     if val is None:
         val = len(sid)
-
     if val % 2 == 0:
         return True
     else:

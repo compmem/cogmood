@@ -1,8 +1,6 @@
 # General imports
 import os
 import sys
-from pathlib import Path
-from hashlib import blake2b
 # Smile imports
 from smile.common import Experiment, Log, Wait, Func, UntilDone, \
     Label, Loop, If, Elif, Else, KeyPress, Ref, \
@@ -75,7 +73,7 @@ exp = Experiment(name=CogBatt_config.EXP_NAME,
                  scale_down=True, scale_box=(1000, 1000), debug=False,
                  Touch=False, local_crashlog=True,
                  cmd_traceback=False, data_dir=WRK_DIR,
-                 working_dir=WRK_DIR, show_splash = False)
+                 working_dir=WRK_DIR, show_splash=False)
 exp._code = ''
 if CogBatt_config.WORKER_ID_SOURCE == 'EXECUTABLE':
     retrieved_worker_id = retrieve_worker_id()
@@ -97,9 +95,14 @@ else:
     raise NotImplementedError
 
 # get subject id odd or even to counterbalance CAB
-flip_CAB = Func(sid_evenness, Ref.object(exp)._subject).result
+exp.FLIP_CAB = Func(sid_evenness, Ref.object(exp)._subject).result
+with If(exp.FLIP_CAB):
+    exp.CAB_RESP_KEYS = {'old': AssBind_config.RESP_KEYS['new'], "new": AssBind_config.RESP_KEYS['old']}
+with Else():
+    exp.CAB_RESP_KEYS = {'old': AssBind_config.RESP_KEYS['old'], "new": AssBind_config.RESP_KEYS['new']}
+
 # take next digit to counterbalance BART
-flip_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
+exp.FLIP_BART = Func(sid_evenness, Ref.object(exp)._subject, True).result
 
 with Parallel():
     with Serial(blocking=False):
@@ -111,22 +114,27 @@ with Parallel():
             email=version.__email__)
         Wait(.5)
         with If(Ref.object(exp).get_var('code_invalid')):
-            error_screen(error='Invalid task code: ' + Ref(str, exp._code),
-                         message='You entered an incorrect task code, please double check the code '
-                                 'listed on the website and try again. If it still does not work '
-                                 'please contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov.'
+            error_screen(error='Invalid combination of Worker ID and Code.',
+                         message='Please double check the Worker ID and Code '
+                                 'and try again.'
+                                 ' Be careful of errors in the Worker ID.'
+                                 '\nYou entered: '
+                                 '\nWorker ID: ' + Ref.object(exp)._subject +
+                                 '\n Code: ' + Ref.object(exp)._vars['_code'] +
+                                 '\n\n If it still does not work '
+                                 'please contact Dylan Nielson through Prolific.'
                          )
 
         with If(CogBatt_config.RUNNING_FROM_EXECUTABLE and (CogBatt_config.WORKER_ID_SOURCE != 'USER')):
             # Handles case where retrieval of worker id fails
             with If(exp.worker_id_dict['status'] == 'error'):
                 error_screen(error='Failed to Retrieve Identifier: ' + exp.worker_id_dict['content'],
-                            message='Contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov')
+                            message='Contact Dylan Nielson through Prolific.')
             # Handles case where retrieval of worker id is default placeholder
             with Elif((exp.worker_id_dict['content'] == CogBatt_config.WORKER_ID_PLACEHOLDER_VALUE)
                        and (CogBatt_config.API_BASE_URL != 'NOSERVER')):
                 error_screen(error='Non-Unique Identifier',
-                            message='Contact Dylan Nielson through Prolific or at Dylan.Nielson@nih.gov')
+                            message='Contact Dylan Nielson through Prolific')
         # Error screen for failed GET request to retrieve blocks
         with If(exp.tasks_from_api['status'] == 'error'):
             error_screen(error='Failed to retrieve tasks.',
@@ -201,8 +209,7 @@ with Parallel():
                            unzip_dir=unzipdir,
                            sub_dir=Ref.object(exp)._subject_dir,
                            block=exp.block_number,
-                           happy_mid=False,
-                           flip_resp=flip_CAB)
+                           happy_mid=False)
             with Elif(exp.task_name == "rdm"):
                 Wait(.5)
                 RDMExp(RDM_config,
@@ -222,8 +229,7 @@ with Parallel():
                            sub_dir=Ref.object(exp)._session_dir,
                            practice=True,
                            task_dir=task2dir,
-                           happy_mid=False,
-                           flip_resp=flip_BART)
+                           happy_mid=False)
             
             Wait(.5)
 
@@ -306,7 +312,8 @@ with Parallel():
                    ' and click the "I have completed the tasks" button.'
                    '\n\n If you no longer have the page open, click on the task link'
                    ' from Prolific again to return to the webpage.'
-                   '\n\n You wil be redirected to Prolific with your completion code.',
+                   '\n\n You wil be redirected to Prolific with your completion code.'
+                   '\n\n Press escape to close this window.',
               text_size=(s(700), None), font_size=s(CogBatt_config.SSI_FONT_SIZE))
         with UntilDone():
             KeyPress()

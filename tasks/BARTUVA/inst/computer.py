@@ -23,8 +23,19 @@ money you could earn by successfully pumping the balloon will be shown
 on the pump itself. The amount of money that could be added to the bank by
 collecting will be displayed within the balloon itself.
 
-You could PUMP the balloon by pressing the %s key with one hand, or you
-could STOP AND COLLECT the money you've already earned by pressing the %s key
+You could PUMP the balloon by pressing the F key with one hand, or you
+could STOP AND COLLECT the money you've already earned by pressing the J key
+with your other hand."""
+
+text_2_flipped = """Here is an example of what the task looks like. In the center of
+the screen is a pump and a balloon. To the side is the bank. The amount of
+money you could earn by successfully pumping the balloon will be shown
+on the pump itself. The amount of money that could be added to the bank by
+collecting will be displayed within the balloon itself.
+
+You could PUMP the balloon by pressing the J key with one hand, or you
+could STOP AND COLLECT the money you've already earned by pressing the F key
 with your other hand."""
 
 computer_list = [text_0, text_1, text_2]
+computer_list_flipped = [text_0, text_1, text_2_flipped]
